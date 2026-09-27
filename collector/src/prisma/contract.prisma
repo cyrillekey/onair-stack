@@ -1,0 +1,12 @@
+// use prisma-8
+model Channel {
+  id         String   @id @default(uuid())
+  externalId String   @unique
+  source     String
+  name       String
+  streamUrl  String?
+  logoUrl    String?
+  group      String?
+  country    String?
+  scrapedAt  DateTime
+}

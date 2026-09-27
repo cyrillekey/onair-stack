@@ -1,0 +1,41 @@
+{
+  "name": "onair-collector",
+  "version": "0.0.1",
+  "description": "Cron-driven JSON/HTML scraper worker. No HTTP server, writes to Postgres.",
+  "private": true,
+  "type": "module",
+  "main": "dist/src/main.js",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "dev:once": "RUN_ONCE=true tsx src/main.ts",
+    "build": "rimraf dist && tsc && tsc-alias -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "start": "node dist/src/main.js",
+    "start:once": "RUN_ONCE=true node dist/src/main.js"
+  },
+  "engines": {
+    "node": "26.x"
+  },
+  "dependencies": {
+    "@prisma/orm-postgres": "^8.0.0-rc.12",
+    "cheerio": "^1.0.0",
+    "dotenv": "^18.0.3",
+    "node-cron": "^4.6.0",
+    "pino": "^9.6.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^22.10.0",
+    "@types/node-cron": "^3.0.11",
+    "eslint": "^9.39.5",
+    "globals": "^17.12.0",
+    "prisma": "^8.0.0-rc.17",
+    "rimraf": "^6.0.1",
+    "tsc-alias": "^1.8.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.70.1"
+  }
+}
