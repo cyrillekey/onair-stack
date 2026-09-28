@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'241b605840eb2e244e1bbbb9f73968f8a788113eafca04325ae139cba8b31c80'>;
+  StorageHashBase<'50b66d573ba4aa1f95bd269cd64e69dc4d0b596470e3e6b85ac3cbefd06e296f'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -281,7 +281,6 @@ export type FieldOutputTypes = {
       readonly slug: CodecTypes['pg/text@1']['output'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
-      readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
     };
   };
 };
@@ -319,7 +318,6 @@ export type FieldInputTypes = {
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
-      readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
     };
   };
 };
@@ -357,7 +355,6 @@ export type StorageColumnTypes = {
       readonly slug: CodecTypes['pg/text@1']['output'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
-      readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
     };
   };
 };
@@ -395,7 +392,6 @@ export type StorageColumnInputTypes = {
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
-      readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
     };
   };
 };
@@ -438,7 +434,6 @@ export namespace Models {
     slug: CodecTypes['pg/text@1']['output'];
     updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     url: CodecTypes['pg/text@1']['output'];
-    youtubeId: CodecTypes['pg/text@1']['output'] | null;
     channel: public_Channel;
     readonly [RelationKeys]?: 'channel';
   };
@@ -664,11 +659,6 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
-                };
-                readonly youtubeId: {
-                  readonly nativeType: 'text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
@@ -935,10 +925,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly youtubeId: {
-                readonly nullable: true;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
             };
             readonly relations: {
               readonly channel: {
@@ -966,7 +952,6 @@ type ContractBase = Omit<
                 readonly slug: { readonly column: 'slug' };
                 readonly updatedat: { readonly column: 'updatedat' };
                 readonly url: { readonly column: 'url' };
-                readonly youtubeId: { readonly column: 'youtubeId' };
               };
             };
           };

@@ -1,12 +1,54 @@
 // use prisma-8
 model Channel {
-  id         String   @id @default(uuid())
-  externalId String   @unique
-  source     String
+  id          String     @id @default(sql`gen_random_uuid()`)
+  name        String
+  category    Category   @default(GENERAL)
+  description String?
+  country     String
+  slug        String     @unique
+  poster      String?
+  streams     Stream[]
+  externalId  String?
+  schedule    Schedule[]
+  createdat   DateTime   @default(now())
+  updatedat   DateTime   @default(now())
+
+  @@map("channel")
+}
+
+model Stream {
+  id         String   @id @default(sql`gen_random_uuid()`)
   name       String
-  streamUrl  String?
-  logoUrl    String?
-  group      String?
-  country    String?
-  scrapedAt  DateTime
+  resolution String?
+  slug       String   @unique
+  url        String
+  youtubeId  String?
+  channel    Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
+  channelId  String
+  createdat  DateTime @default(now())
+  updatedat  DateTime @default(now())
+
+  @@map("stream")
+}
+
+model Schedule {
+  id        String   @id @default(sql`gen_random_uuid()`)
+  name      String
+  poster    String?
+  date      DateTime
+  startTime DateTime
+  endTime   DateTime
+  channel   Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
+  channelId String
+  createdat DateTime @default(now())
+  updatedat DateTime @default(now())
+
+  @@map("schedule")
+}
+
+enum Category {
+  SPORTS
+  NEWS
+  ENTERTAINMENT
+  GENERAL
 }

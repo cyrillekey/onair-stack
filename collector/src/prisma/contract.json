@@ -4,18 +4,76 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Channel": {
+    "channel": {
       "model": "Channel",
+      "namespace": "public"
+    },
+    "schedule": {
+      "model": "Schedule",
+      "namespace": "public"
+    },
+    "stream": {
+      "model": "Stream",
       "namespace": "public"
     }
   },
   "domain": {
     "namespaces": {
       "public": {
+        "enum": {
+          "Category": {
+            "codecId": "pg/text@1",
+            "members": [
+              {
+                "name": "SPORTS",
+                "value": "SPORTS"
+              },
+              {
+                "name": "NEWS",
+                "value": "NEWS"
+              },
+              {
+                "name": "ENTERTAINMENT",
+                "value": "ENTERTAINMENT"
+              },
+              {
+                "name": "GENERAL",
+                "value": "GENERAL"
+              }
+            ]
+          }
+        },
         "models": {
           "Channel": {
             "fields": {
+              "category": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "Category",
+                  "namespaceId": "public",
+                  "plane": "domain"
+                }
+              },
               "country": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "description": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -23,13 +81,6 @@
                 }
               },
               "externalId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "group": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -43,8 +94,136 @@
                   "kind": "scalar"
                 }
               },
-              "logoUrl": {
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "poster": {
                 "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "schedule": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "channelId"
+                  ]
+                },
+                "to": {
+                  "model": "Schedule",
+                  "namespace": "public"
+                }
+              },
+              "streams": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "channelId"
+                  ]
+                },
+                "to": {
+                  "model": "Stream",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "category": {
+                  "column": "category"
+                },
+                "country": {
+                  "column": "country"
+                },
+                "createdat": {
+                  "column": "createdat"
+                },
+                "description": {
+                  "column": "description"
+                },
+                "externalId": {
+                  "column": "externalId"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "poster": {
+                  "column": "poster"
+                },
+                "slug": {
+                  "column": "slug"
+                },
+                "updatedat": {
+                  "column": "updatedat"
+                }
+              },
+              "namespaceId": "public",
+              "table": "channel"
+            }
+          },
+          "Schedule": {
+            "fields": {
+              "channelId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "createdat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "date": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "endTime": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -57,21 +236,139 @@
                   "kind": "scalar"
                 }
               },
-              "scrapedAt": {
+              "poster": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "startTime": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
               },
-              "source": {
+              "updatedat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "channel": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "channelId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Channel",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "channelId": {
+                  "column": "channelId"
+                },
+                "createdat": {
+                  "column": "createdat"
+                },
+                "date": {
+                  "column": "date"
+                },
+                "endTime": {
+                  "column": "endTime"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "poster": {
+                  "column": "poster"
+                },
+                "startTime": {
+                  "column": "startTime"
+                },
+                "updatedat": {
+                  "column": "updatedat"
+                }
+              },
+              "namespaceId": "public",
+              "table": "schedule"
+            }
+          },
+          "Stream": {
+            "fields": {
+              "channelId": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
                 }
               },
-              "streamUrl": {
+              "createdat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "resolution": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "slug": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "updatedat": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
+              "url": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "youtubeId": {
                 "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
@@ -79,39 +376,56 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "channel": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "channelId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Channel",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
-                "country": {
-                  "column": "country"
+                "channelId": {
+                  "column": "channelId"
                 },
-                "externalId": {
-                  "column": "externalId"
-                },
-                "group": {
-                  "column": "group"
+                "createdat": {
+                  "column": "createdat"
                 },
                 "id": {
                   "column": "id"
                 },
-                "logoUrl": {
-                  "column": "logoUrl"
-                },
                 "name": {
                   "column": "name"
                 },
-                "scrapedAt": {
-                  "column": "scrapedAt"
+                "resolution": {
+                  "column": "resolution"
                 },
-                "source": {
-                  "column": "source"
+                "slug": {
+                  "column": "slug"
                 },
-                "streamUrl": {
-                  "column": "streamUrl"
+                "updatedat": {
+                  "column": "updatedat"
+                },
+                "url": {
+                  "column": "url"
+                },
+                "youtubeId": {
+                  "column": "youtubeId"
                 }
               },
               "namespaceId": "public",
-              "table": "Channel"
+              "table": "stream"
             }
           }
         }
@@ -123,9 +437,45 @@
       "public": {
         "entries": {
           "table": {
-            "Channel": {
+            "channel": {
+              "checks": [
+                {
+                  "expression": "\"category\" IN ('SPORTS', 'NEWS', 'ENTERTAINMENT', 'GENERAL')",
+                  "name": "channel_category_check_ec5d660c",
+                  "prefix": "channel_category_check"
+                }
+              ],
               "columns": {
+                "category": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": "GENERAL"
+                  },
+                  "nativeType": "text",
+                  "nullable": false,
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Category",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "country": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "description": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
@@ -133,42 +483,40 @@
                 "externalId": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
-                  "nullable": false
-                },
-                "group": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
                   "nullable": true
                 },
                 "id": {
                   "codecId": "pg/text@1",
+                  "default": {
+                    "expression": "gen_random_uuid()",
+                    "kind": "function"
+                  },
                   "nativeType": "text",
                   "nullable": false
-                },
-                "logoUrl": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": true
                 },
                 "name": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
                 },
-                "scrapedAt": {
-                  "codecId": "pg/timestamptz-temporal@1",
-                  "nativeType": "timestamptz",
-                  "nullable": false
-                },
-                "source": {
-                  "codecId": "pg/text@1",
-                  "nativeType": "text",
-                  "nullable": false
-                },
-                "streamUrl": {
+                "poster": {
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": true
+                },
+                "slug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
                 }
               },
               "foreignKeys": [],
@@ -181,9 +529,218 @@
               "uniques": [
                 {
                   "columns": [
-                    "externalId"
+                    "slug"
                   ]
                 }
+              ]
+            },
+            "schedule": {
+              "columns": {
+                "channelId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "date": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "endTime": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "expression": "gen_random_uuid()",
+                    "kind": "function"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "poster": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "startTime": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "updatedat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "channelId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "schedule"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "channel"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "channelId"
+                  ],
+                  "name": "schedule_channelId_idx_166d3598",
+                  "prefix": "schedule_channelId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "stream": {
+              "columns": {
+                "channelId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "createdat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "default": {
+                    "expression": "gen_random_uuid()",
+                    "kind": "function"
+                  },
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "resolution": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
+                "slug": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "updatedat": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nativeType": "timestamptz",
+                  "nullable": false
+                },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": false
+                },
+                "youtubeId": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                }
+              },
+              "foreignKeys": [
+                {
+                  "onDelete": "cascade",
+                  "source": {
+                    "columns": [
+                      "channelId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "stream"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "channel"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "channelId"
+                  ],
+                  "name": "stream_channelId_idx_166d3598",
+                  "prefix": "stream_channelId_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "slug"
+                  ]
+                }
+              ]
+            }
+          },
+          "valueSet": {
+            "Category": {
+              "kind": "valueSet",
+              "values": [
+                "SPORTS",
+                "NEWS",
+                "ENTERTAINMENT",
+                "GENERAL"
               ]
             }
           }
@@ -192,25 +749,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "555cc99624fce2f3edcb52bdfc5d1927911fa02dea3090aadf1c40efa8ad5a6c"
-  },
-  "execution": {
-    "executionHash": "ab65de00dc058ae5cd07ec40327b8e27ed75dc32e9cc493e4c20e92ea5224b55",
-    "mutations": {
-      "defaults": [
-        {
-          "onCreate": {
-            "id": "uuidv4",
-            "kind": "generator"
-          },
-          "ref": {
-            "column": "id",
-            "namespace": "public",
-            "table": "Channel"
-          }
-        }
-      ]
-    }
+    "storageHash": "241b605840eb2e244e1bbbb9f73968f8a788113eafca04325ae139cba8b31c80"
   },
   "capabilities": {
     "postgres": {

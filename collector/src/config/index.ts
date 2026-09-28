@@ -3,8 +3,6 @@ import { z } from "zod";
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
-  JSON_COLLECT_CRON: z.string().default("0 */15 * * * *"),
-  HTML_COLLECT_CRON: z.string().default("0 */30 * * * *"),
   RUN_ONCE: z
     .string()
     .default("false")
@@ -14,7 +12,7 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),
-  HTTP_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
+  HTTP_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
   HTTP_MAX_RETRIES: z.coerce.number().int().min(0).max(10).default(3),
   HTTP_USER_AGENT: z.string().default("onair-collector/0.0.1"),
   NODE_ENV: z.string().default("development"),

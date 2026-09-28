@@ -3,14 +3,19 @@
 import "dotenv/config";
 import { config } from "@/config/index.js";
 import { getDb } from "@/db/client.js";
-import { LoggingChannelRepository } from "@/db/repositories/channel.repository.js";
 import { buildRegistry } from "@/jobs/registry.js";
 import { filterCollectors, runOnce, startScheduler } from "@/jobs/scheduler.js";
 import { logger } from "@/utils/logger.js";
-
+import { v2 as cloudinary } from "cloudinary";
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+  secure: true,
+});
 // Worker entrypoint. Intentionally exposes NO HTTP port:
 // collection is triggered by in-process cron (or a single
-// RUN_ONCE pass when deployed as a Kubernetes CronJob).
+// RUN_ONCE pass when deployed as a Kubernetes CronJob).x
 async function main(): Promise<void> {
   const all = buildRegistry();
   const collectors = filterCollectors(all);
@@ -20,17 +25,23 @@ async function main(): Promise<void> {
   }
 
   const db = getDb();
-  const channels = new LoggingChannelRepository();
-  const buildCtx = () => ({ db, channels, log: logger });
+
+  const buildCtx = () => ({ db, log: logger });
 
   if (config.RUN_ONCE) {
-    logger.info({ jobs: collectors.map((c) => c.name) }, "RUN_ONCE=true, running jobs once");
+    logger.info(
+      { jobs: collectors.map((c) => c.name) },
+      "RUN_ONCE=true, running jobs once",
+    );
     await runOnce(collectors, buildCtx);
     return;
   }
 
   startScheduler(collectors, buildCtx, logger);
-  logger.info({ jobs: collectors.map((c) => `${c.name} (${c.schedule})`) }, "collector running");
+  logger.info(
+    { jobs: collectors.map((c) => `${c.name} (${c.schedule})`) },
+    "collector running",
+  );
 
   const shutdown = (signal: string) => {
     logger.info({ signal }, "shutting down");
