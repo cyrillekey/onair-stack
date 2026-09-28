@@ -7,7 +7,6 @@ const envSchema = z.object({
     .string()
     .default("false")
     .transform((v) => v.toLowerCase() === "true"),
-  ENABLED_JOBS: z.string().default(""),
   TZ: z.string().default("UTC"),
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
@@ -18,9 +17,7 @@ const envSchema = z.object({
   NODE_ENV: z.string().default("development"),
 });
 
-export type AppConfig = z.infer<typeof envSchema> & {
-  enabledJobs: string[];
-};
+export type AppConfig = z.infer<typeof envSchema>
 
 function loadConfig(): AppConfig {
   const parsed = envSchema.safeParse(process.env);
@@ -30,10 +27,7 @@ function loadConfig(): AppConfig {
       .join("; ");
     throw new Error(`Invalid environment config: ${details}`);
   }
-  const enabledJobs = parsed.data.ENABLED_JOBS.split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  return { ...parsed.data, enabledJobs };
+  return { ...parsed.data,  };
 }
 
 export const config = loadConfig();

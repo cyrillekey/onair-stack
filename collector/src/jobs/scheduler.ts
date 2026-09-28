@@ -9,10 +9,7 @@ export interface ScheduledHandle {
 }
 
 export function filterCollectors(all: BaseCollector[]): BaseCollector[] {
-  const { enabledJobs } = config;
-  if (enabledJobs.length === 0) return all.filter((c) => c.enabled);
-  const wanted = new Set(enabledJobs);
-  return all.filter((c) => c.enabled && wanted.has(c.name));
+ return all.filter((c) => c.enabled);
 }
 
 function guardOverlap(job: string, log: Logger, fn: () => Promise<void>): () => void {
