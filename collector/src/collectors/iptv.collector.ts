@@ -20,6 +20,7 @@ class IPTVCollector extends BaseCollector<Stream> {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<Stream>, "job" | "durationMs">> {
     try {
+      logger.info({ url: this.url }, "fetching streams");
       const streams = await this.fetchStreams();
       const validated: Stream[] = [];
       const chunks = this.chunk(streams);
@@ -29,6 +30,7 @@ class IPTVCollector extends BaseCollector<Stream> {
         const valid = result.filter((a): a is Stream => a !== null);
         validated.push(...valid);
       }
+      logger.info({ url: this.url }, "finished fetching streams");
       return {
         fetched: streams.length,
         stored: 0,

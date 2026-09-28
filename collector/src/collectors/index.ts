@@ -73,11 +73,18 @@ class StreamsCollector extends BaseCollector {
         tasks.map((a) => new IPTVCollector(a, "IPTV").collect(ctx)),
       );
       const streams = results.flatMap((a) => a.streams);
+      logger.info({ streams: streams.length }, "streams collected");
       const fameLack = await new FamelackCollecter("us").collect(ctx);
+      logger.info({ fameLack: fameLack.streams?.length }, "famelack collected");
       if ((fameLack.streams?.length ?? 0) > 0 && (streams.length ?? 0) > 0) {
+        logger.info("Starting channels upsert");
         const allChannels = await ctx.db.orm.public.Channel.all();
         for (let index = 0; index < allChannels.length; index++) {
           const channel = allChannels[index];
+          logger.info(
+            { index, total: allChannels.length },
+            "starting upserting channel",
+          );
           if (streams.length > 0) {
             const matching = streams.filter((a) =>
               this.fuzzyMatch(this.slugify(a!.name), channel.slug),
@@ -117,6 +124,10 @@ class StreamsCollector extends BaseCollector {
                 .flat(),
             );
           }
+          logger.info(
+            { index, total: allChannels.length },
+            "finished upserting",
+          );
           // matching fameLack
         }
       }
