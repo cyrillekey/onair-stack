@@ -25,6 +25,7 @@
     "dotenv": "^18.0.3",
     "node-cron": "^4.6.0",
     "pino": "^9.6.0",
+    "progress": "^2.0.3",
     "similarity": "^1.2.1",
     "temporal-polyfill": "^1.0.5",
     "zod": "^3.23.8"
@@ -33,6 +34,7 @@
     "@eslint/js": "^9.39.5",
     "@types/node": "^22.10.0",
     "@types/node-cron": "^3.0.11",
+    "@types/progress": "^2.0.7",
     "@types/similarity": "^1.2.3",
     "eslint": "^9.39.5",
     "globals": "^17.12.0",

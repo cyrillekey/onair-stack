@@ -24,7 +24,7 @@ export interface VariantStreamInfo {
 }
 
 export interface VerifyOptions {
-  /** Abort the check if it takes longer than this many milliseconds (default: 10000). */
+  /** Abort the check if it takes longer than this many milliseconds (default: 30000). */
   timeoutMs?: number;
   /** Extra HTTP headers to send, e.g. a Referer some CDNs require to allow playback. */
   headers?: Record<string, string>;
@@ -36,6 +36,12 @@ export interface VerifyOptions {
    * Costs one extra network round trip. Set false for a faster, shallower check.
    */
   deepCheck?: boolean;
+  /**
+   * Abort reading a response body once it exceeds this many bytes
+   * (default: 10 MiB). Some URLs serve multi-gigabyte media files instead of a
+   * playlist; without a cap, buffering the body would exhaust memory.
+   */
+  maxBodyBytes?: number;
 }
 
 export interface VerifyResult {
@@ -72,18 +78,157 @@ export interface VerifyResult {
   error?: string;
 }
 
+/** Options for fetchWithTimeout. */
+interface FetchWithTimeoutOptions {
+  /**
+   * When true, throw FileDownloadError if the response headers show a file
+   * download (attachment disposition or binary media type) instead of a
+   * playlist. Enable for playlist fetches; leave off when the target is
+   * itself a file (e.g. the deep-check on a media segment).
+   */
+  abortOnFileDownload?: boolean;
+}
+
+/** Thrown when a response is a file download rather than a fetchable playlist. */
+export class FileDownloadError extends Error {
+  constructor(reason: string) {
+    super(`Skipped: response is a file download (${reason})`);
+    this.name = "FileDownloadError";
+  }
+}
+
+/** `application/*` subtypes that can never be a text M3U8 playlist. */
+const BINARY_APPLICATION_SUBTYPES = new Set([
+  "zip",
+  "x-zip-compressed",
+  "gzip",
+  "x-gzip",
+  "x-rar-compressed",
+  "x-7z-compressed",
+  "x-tar",
+  "pdf",
+  "msword",
+  "mp4",
+  "ogg",
+]);
+
+/**
+ * Conservative check for "this response is a media/binary file, not a playlist".
+ * Deliberately narrow: `application/octet-stream`, `text/*`, or a missing
+ * content-type are all served for real playlists by misconfigured servers, so
+ * those still go through the #EXTM3U gate instead of being rejected here.
+ */
+function isBinaryContentType(contentType: string): boolean {
+  const mime = contentType.split(";")[0]?.trim().toLowerCase() ?? "";
+  if (mime.startsWith("video/") || mime.startsWith("image/")) return true;
+  if (mime.startsWith("audio/") && !mime.includes("mpegurl")) return true;
+  return BINARY_APPLICATION_SUBTYPES.has(mime);
+}
+
+function getFileDownloadReason(response: Response): string | undefined {
+  const disposition = response.headers.get("content-disposition");
+  if (disposition && /attachment/i.test(disposition)) {
+    return `content-disposition: ${disposition}`;
+  }
+  const contentType = response.headers.get("content-type");
+  if (contentType && isBinaryContentType(contentType)) {
+    return `content-type: ${contentType}`;
+  }
+  return undefined;
+}
+
+/** Best-effort body cancel so the socket doesn't linger when we won't read it. */
+async function cancelBody(response: Response): Promise<void> {
+  try {
+    await response.body?.cancel();
+  } catch {
+    // Already closed/errored; nothing to clean up.
+  }
+}
+
 async function fetchWithTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs: number
+  timeoutMs: number,
+  options: FetchWithTimeoutOptions = {}
 ): Promise<Response> {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...init, signal: controller.signal });
-  } finally {
+  let timedOut = false;
+  // Honor a caller-provided signal (e.g. shutdown) alongside the timeout
+  // instead of silently discarding it.
+  const externalSignal = init.signal;
+  const onExternalAbort = () => controller.abort(externalSignal?.reason);
+  const clear = () => {
     clearTimeout(timer);
+    externalSignal?.removeEventListener("abort", onExternalAbort);
+  };
+  const timer = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, timeoutMs);
+
+  if (externalSignal?.aborted) {
+    clear();
+    throw externalSignal.reason instanceof Error
+      ? externalSignal.reason
+      : new Error("Request aborted", { cause: externalSignal.reason });
   }
+  externalSignal?.addEventListener("abort", onExternalAbort, { once: true });
+
+  let response: Response;
+  try {
+    response = await fetch(url, { ...init, signal: controller.signal });
+  } catch (err) {
+    clear();
+    if (timedOut) throw new Error(`Timed out after ${timeoutMs}ms`);
+    throw err;
+  }
+
+  if (options.abortOnFileDownload) {
+    const reason = getFileDownloadReason(response);
+    if (reason) {
+      await cancelBody(response);
+      clear();
+      throw new FileDownloadError(reason);
+    }
+  }
+
+  if (!response.body) {
+    // No body to stream (e.g. HEAD): nothing left for the timeout to cover.
+    clear();
+    return response;
+  }
+
+  // Track the body so the timeout covers a slow/trickling download too, not
+  // just time-to-headers. The timer stops when the body completes, errors,
+  // or is cancelled; every terminal path also settles the source stream.
+  const source = response.body.getReader();
+  const trackedBody = new ReadableStream<Uint8Array>({
+    async pull(streamController) {
+      try {
+        const { done, value } = await source.read();
+        if (done) {
+          streamController.close();
+          clear();
+        } else {
+          streamController.enqueue(value);
+        }
+      } catch (err) {
+        clear();
+        streamController.error(err);
+      }
+    },
+    async cancel(reason) {
+      clear();
+      try {
+        await source.cancel(reason);
+      } catch {
+        // Source already closed/errored; nothing to do.
+      }
+    },
+  });
+
+  return new Response(trackedBody, response);
 }
 
 function resolvePlaylistUrl(maybeRelative: string, baseUrl: string): string {
@@ -91,6 +236,89 @@ function resolvePlaylistUrl(maybeRelative: string, baseUrl: string): string {
     return new URL(maybeRelative, baseUrl).toString();
   } catch {
     return maybeRelative;
+  }
+}
+
+/** Default cap for how much of a response body verifyM3U8 will buffer (10 MiB). */
+export const DEFAULT_MAX_BODY_BYTES = 10 * 1024 * 1024;
+
+/**
+ * Read a response body as text, aborting if it exceeds `maxBytes`.
+ * Checks the declared Content-Length first (fast path), then enforces the cap
+ * while streaming so an over-limit body is cut off mid-download instead of
+ * being buffered fully into memory.
+ */
+async function readBodyWithLimit(
+  response: Response,
+  maxBytes: number,
+  timeoutMs: number
+): Promise<{ text?: string; error?: string }> {
+  const contentLength = response.headers.get("content-length");
+  if (contentLength !== null) {
+    const declared = Number(contentLength);
+    if (Number.isFinite(declared) && declared > maxBytes) {
+      await cancelBody(response);
+      return {
+        error: `Response body too large (~${declared} bytes declared, limit ${maxBytes})`,
+      };
+    }
+  }
+
+  if (!response.body) {
+    try {
+      return { text: await response.text() };
+    } catch {
+      return { error: "Failed to read response body" };
+    }
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let received = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      received += value.byteLength;
+      if (received > maxBytes) {
+        await reader.cancel();
+        return { error: `Response body exceeds ${maxBytes} bytes, aborting` };
+      }
+      chunks.push(value);
+    }
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") {
+      // Timeout (or external cancellation) fired mid-download. Nothing passes
+      // an external signal today, so in practice this is always the timeout.
+      return { error: `Timed out after ${timeoutMs}ms` };
+    }
+    return { error: "Failed to read response body" };
+  } finally {
+    reader.releaseLock();
+  }
+
+  const merged = new Uint8Array(received);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return { text: new TextDecoder().decode(merged) };
+}
+
+/**
+ * Quick syntactic check for whether a string is worth passing to verifyM3U8:
+ * non-blank with an http(s) scheme. Anything else (empty, relative, rtmp://,
+ * udp://, rtsp://, etc.) can never be fetched as an M3U8 playlist, so callers
+ * should skip verification instead of burning a network round trip.
+ */
+export function isVerifiableM3U8Url(url: string): boolean {
+  if (!url || !url.trim()) return false;
+  try {
+    const parsed = new URL(url.trim());
+    return parsed.protocol === "http:" || parsed.protocol === "https:";
+  } catch {
+    return false;
   }
 }
 
@@ -127,14 +355,22 @@ function parseBandwidth(streamInfLine: string): number | undefined {
 async function checkMediaPlaylistReachable(
   url: string,
   headers: Record<string, string>,
-  timeoutMs: number
+  timeoutMs: number,
+  maxBodyBytes: number
 ): Promise<{ ok: boolean; error?: string }> {
   try {
-    const response = await fetchWithTimeout(url, { headers }, timeoutMs);
+    const response = await fetchWithTimeout(url, { headers }, timeoutMs, {
+      abortOnFileDownload: true,
+    });
     if (!response.ok) {
+      await cancelBody(response);
       return { ok: false, error: `HTTP ${response.status} ${response.statusText}` };
     }
-    const text = await response.text();
+    const body = await readBodyWithLimit(response, maxBodyBytes, timeoutMs);
+    if (body.error !== undefined || body.text === undefined) {
+      return { ok: false, error: body.error ?? "Failed to read response body" };
+    }
+    const text = body.text;
     const lines = text
       .split(/\r?\n/)
       .map((l) => l.trim())
@@ -165,6 +401,12 @@ async function checkMediaPlaylistReachable(
  *     #EXT-X-STREAM-INF line are parsed and RESOLUTION is bucketed into a coarse
  *     "4k" | "hd" | "sd" | "unknown" tier, exposed via `variants` and `resolution`.
  *
+ * Bodies larger than `maxBodyBytes` (default 10 MiB) are aborted before being
+ * buffered, so a URL serving a huge media file instead of a playlist can't
+ * exhaust memory. Responses that declare themselves a file download
+ * (attachment disposition or binary media type) are rejected on headers
+ * without downloading the body at all.
+ *
  * This cannot guarantee a video will actually render in a specific player (that also
  * depends on codecs, DRM, and client support), but it reliably distinguishes a live,
  * well-formed stream from a broken, empty, or dead link.
@@ -173,7 +415,12 @@ export async function verifyM3U8(
   url: string,
   options: VerifyOptions = {}
 ): Promise<VerifyResult> {
-  const { timeoutMs = 10000, headers = {}, deepCheck = true } = options;
+  const {
+    timeoutMs = 30000,
+    headers = {},
+    deepCheck = true,
+    maxBodyBytes = DEFAULT_MAX_BODY_BYTES,
+  } = options;
 
   const result: VerifyResult = {
     url,
@@ -183,14 +430,29 @@ export async function verifyM3U8(
     resolution: "unknown",
   };
 
+  if (!isVerifiableM3U8Url(url)) {
+    result.error = "Skipped verification: not a verifiable HTTP(S) URL";
+    return result;
+  }
+
   let response: Response;
   try {
-    response = await fetchWithTimeout(url, { headers }, timeoutMs);
+    response = await fetchWithTimeout(url, { headers }, timeoutMs, {
+      abortOnFileDownload: true,
+    });
   } catch (err) {
-    result.error =
-      err instanceof Error && err.name === "AbortError"
-        ? `Timed out after ${timeoutMs}ms`
-        : `Network error: ${err instanceof Error ? err.message : String(err)}`;
+    if (err instanceof FileDownloadError) {
+      result.error = err.message;
+    } else if (
+      err instanceof Error &&
+      err.message.startsWith("Timed out after")
+    ) {
+      result.error = err.message;
+    } else if (err instanceof Error && err.name === "AbortError") {
+      result.error = "Request aborted";
+    } else {
+      result.error = `Network error: ${err instanceof Error ? err.message : String(err)}`;
+    }
     return result;
   }
 
@@ -198,17 +460,17 @@ export async function verifyM3U8(
   result.contentType = response.headers.get("content-type") ?? undefined;
 
   if (!response.ok) {
+    await cancelBody(response);
     result.error = `HTTP ${response.status} ${response.statusText}`;
     return result;
   }
 
-  let text: string;
-  try {
-    text = await response.text();
-  } catch {
-    result.error = "Failed to read response body";
+  const body = await readBodyWithLimit(response, maxBodyBytes, timeoutMs);
+  if (body.error !== undefined || body.text === undefined) {
+    result.error = body.error ?? "Failed to read response body";
     return result;
   }
+  const text = body.text;
 
   const lines = text
     .split(/\r?\n/)
@@ -264,7 +526,12 @@ export async function verifyM3U8(
 
     if (deepCheck) {
       const firstVariant = variants[0].url;
-      const deep = await checkMediaPlaylistReachable(firstVariant, headers, timeoutMs);
+      const deep = await checkMediaPlaylistReachable(
+        firstVariant,
+        headers,
+        timeoutMs,
+        maxBodyBytes
+      );
       result.deepCheckPassed = deep.ok;
       result.isPlayable = deep.ok;
       if (!deep.ok) {
@@ -299,13 +566,18 @@ export async function verifyM3U8(
         timeoutMs
       );
       // Some CDNs don't support HEAD requests; fall back to a 1-byte ranged GET.
+      // Note: no abortOnFileDownload here — a segment IS a file by nature.
       if (!segResponse.ok && (segResponse.status === 405 || segResponse.status === 501)) {
+        await cancelBody(segResponse);
         segResponse = await fetchWithTimeout(
           firstSegment,
           { headers: { ...headers, Range: "bytes=0-0" } },
           timeoutMs
         );
       }
+      // Status-only check: the body is never read, so cancel it to stop the
+      // timeout and free the socket (no-op for HEAD responses).
+      await cancelBody(segResponse);
       result.deepCheckPassed = segResponse.ok;
       result.isPlayable = segResponse.ok;
       if (!segResponse.ok) {
