@@ -1,0 +1,1 @@
+export type CATALOG_TYPE = "SPORTS" | "NEWS" | "ENTERTAINMENT" | "GENERAL";
