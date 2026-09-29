@@ -79,7 +79,7 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
       type: "tv",
       description: a.name,
       poster: a?.poster ?? appConfig.fallbackImage,
-      posterShape: "square",
+      posterShape: "landscape",
       logo: a?.poster ?? appConfig.fallbackImage,
     })),
   });
@@ -105,7 +105,7 @@ builder.defineMetaHandler(async (params) => {
       description: catalog.name,
       language: "eng",
       poster: catalog.poster ?? appConfig.fallbackImage,
-      posterShape: "square",
+      posterShape: "landscape",
       logo: catalog.poster ?? appConfig.fallbackImage,
     },
   });
