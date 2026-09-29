@@ -15,7 +15,7 @@
     "start:once": "RUN_ONCE=true node dist/src/main.js"
   },
   "engines": {
-    "node": "24.x"
+    "node": ">=24.x"
   },
   "dependencies": {
     "@prisma/orm-postgres": "^8.0.0-rc.12",

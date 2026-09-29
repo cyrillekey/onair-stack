@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: cyrillekey/onair-collector
+  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/onair-collector
 
 jobs:
   build-and-push:
