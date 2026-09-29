@@ -79,6 +79,7 @@ class ScheduleCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult, "job" | "durationMs">> {
     try {
+      ctx.log.info("Starting schedule collector");
       const date = dayjs();
       const channels = (await ctx.db.orm.public.Channel.all()).filter(
         (a) => !!a.externalId && a.externalId != null,
@@ -111,6 +112,7 @@ class ScheduleCollector extends BaseCollector {
           }
         }
       }
+      ctx.log.info("Starting schedule collector");
       return {
         fetched: channels.length,
         stored: channels.length,

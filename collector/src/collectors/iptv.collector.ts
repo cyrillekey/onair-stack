@@ -23,12 +23,21 @@ class IPTVCollector extends BaseCollector<Stream> {
       logger.info({ url: this.url }, "fetching streams");
       const streams = await this.fetchStreams();
       const validated: Stream[] = [];
+      logger.info({ streams: streams.length }, "total fetched streams");
       const chunks = this.chunk(streams);
       for (let index = 0; index < chunks.length; index++) {
+        ctx.log.info(
+          { index: index + 1, total: chunks.length },
+          "fetching chunk",
+        );
         const chunk = chunks[index];
         const result = await Promise.all(chunk.map((a) => this.verifyLink(a)));
         const valid = result.filter((a): a is Stream => a !== null);
         validated.push(...valid);
+        ctx.log.info(
+          { index: index + 1, total: chunks.length },
+          "finished fetching chunk",
+        );
       }
       logger.info({ url: this.url }, "finished fetching streams");
       return {

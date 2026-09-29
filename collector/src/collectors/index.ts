@@ -11,7 +11,8 @@ import type { Contract } from "@/prisma/contract.js";
 
 class StreamsCollector extends BaseCollector {
   name = "StreamCollector";
-  schedule = "* 00,08,16 * * *";
+  schedule = "00 00,08,16 * * *";
+
   private iptvBaseUrl =
     "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/";
   private ipSources = [
@@ -60,7 +61,7 @@ class StreamsCollector extends BaseCollector {
    * @returns boolean do they match
    */
   private fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a, b) > 0.8;
+    return similarity(a, b) > 0.9;
   }
 
   async collect(
