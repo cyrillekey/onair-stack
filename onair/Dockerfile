@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:24-alpine AS builder
+FROM node:26-alpine AS builder
 
 # Build tools needed to compile native modules on Alpine (musl libc)
 RUN apk add --no-cache python3 make g++
@@ -16,7 +16,7 @@ COPY src ./src
 
 RUN npm run build
 
-FROM node:24-alpine AS runner
+FROM node:26-alpine AS runner
 
 # Runtime libs for native modules (Prisma engines, Sentry)
 RUN apk add --no-cache libgcc libstdc++
