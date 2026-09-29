@@ -3,25 +3,31 @@ import { fetchHtml } from "@/utils/http.js";
 import { logger } from "@/utils/logger.js";
 import { load } from "cheerio";
 import dayjs from "dayjs";
-import { BaseCollector, type CollectorContext, type CollectResult } from "../base.collector.js";
+import { Temporal } from "temporal-polyfill";
+import {
+  BaseCollector,
+  type CollectorContext,
+  type CollectResult,
+} from "../base.collector.js";
 
 class ScheduleCollector extends BaseCollector {
   name = "Schedule";
   private baseUrl = "https://online-television.com";
   private db = getDb();
 
-  schedule = "00 02 * * *";
+  schedule = "15 00 * * *";
 
   private buildLink(name: string): string {
     const date = dayjs();
-    return `${this.baseUrl}${name}/tv-channel/?pgday=${date.format("YYYY-MM-DD")}`;
+    return `${this.baseUrl}/tv-channel/${name}/?pgday=${date.format("YYYY-MM-DD")}`;
   }
 
   private async scrapePage(name: string): Promise<string | null> {
     try {
-      const html = await fetchHtml(this.buildLink(name));
+      const html = await fetchHtml(this.buildLink(name), { timeoutMs: 60000 });
       return html;
     } catch (error) {
+      console.log(error);
       logger.error({ error }, "failed to scrape page");
       return null;
     }
@@ -33,6 +39,10 @@ class ScheduleCollector extends BaseCollector {
     date.setMinutes(Number(minute));
     return date;
   }
+  private buildTemporalDate(date: Date) {
+    const instant = Temporal.Instant.from(date.toISOString());
+    return instant;
+  }
 
   private buildSchedule(content: string) {
     try {
@@ -41,8 +51,10 @@ class ScheduleCollector extends BaseCollector {
         .find(".tv-program-item")
         .map((_, el) => {
           const program = $(el);
+
           const time = program.find(".tv-program-item__time").text();
-          const [startTime, endTime] = time.split("-");
+
+          const [startTime, endTime] = time.replace("LIVE", "").split("-");
           return {
             name: program.find(".tv-program-item__title").text(),
             startTime: this.buildDate(startTime.trim()),
@@ -55,6 +67,7 @@ class ScheduleCollector extends BaseCollector {
         .get();
       return body;
     } catch (error) {
+      console.log(error);
       logger.error({ error }, "failed to build schedule");
       return [];
     }
@@ -76,25 +89,28 @@ class ScheduleCollector extends BaseCollector {
       for (let index = 0; index < chunks.length; index++) {
         const chunk = chunks[index];
         for (const channel of chunk) {
-          if (!channel.externalId) continue;
-          const content = await this.scrapePage(
-            this.buildLink(channel.externalId),
-          );
-          if (!content) continue;
-          const programs = this.buildSchedule(content);
-          if (programs.length > 0)
-            await this.db.orm.public.Schedule.createAll(
-              programs.map((program) => ({
-                channelId: channel.id,
-                date: date.date(),
-                endTime: program.endTime,
-                name: program.name,
-                startTime: program.startTime,
-                poster: program.poster,
-              })),
-              { onConflict: "skip" },
-            );
-          await this.sleep();
+          try {
+            if (!channel.externalId) continue;
+            const content = await this.scrapePage(channel.externalId);
+            if (!content) continue;
+            const programs = this.buildSchedule(content);
+
+            if (programs.length > 0)
+              await this.db.orm.public.Schedule.createAll(
+                programs.map((program) => ({
+                  channelId: channel.id,
+                  date: this.buildTemporalDate(date.toDate()),
+                  endTime: this.buildTemporalDate(program.endTime),
+                  name: program.name,
+                  startTime: this.buildTemporalDate(program.startTime),
+                  poster: `${this.baseUrl}${program.poster}`,
+                })),
+                { onConflict: "skip" },
+              );
+            await this.sleep();
+          } catch (error) {
+            logger.error({ error }, "failed to build schedule");
+          }
         }
       }
       return {
@@ -103,6 +119,7 @@ class ScheduleCollector extends BaseCollector {
         streams: channels,
       };
     } catch (error) {
+      console.log(error);
       logger.error({ error }, "failed to build schedule");
       return {
         fetched: 0,

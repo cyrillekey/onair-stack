@@ -10,7 +10,7 @@ import {
 class IPTVCollector extends BaseCollector<Stream> {
   private url: string;
   name: string;
-  schedule = "30 00 * * *";
+  schedule = "-";
   constructor(url: string, name: string) {
     super();
     this.url = url;

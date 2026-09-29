@@ -4,7 +4,6 @@ import {
   type CollectorContext,
   type CollectResult,
 } from "./base.collector.js";
-import FamelackCollecter from "./famelack.collector.js";
 import IPTVCollector from "./iptv.collector.js";
 import similarity from "similarity";
 import type { DefaultModelRow } from "@prisma/orm-postgres/orm-client";
@@ -69,67 +68,35 @@ class StreamsCollector extends BaseCollector {
   ): Promise<Omit<CollectResult<null>, "job" | "durationMs">> {
     try {
       const tasks = this.ipSources.map((a) => this.buildLink(a));
-      const results = await Promise.all(
-        tasks.map((a) => new IPTVCollector(a, "IPTV").collect(ctx)),
-      );
-      const streams = results.flatMap((a) => a.streams);
-      logger.info({ streams: streams.length }, "streams collected");
-      const fameLack = await new FamelackCollecter("us").collect(ctx);
-      logger.info({ fameLack: fameLack.streams?.length }, "famelack collected");
-      if ((fameLack.streams?.length ?? 0) > 0 && (streams.length ?? 0) > 0) {
-        logger.info("Starting channels upsert");
-        const allChannels = await ctx.db.orm.public.Channel.all();
-        for (let index = 0; index < allChannels.length; index++) {
-          const channel = allChannels[index];
-          logger.info(
-            { index, total: allChannels.length },
-            "starting upserting channel",
-          );
-          if (streams.length > 0) {
-            const matching = streams.filter((a) =>
-              this.fuzzyMatch(this.slugify(a!.name), channel.slug),
-            );
-            // for all matching upsert streams
-            await Promise.all(
-              matching.map((a) =>
-                this.upsertRecord(ctx, {
-                  channelId: channel.id,
-                  name: a!.name,
-                  slug: this.slugify(a!.name),
-                  url: a!.streamLink,
-                  resolution: a!.resolution,
-                }),
-              ),
-            );
-          }
-          if ((fameLack.streams?.length ?? 0) > 0) {
-            const matching = fameLack.streams!.filter((a) =>
-              this.fuzzyMatch(this.slugify(a.name), channel.slug),
-            );
-            // for all matching upsert streams
-            await Promise.all(
-              matching
-                .map((b) =>
-                  b.streams.map((a) =>
-                    this.upsertRecord(ctx, {
-                      channelId: channel.id,
-                      name: b.name,
-                      slug: this.slugify(b.name),
-                      url: a.url,
-                      resolution: a.resoulution,
-                      youtubeId: a.youtubeId,
-                    }),
-                  ),
-                )
-                .flat(),
-            );
-          }
-          logger.info(
-            { index, total: allChannels.length },
-            "finished upserting",
-          );
-          // matching fameLack
+      const allChannels = await ctx.db.orm.public.Channel.all();
+      // build IPTV LINKS
+      for (let index = 0; index < tasks.length; index++) {
+        logger.info(`Starting ingestion for ${tasks[index]}`);
+        const url = tasks[index];
+        const collecter = await new IPTVCollector(url, url).collect(ctx);
+        const streams = collecter.streams ?? [];
+        logger.info(`Found ${streams.length} streams to ingest`);
+        if (streams.length > 0) {
+          logger.info({ streams: streams.length }, "streams collected");
         }
+        for (const channel of allChannels) {
+          const matching = streams.filter((a) =>
+            this.fuzzyMatch(this.slugify(a.name), channel.slug),
+          );
+          // for all matching upsert streams
+          await Promise.all(
+            matching.map((a) =>
+              this.upsertRecord(ctx, {
+                channelId: channel.id,
+                name: a.name,
+                slug: this.slugify(a.name),
+                url: a.streamLink,
+                resolution: a.resolution,
+              }),
+            ),
+          );
+        }
+        logger.info(`Finished ingestion for ${tasks[index]}`);
       }
 
       return {

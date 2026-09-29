@@ -3,7 +3,6 @@ import { logger } from "@/utils/logger.js";
 import { getDb } from "../db/client.js";
 import { load } from "cheerio";
 import { fetchHtml } from "@/utils/http.js";
-import { uploadImageFromUrl } from "@/utils/image.js";
 import { v2 as cloudinary } from "cloudinary";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -27,8 +26,6 @@ async function channelCollector(page: number) {
         const country = channel.find(".topch-item__country").text();
         const logo = channel.find(".topch-item__logo").find("img").attr("src");
         const logoUrl = logo ? `https://online-television.com${logo}` : null;
-        console.log(logoUrl);
-
         return {
           name,
           url,
@@ -53,21 +50,8 @@ async function main() {
       try {
         const page = index + 1;
         const channels = await channelCollector(page);
-        const withPosters = [];
-        for (let index = 0; index < channels.length; index++) {
-          const channel = channels[index];
-          if (!channel?.poster) {
-            withPosters.push(channel);
-          } else {
-            const poster = await uploadImageFromUrl(channel.poster);
-            if (poster?.secure_url) {
-              channel.poster = poster.secure_url;
-              withPosters.push(channel);
-            }
-          }
-        }
         await db.orm.public.Channel.createAll(
-          withPosters.map((a) => {
+          channels.map((a) => {
             const channelId = a.url
               ?.split("/")
               .filter((a) => a)

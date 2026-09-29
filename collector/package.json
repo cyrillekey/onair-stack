@@ -27,6 +27,7 @@
     "node-cron": "^4.6.0",
     "pino": "^9.6.0",
     "similarity": "^1.2.1",
+    "temporal-polyfill": "^1.0.5",
     "zod": "^3.23.8"
   },
   "devDependencies": {
