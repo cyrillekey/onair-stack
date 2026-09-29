@@ -9,28 +9,31 @@ const manifest: Manifest = {
   id: "community.onair",
   version: "0.0.1",
   logo: appConfig.logo,
-  behaviorHints: { configurable: false, epgProvider: true },
+  behaviorHints: { configurable: false },
   catalogs: [
     {
       type: "tv",
       id: "ENTERTAINMENT",
       name: "Entertainment",
-      extra: [{ name: "skip" }, { name: "date" }],
+      extra: [{ name: "skip" }],
     },
     {
       id: "GENERAL",
       name: "General",
       type: "tv",
+      extra: [{ name: "skip" }],
     },
     {
       id: "NEWS",
       name: "USA tv",
       type: "tv",
+      extra: [{ name: "skip" }],
     },
     {
       id: "SPORTS",
       name: "Sports",
       type: "tv",
+      extra: [{ name: "skip" }],
     },
   ],
   resources: ["catalog", "stream", "meta"],
