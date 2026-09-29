@@ -1,19 +1,9 @@
 # syntax=docker/dockerfile:1
 
-FROM node:26-bookworm-slim AS builder
+FROM node:24-alpine AS builder
 
-# Native deps required to build `canvas`
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    python3 \
-    make \
-    g++ \
-    pkg-config \
-    libcairo2-dev \
-    libpango1.0-dev \
-    libjpeg-dev \
-    libgif-dev \
-    librsvg2-dev \
-  && rm -rf /var/lib/apt/lists/*
+# Build tools needed to compile native modules on Alpine (musl libc)
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -26,18 +16,10 @@ COPY src ./src
 
 RUN npm run build
 
-FROM node:26-bookworm-slim AS runner
+FROM node:24-alpine AS runner
 
-# Runtime libs required by `canvas`
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libcairo2 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libjpeg62-turbo \
-    libgif7 \
-    librsvg2-2 \
-    libpixman-1-0 \
-  && rm -rf /var/lib/apt/lists/*
+# Runtime libs for native modules (Prisma engines, Sentry)
+RUN apk add --no-cache libgcc libstdc++
 
 ENV NODE_ENV=production
 ENV PORT=8080

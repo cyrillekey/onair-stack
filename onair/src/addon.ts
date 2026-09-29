@@ -9,12 +9,13 @@ const manifest: Manifest = {
   id: "community.onair",
   version: "0.0.1",
   logo: appConfig.logo,
-  behaviorHints: { configurable: false },
+  behaviorHints: { configurable: false, epgProvider: true },
   catalogs: [
     {
       type: "tv",
       id: "ENTERTAINMENT",
       name: "Entertainment",
+      extra: [{ name: "skip" }, { name: "date" }],
     },
     {
       id: "GENERAL",
@@ -40,7 +41,7 @@ const manifest: Manifest = {
 
 const builder = new addonBuilder(manifest);
 
-builder.defineCatalogHandler(async ({ id }) => {
+builder.defineCatalogHandler(async ({ id, extra }) => {
   const allowedTypes = [
     "ENTERTAINMENT",
     "GENERAL",
@@ -52,12 +53,18 @@ builder.defineCatalogHandler(async ({ id }) => {
   if (!allowedTypes.includes(type)) {
     return { metas: [] };
   }
-
+  if (extra?.date) {
+    // TODO: implement catalog schedul
+    return Promise.resolve({
+      metasDetailed: [],
+    });
+  }
   const catalogs = (
     await db.orm.public.Channel.include("streams", (a) => a.count())
       .where({
         category: type,
       })
+      .offset(extra.skip ?? 0)
       .all()
   ).filter((a) => a.streams > 0);
 
