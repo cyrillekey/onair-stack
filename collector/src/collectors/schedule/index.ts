@@ -1,4 +1,3 @@
-import { getDb } from "@/db/client.js";
 import { fetchHtml } from "@/utils/http.js";
 import { logger } from "@/utils/logger.js";
 import { load } from "cheerio";
@@ -13,7 +12,6 @@ import {
 class ScheduleCollector extends BaseCollector {
   name = "Schedule";
   private baseUrl = "https://online-television.com";
-  private db = getDb();
 
   schedule = "15 00 * * *";
 
@@ -78,11 +76,11 @@ class ScheduleCollector extends BaseCollector {
     });
   }
   async collect(
-    _ctx: CollectorContext,
+    ctx: CollectorContext,
   ): Promise<Omit<CollectResult, "job" | "durationMs">> {
     try {
       const date = dayjs();
-      const channels = (await this.db.orm.public.Channel.all()).filter(
+      const channels = (await ctx.db.orm.public.Channel.all()).filter(
         (a) => !!a.externalId && a.externalId != null,
       );
       const chunks = this.chunk(channels);
@@ -96,7 +94,7 @@ class ScheduleCollector extends BaseCollector {
             const programs = this.buildSchedule(content);
 
             if (programs.length > 0)
-              await this.db.orm.public.Schedule.createAll(
+              await ctx.db.orm.public.Schedule.createAll(
                 programs.map((program) => ({
                   channelId: channel.id,
                   date: this.buildTemporalDate(date.toDate()),

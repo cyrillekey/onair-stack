@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import "dotenv/config";
+import "temporal-polyfill/global";
 import { config } from "@/config/index.js";
 import { getDb } from "@/db/client.js";
 import { buildRegistry } from "@/jobs/registry.js";

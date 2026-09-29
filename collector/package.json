@@ -15,11 +15,10 @@
     "start:once": "RUN_ONCE=true node dist/src/main.js"
   },
   "engines": {
-    "node": "26.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@prisma/orm-postgres": "^8.0.0-rc.12",
-    "canvas": "^3.2.3",
     "cheerio": "^1.0.0",
     "cloudinary": "^2.11.0",
     "dayjs": "^1.11.23",

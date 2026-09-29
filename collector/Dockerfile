@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:26-bookworm-slim AS builder
+FROM node:26-alpine AS builder
 
 WORKDIR /app
 
@@ -12,7 +12,7 @@ COPY src ./src
 
 RUN npm run build
 
-FROM node:26-bookworm-slim AS runner
+FROM node:26-alpine AS runner
 
 ENV NODE_ENV=production
 
