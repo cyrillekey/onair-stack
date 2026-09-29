@@ -25,7 +25,7 @@ const manifest: Manifest = {
     },
     {
       id: "NEWS",
-      name: "USA tv",
+      name: "NEWS",
       type: "tv",
       extra: [{ name: "skip" }],
     },
