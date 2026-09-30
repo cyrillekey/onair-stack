@@ -75,7 +75,7 @@ class StreamsCollector extends BaseCollector {
    * @returns boolean do they match
    */
   private fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a, b) > 0.9;
+    return similarity(a, b) > 0.8;
   }
 
   async collect(
