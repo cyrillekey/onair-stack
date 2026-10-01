@@ -1,4 +1,4 @@
 {
-  "name": "my-worker",
+  "name": "onair-stack",
   "main": "dist/src/main.js"
 }

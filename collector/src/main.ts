@@ -56,3 +56,5 @@ void main().catch((err) => {
   logger.fatal({ err }, "collector failed to start");
   process.exit(1);
 });
+
+export default main;
