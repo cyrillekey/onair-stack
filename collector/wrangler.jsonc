@@ -1,0 +1,4 @@
+{
+  "name": "my-worker",
+  "main": "dist/src/main.js"
+}

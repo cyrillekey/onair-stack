@@ -2,7 +2,7 @@ import { fetchHtml } from "@/utils/http.js";
 import { logger } from "@/utils/logger.js";
 import { load } from "cheerio";
 import dayjs from "dayjs";
-import { Temporal } from "temporal-polyfill";
+
 import {
   BaseCollector,
   type CollectorContext,
@@ -36,10 +36,6 @@ class ScheduleCollector extends BaseCollector {
     date.setHours(Number(hour));
     date.setMinutes(Number(minute));
     return date;
-  }
-  private buildTemporalDate(date: Date) {
-    const instant = Temporal.Instant.from(date.toISOString());
-    return instant;
   }
 
   private buildSchedule(content: string) {

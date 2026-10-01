@@ -52,12 +52,25 @@ class StreamsCollector extends BaseCollector {
         "us_wfmz.m3u",
         "us_wowza.m3u",
         "us_xumo.m3u",
+        "uk_bbc.m3u",
+        "uk_distro.m3u",
+        "uk_pluto.m3u",
+        "uk_rakuten.m3u",
+        "uk_samsung.m3u",
+        "uk_sportstribal.m3u",
       ],
     },
     {
       baseUrl:
         "https://raw.githubusercontent.com/Free-TV/IPTV/refs/heads/master/playlists/",
-      sources: ["playlist_usa.m3u8"],
+      sources: [
+        "playlist_usa.m3u8",
+        "playlist_uk.m3u8",
+        "playlist_zz_news_en.m3u8",
+        "playlist_zz_music_en.m3u8",
+        "playlist_zz_documentaries_en.m3u8",
+        "playlist_zz_movies.m3u8",
+      ],
     },
     {
       baseUrl: "https://raw.githubusercontent.com/BuddyChewChew/pluto/main/",
@@ -119,38 +132,41 @@ class StreamsCollector extends BaseCollector {
           logger.info(`Finished ingestion for ${task.sources[index]}`);
         }
       }
+      const countries = ["us", "uk"];
       // collect from famelack
-      const famelack = await new FamelackCollecter("us").collect(ctx);
-      const streams = (famelack.streams ?? []).filter(
-        (a) => (a.streams?.length ?? 0) > 0,
-      );
-      logger.info(`Found ${streams.length} famelack streams to ingest`);
-      if (streams.length > 0) {
-        logger.info({ streams: streams.length }, "streams collected");
-        // for all matching upsert streams
-        for (const channel of allChannels) {
-          const channelStreams = (famelack.streams ?? []).filter((a) =>
-            this.fuzzyMatch(this.slugify(a.name), channel.slug),
-          );
-          const promises = [];
-          for (const stream of channelStreams) {
-            // pass
-            if (stream.streams.length > 0) {
-              promises.push(
-                ...stream.streams.map((a) =>
-                  this.upsertRecord(ctx, {
-                    channelId: channel.id,
-                    name: channel.name,
-                    slug: this.slugifyUrl(a.url),
-                    resolution: a.resoulution,
-                    url: a.url,
-                    youtubeId: a.youtubeId,
-                  }),
-                ),
-              );
+      for (const country of countries) {
+        const famelack = await new FamelackCollecter(country).collect(ctx);
+        const streams = (famelack.streams ?? []).filter(
+          (a) => (a.streams?.length ?? 0) > 0,
+        );
+        logger.info(`Found ${streams.length} famelack streams to ingest`);
+        if (streams.length > 0) {
+          logger.info({ streams: streams.length }, "streams collected");
+          // for all matching upsert streams
+          for (const channel of allChannels) {
+            const channelStreams = (famelack.streams ?? []).filter((a) =>
+              this.fuzzyMatch(this.slugify(a.name), channel.slug),
+            );
+            const promises = [];
+            for (const stream of channelStreams) {
+              // pass
+              if (stream.streams.length > 0) {
+                promises.push(
+                  ...stream.streams.map((a) =>
+                    this.upsertRecord(ctx, {
+                      channelId: channel.id,
+                      name: channel.name,
+                      slug: this.slugifyUrl(a.url),
+                      resolution: a.resoulution,
+                      url: a.url,
+                      youtubeId: a.youtubeId,
+                    }),
+                  ),
+                );
+              }
             }
+            await Promise.all(promises);
           }
-          await Promise.all(promises);
         }
       }
       return {

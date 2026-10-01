@@ -1,6 +1,7 @@
 import type { Logger } from "pino";
 import type { Contract } from "@/prisma/contract.js";
 import type postgres from "@prisma/orm-postgres/runtime";
+import { Temporal } from "temporal-polyfill";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -36,6 +37,10 @@ export abstract class BaseCollector<T = unknown> {
     for (let i = 0; i < items.length; i += size)
       out.push(items.slice(i, i + size));
     return out;
+  }
+  protected buildTemporalDate(date: Date) {
+    const instant = Temporal.Instant.from(date.toISOString());
+    return instant;
   }
   protected slugifyUrl(url: string) {
     return url
