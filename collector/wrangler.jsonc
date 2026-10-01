@@ -1,4 +1,5 @@
 {
   "name": "onair-stack",
-  "main": "dist/src/main.js"
+  "main": "dist/src/main.js",
+  "compatibility_flags": ["nodejs_compat"]
 }
