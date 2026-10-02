@@ -13,7 +13,6 @@ class UkScheduler extends BaseCollector {
   readonly name = "uk.schedule";
   readonly schedule = "15 03 * * *";
   private apiUrl = "https://www.freeview.co.uk/api/tv-guide?nid=64257&start=";
-  private url = "https://www.freeview.co.uk/tv-guide?userNid=64257";
   private async collectChannels(): Promise<BbcChannel[]> {
     try {
       const date = dayjs().utc().startOf("date").unix();
@@ -82,6 +81,11 @@ class UkScheduler extends BaseCollector {
     try {
       const channels = await this.collectChannels();
       const fetched = channels;
+      await Promise.all(
+        channels.map(async (channel) => {
+          await this.upsertChannel(ctx, channel);
+        }),
+      );
 
       return {
         fetched: fetched.length,
