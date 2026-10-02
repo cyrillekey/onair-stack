@@ -15,6 +15,14 @@ const envSchema = z.object({
   HTTP_MAX_RETRIES: z.coerce.number().int().min(0).max(10).default(3),
   HTTP_USER_AGENT: z.string().default("onair-collector/0.0.1"),
   NODE_ENV: z.string().default("development"),
+  STREAM_HEALTH_CRON: z.string().default("0 4 * * *"),
+  STREAM_HEALTH_BATCH_SIZE: z.coerce.number().int().positive().default(20),
+  STREAM_HEALTH_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
+  STREAM_HEALTH_DEEP_CHECK: z
+    .string()
+    .default("true")
+    .transform((v) => v.toLowerCase() === "true"),
+  STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.9),
 });
 
 export type AppConfig = z.infer<typeof envSchema>
