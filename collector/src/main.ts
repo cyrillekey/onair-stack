@@ -2,11 +2,14 @@
 
 import "dotenv/config";
 import "temporal-polyfill/global";
+import "@/utils/instrument.js";
+import * as Sentry from "@sentry/node";
 import { config } from "@/config/index.js";
 import { getDb } from "@/db/client.js";
 import { buildRegistry } from "@/jobs/registry.js";
 import { filterCollectors, runOnce, startScheduler } from "@/jobs/scheduler.js";
 import { logger } from "@/utils/logger.js";
+import { flushSentry, reportError } from "@/utils/sentry.js";
 import { v2 as cloudinary } from "cloudinary";
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -34,7 +37,13 @@ async function main(): Promise<void> {
       { jobs: collectors.map((c) => c.name) },
       "RUN_ONCE=true, running jobs once",
     );
-    await runOnce(collectors, buildCtx);
+    const outcomes = await runOnce(collectors, buildCtx);
+    const failed = outcomes.filter((o) => o.error);
+    if (failed.length > 0) {
+      logger.error({ failed }, "RUN_ONCE finished with job failures");
+      // Non-zero exit so Kubernetes CronJobs / alerting notice the failure.
+      process.exitCode = 1;
+    }
     return;
   }
 
@@ -46,15 +55,32 @@ async function main(): Promise<void> {
 
   const shutdown = (signal: string) => {
     logger.info({ signal }, "shutting down");
-    process.exit(0);
+    void flushSentry().finally(() => process.exit(0));
   };
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
 
+process.on("unhandledRejection", (reason) => {
+  logger.error({ err: reason }, "unhandled rejection");
+  reportError(reason, { message: "unhandled rejection" });
+});
+
+process.on("uncaughtException", (err) => {
+  logger.fatal({ err }, "uncaught exception");
+  reportError(err, { message: "uncaught exception" });
+  void flushSentry().finally(() => process.exit(1));
+});
+
 void main().catch((err) => {
   logger.fatal({ err }, "collector failed to start");
-  process.exit(1);
+  reportError(err, { message: "collector failed to start" });
+  // Sentry.init already flushes on uncaughts, but an explicit flush
+  // guarantees the startup failure is delivered before exit.
+  void (async () => {
+    await Sentry.flush(5_000);
+    process.exit(1);
+  })();
 });
 
 export default main;

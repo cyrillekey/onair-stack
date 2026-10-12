@@ -2,6 +2,7 @@ import type { Logger } from "pino";
 import type { Contract } from "@/prisma/contract.js";
 import type postgres from "@prisma/orm-postgres/runtime";
 import { Temporal } from "temporal-polyfill";
+import { reportError } from "@/utils/sentry.js";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -78,6 +79,7 @@ export abstract class BaseCollector<T = unknown> {
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       log.error({ err }, "collect failed");
+      reportError(err, { job: this.name, message: "collect failed" });
       return {
         job: this.name,
         fetched: 0,

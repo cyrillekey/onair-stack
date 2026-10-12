@@ -23,6 +23,9 @@ const envSchema = z.object({
     .default("true")
     .transform((v) => v.toLowerCase() === "true"),
   STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.9),
+  SENTRY_DSN: z.string().optional().default(""),
+  SENTRY_ENVIRONMENT: z.string().optional().default(""),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(1),
 });
 
 export type AppConfig = z.infer<typeof envSchema>

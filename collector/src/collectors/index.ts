@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger.js";
+import { reportError } from "@/utils/sentry.js";
 import {
   BaseCollector,
   type CollectorContext,
@@ -176,6 +177,7 @@ class StreamsCollector extends BaseCollector {
       };
     } catch (error) {
       ctx.log.error({ error }, "Error collecting");
+      reportError(error, { job: this.name, message: "Error collecting" });
       return {
         fetched: 0,
         stored: 0,
@@ -202,6 +204,12 @@ class StreamsCollector extends BaseCollector {
       });
     } catch (error) {
       logger.error({ error });
+      reportError(error, {
+        job: this.name,
+        message: "Stream upsert failed",
+        channelId: record.channelId,
+        slug: record.slug,
+      });
       return false;
     }
   }

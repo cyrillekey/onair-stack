@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger.js";
+import { reportError } from "@/utils/sentry.js";
 import {
   BaseCollector,
   type CollectorContext,
@@ -25,8 +26,8 @@ class UkScheduler extends BaseCollector {
       const channels = response.data?.programs ?? [];
       return channels;
     } catch (error) {
-      console.error("Failed to fetch channels", error);
-      logger.error({ error }, "Failed to fetch ,channels");
+      logger.error({ error }, "Failed to fetch channels");
+      reportError(error, { job: this.name, message: "Failed to fetch channels", url: this.apiUrl });
       return [];
     }
   }
@@ -71,6 +72,11 @@ class UkScheduler extends BaseCollector {
       return true;
     } catch (error) {
       ctx.log.error({ error }, "Failed to upsert channel");
+      reportError(error, {
+        job: this.name,
+        message: "Failed to upsert channel",
+        channelTitle: channel.title,
+      });
       return false;
     }
   }
@@ -93,7 +99,8 @@ class UkScheduler extends BaseCollector {
         skipped: 0,
       };
     } catch (error) {
-      ctx.log.error({ error }, "collect ");
+      ctx.log.error({ error }, "collect failed");
+      reportError(error, { job: this.name, message: "collect failed" });
       return {
         fetched: 0,
         stored: 0,

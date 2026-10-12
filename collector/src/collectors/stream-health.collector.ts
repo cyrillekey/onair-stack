@@ -1,5 +1,6 @@
 import { config } from "@/config/index.js";
 import { isVerifiableM3U8Url, verifyM3U8 } from "@/utils/url.js";
+import { reportError, reportMessage } from "@/utils/sentry.js";
 import {
   BaseCollector,
   type CollectorContext,
@@ -173,6 +174,17 @@ class StreamHealthCollector extends BaseCollector<string> {
         },
         "safety trip: too many streams look broken, deleting nothing",
       );
+      reportMessage(
+        `safety trip: ${broken.length}/${checked} streams failed verification, deleting nothing`,
+        "error",
+        {
+          job: this.name,
+          checked,
+          broken: broken.length,
+          deleteRatio,
+          maxRatio: config.STREAM_HEALTH_MAX_DELETE_RATIO,
+        },
+      );
       return {
         fetched: saved.length,
         stored: 0,
@@ -198,6 +210,12 @@ class StreamHealthCollector extends BaseCollector<string> {
                 { err, id: item.id, url: item.url },
                 "failed to delete broken stream",
               );
+              reportError(err, {
+                job: this.name,
+                message: "failed to delete broken stream",
+                id: item.id,
+                url: item.url,
+              });
               return false;
             }
           }),
@@ -222,6 +240,11 @@ class StreamHealthCollector extends BaseCollector<string> {
                 { err, id: item.id },
                 "failed to refresh stream resolution",
               );
+              reportError(err, {
+                job: this.name,
+                message: "failed to refresh stream resolution",
+                id: item.id,
+              });
               return false;
             }
           }),

@@ -1,5 +1,6 @@
 import { fetchHtml } from "@/utils/http.js";
 import { logger } from "@/utils/logger.js";
+import { reportError } from "@/utils/sentry.js";
 import { load } from "cheerio";
 import dayjs from "dayjs";
 
@@ -25,8 +26,12 @@ class ScheduleCollector extends BaseCollector {
       const html = await fetchHtml(this.buildLink(name), { timeoutMs: 60000 });
       return html;
     } catch (error) {
-      console.log(error);
       logger.error({ error }, "failed to scrape page");
+      reportError(error, {
+        job: this.name,
+        message: "failed to scrape page",
+        externalId: name,
+      });
       return null;
     }
   }
@@ -61,8 +66,8 @@ class ScheduleCollector extends BaseCollector {
         .get();
       return body;
     } catch (error) {
-      console.log(error);
       logger.error({ error }, "failed to build schedule");
+      reportError(error, { job: this.name, message: "failed to build schedule" });
       return [];
     }
   }
@@ -104,7 +109,13 @@ class ScheduleCollector extends BaseCollector {
               );
             await this.sleep();
           } catch (error) {
-            logger.error({ error }, "failed to build schedule");
+            logger.error({ error, channelId: channel.id }, "failed to build schedule");
+            reportError(error, {
+              job: this.name,
+              message: "failed to build schedule for channel",
+              channelId: channel.id,
+              externalId: channel.externalId,
+            });
           }
         }
       }
@@ -115,8 +126,8 @@ class ScheduleCollector extends BaseCollector {
         streams: channels,
       };
     } catch (error) {
-      console.log(error);
       logger.error({ error }, "failed to build schedule");
+      reportError(error, { job: this.name, message: "failed to build schedule" });
       return {
         fetched: 0,
         stored: 0,

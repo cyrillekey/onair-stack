@@ -1,5 +1,6 @@
 import ProgressBar from "progress";
 import { logger } from "@/utils/logger.js";
+import { reportError } from "@/utils/sentry.js";
 import { isVerifiableM3U8Url, verifyM3U8 } from "@/utils/url.js";
 import { parseM3U, type Stream } from "@/utils/urlparser.js";
 import {
@@ -99,6 +100,7 @@ class IPTVCollector extends BaseCollector<Stream> {
     } catch (error) {
       if (bar && !bar.complete) bar.terminate();
       ctx.log.error({ error }, "Error collecting");
+      reportError(error, { job: this.name, message: "Error collecting", url: this.url });
       return {
         fetched: 0,
         stored: 0,
@@ -116,6 +118,7 @@ class IPTVCollector extends BaseCollector<Stream> {
       return formated;
     } catch (error) {
       logger.error({ error }, "failed to fetch streams");
+      reportError(error, { job: this.name, message: "failed to fetch streams", url: this.url });
       return [];
     }
   }
@@ -138,6 +141,12 @@ class IPTVCollector extends BaseCollector<Stream> {
       return null;
     } catch (error) {
       logger.error({ error }, "Failed to parse m3u8", index);
+      reportError(error, {
+        job: this.name,
+        message: "Failed to parse m3u8",
+        index,
+        streamName: media.name,
+      });
       return null;
     }
   }
@@ -152,6 +161,7 @@ class IPTVCollector extends BaseCollector<Stream> {
       return formattedMedia;
     } catch (error) {
       logger.error({ error }, "Failed to format names");
+      reportError(error, { job: this.name, message: "Failed to format names" });
       return [];
     }
   }

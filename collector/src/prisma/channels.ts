@@ -1,5 +1,8 @@
 import "dotenv/config";
+import "@/utils/instrument.js";
+import * as Sentry from "@sentry/node";
 import { logger } from "@/utils/logger.js";
+import { flushSentry, reportError } from "@/utils/sentry.js";
 import { getDb } from "../db/client.js";
 import { load } from "cheerio";
 import { fetchHtml } from "@/utils/http.js";
@@ -37,7 +40,12 @@ async function channelCollector(page: number) {
       .get();
     return body;
   } catch (error) {
-    logger.error({ error }, "failed to build channels list");
+    logger.error({ error, page }, "failed to build channels list");
+    reportError(error, {
+      job: "channels-seed",
+      message: "failed to build channels list",
+      page,
+    });
     return [];
   }
 }
@@ -70,12 +78,17 @@ async function main() {
         );
         await sleep();
       } catch (error) {
-        console.log(error);
+        logger.error({ error, page: index + 1 }, "failed to ingest channels page");
+        reportError(error, {
+          job: "channels-seed",
+          message: "failed to ingest channels page",
+          page: index + 1,
+        });
       }
     }
   } catch (error) {
-    console.log(error);
     logger.error({ error }, "error running collector");
+    reportError(error, { job: "channels-seed", message: "error running collector" });
   }
 }
 
@@ -97,5 +110,10 @@ async function sleep() {
 
 main().catch((err) => {
   logger.fatal({ err }, "collector failed to start");
-  process.exit(1);
+  reportError(err, { job: "channels-seed", message: "collector failed to start" });
+  void (async () => {
+    await Sentry.flush(5_000);
+    await flushSentry();
+    process.exit(1);
+  })();
 });

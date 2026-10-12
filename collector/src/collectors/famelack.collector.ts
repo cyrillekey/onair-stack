@@ -1,4 +1,5 @@
 import { logger } from "@/utils/logger.js";
+import { reportError } from "@/utils/sentry.js";
 import {
   BaseCollector,
   type CollectorContext,
@@ -55,6 +56,12 @@ class FamelackCollecter extends BaseCollector {
       return media.filter((a) => !a.isGeoBlocked);
     } catch (error) {
       logger.error({ error }, "failed to fetch streams");
+      reportError(error, {
+        job: this.name,
+        message: "failed to fetch streams",
+        country: this.country,
+        url: this.buildLink(),
+      });
       return [];
     }
   }
@@ -67,6 +74,11 @@ class FamelackCollecter extends BaseCollector {
       return id;
     } catch (error) {
       logger.error({ error }, "Failed to extract embeded url");
+      reportError(error, {
+        job: this.name,
+        message: "Failed to extract embeded url",
+        url,
+      });
       return null;
     }
   }
@@ -93,6 +105,11 @@ class FamelackCollecter extends BaseCollector {
       return null;
     } catch (error) {
       logger.error({ error }, "Failed to verify stream");
+      reportError(error, {
+        job: this.name,
+        message: "Failed to verify stream",
+        streamName: stream?.name,
+      });
       return null;
     }
   }
@@ -114,6 +131,7 @@ class FamelackCollecter extends BaseCollector {
       // pass
     } catch (error) {
       logger.error({ error }, "Failed to verify streams");
+      reportError(error, { job: this.name, message: "Failed to verify streams" });
       return [];
     }
   }
@@ -145,6 +163,7 @@ class FamelackCollecter extends BaseCollector {
       };
     } catch (error) {
       ctx.log.error({ error });
+      reportError(error, { job: this.name, message: "collect failed" });
       return { fetched: 0, stored: 0, skipped: 0, error: String(error) };
     }
   }

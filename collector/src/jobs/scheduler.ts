@@ -2,6 +2,7 @@ import cron from "node-cron";
 import type { Logger } from "pino";
 import { config } from "@/config/index.js";
 import type { BaseCollector, CollectorContext } from "@/collectors/base.collector.js";
+import { reportError, reportMessage } from "@/utils/sentry.js";
 
 export interface ScheduledHandle {
   job: string;
@@ -9,7 +10,7 @@ export interface ScheduledHandle {
 }
 
 export function filterCollectors(all: BaseCollector[]): BaseCollector[] {
- return all.filter((c) => c.enabled);
+  return all.filter((c) => c.enabled);
 }
 
 function guardOverlap(job: string, log: Logger, fn: () => Promise<void>): () => void {
@@ -20,9 +21,16 @@ function guardOverlap(job: string, log: Logger, fn: () => Promise<void>): () => 
       return;
     }
     running = true;
-    void fn().finally(() => {
-      running = false;
-    });
+    void fn()
+      .catch((err) => {
+        // BaseCollector.run catches its own errors, so reaching here means
+        // buildCtx() or an unexpected throw: always worth a Sentry event.
+        log.error({ err, job }, "collector tick threw");
+        reportError(err, { job, message: "collector tick threw" });
+      })
+      .finally(() => {
+        running = false;
+      });
   };
 }
 
@@ -35,11 +43,23 @@ export function startScheduler(
   for (const collector of collectors) {
     if (!cron.validate(collector.schedule)) {
       log.error({ job: collector.name, schedule: collector.schedule }, "invalid cron expression, skipping");
+      reportMessage("invalid cron expression, skipping job", "error", {
+        job: collector.name,
+        schedule: collector.schedule,
+      });
       continue;
     }
     const tick = guardOverlap(collector.name, log, async () => {
       const result = await collector.run(buildCtx());
-      if (result.error) log.error(result, "job failed");
+      if (result.error) {
+        log.error(result, "job failed");
+        reportMessage(`job failed: ${result.error}`, "error", {
+          job: collector.name,
+          fetched: result.fetched,
+          stored: result.stored,
+          durationMs: result.durationMs,
+        });
+      }
     });
     const task = cron.schedule(
       collector.schedule,
@@ -59,8 +79,22 @@ export function startScheduler(
   return handles;
 }
 
-export async function runOnce(collectors: BaseCollector[], buildCtx: () => CollectorContext): Promise<void> {
+export async function runOnce(
+  collectors: BaseCollector[],
+  buildCtx: () => CollectorContext,
+): Promise<{ job: string; error?: string }[]> {
+  const outcomes: { job: string; error?: string }[] = [];
   for (const collector of collectors) {
-    await collector.run(buildCtx());
+    const result = await collector.run(buildCtx());
+    if (result.error) {
+      reportMessage(`job failed: ${result.error}`, "error", {
+        job: collector.name,
+        fetched: result.fetched,
+        stored: result.stored,
+        durationMs: result.durationMs,
+      });
+    }
+    outcomes.push({ job: collector.name, error: result.error });
   }
+  return outcomes;
 }
