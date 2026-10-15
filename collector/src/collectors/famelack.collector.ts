@@ -86,11 +86,16 @@ class FamelackCollecter extends BaseCollector {
     stream: FamelackMedia,
   ): Promise<(FamelackMedia & { resolution?: string }) | null> {
     try {
-      if (stream?.sources?.streams?.length == 0) {
+      if (
+        stream?.sources?.streams == null ||
+        stream?.sources?.streams == undefined ||
+        stream?.sources?.streams?.length == 0
+      ) {
         return null;
       }
+
       const streams = await Promise.all(
-        stream.sources.streams!.map((a) => verifyM3U8(a)),
+        stream.sources.streams.map((a) => verifyM3U8(a)),
       );
       const valid = streams.filter((a) => a.isPlayable && a.isValid && a.url);
       if (valid.length > 0) {
@@ -131,7 +136,10 @@ class FamelackCollecter extends BaseCollector {
       // pass
     } catch (error) {
       logger.error({ error }, "Failed to verify streams");
-      reportError(error, { job: this.name, message: "Failed to verify streams" });
+      reportError(error, {
+        job: this.name,
+        message: "Failed to verify streams",
+      });
       return [];
     }
   }
