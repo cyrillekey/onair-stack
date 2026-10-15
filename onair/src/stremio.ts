@@ -11,4 +11,4 @@ import sdk from "stremio-addon-sdk";
  */
 export const { addonBuilder, getRouter, publishToCentral, serveHTTP } = sdk;
 
-export type { Manifest } from "stremio-addon-sdk";
+export type { Manifest, MetaDetail, MetaVideo } from "stremio-addon-sdk";
