@@ -14,6 +14,14 @@ Both services use the same Prisma 8 contract (`src/prisma/contract.prisma`):
 - `Stream` — `channelId`, name, slug, `url` (verified m3u8), resolution, `youtubeId`
 - `Schedule` — `channelId`, program name, poster, date, start/end time
 
+## Screenshots
+
+The `onair` addon's channels rendered in Stremio's TV guide:
+
+![Stremio TV guide — news channels](tv-guide-news-1.png)
+![Stremio TV guide — entertainment channels](tv-guide-entertainment.png)
+![Stremio TV guide — news channels, later in the day](tv-guide-news-2.png)
+
 ## onair
 
 Stremio addon backend. Exposes a standard Stremio manifest over HTTP and reads only from Postgres — it never scrapes directly.

@@ -1,4 +1,5 @@
 import type { BaseCollector } from "@/collectors/base.collector.js";
+import BroadcastCollector from "@/collectors/broadcast.collector.js";
 import StreamsCollector from "@/collectors/index.js";
 import UkScheduler from "@/collectors/schedule/uk.schedule.js";
 import ScheduleCollector from "@/collectors/schedule/usa.schedule.js";
@@ -13,5 +14,6 @@ export function buildRegistry(): BaseCollector[] {
     new ScheduleCollector(),
     new StreamsCollector(),
     new UkScheduler(),
+    new BroadcastCollector(),
   ];
 }

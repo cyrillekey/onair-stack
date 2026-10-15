@@ -6,7 +6,7 @@ import {
   type CollectResult,
 } from "./base.collector.js";
 import IPTVCollector from "./iptv.collector.js";
-import similarity from "similarity";
+
 import type { DefaultModelRow } from "@prisma/orm-postgres/orm-client";
 import type { Contract } from "@/prisma/contract.js";
 import FamelackCollecter from "./famelack.collector.js";
@@ -20,6 +20,13 @@ class StreamsCollector extends BaseCollector {
       baseUrl:
         "https://raw.githubusercontent.com/iptv-org/iptv/refs/heads/master/streams/",
       sources: [
+        "uk.m3u",
+        "uk_bbc.m3u",
+        "uk_distro.m3u",
+        "uk_pluto.m3u",
+        "uk_rakuten.m3u",
+        "uk_samsung.m3u",
+        "uk_sportstribal.m3u",
         "us.m3u",
         "us_30a.m3u",
         "us_3abn.m3u",
@@ -53,12 +60,7 @@ class StreamsCollector extends BaseCollector {
         "us_wfmz.m3u",
         "us_wowza.m3u",
         "us_xumo.m3u",
-        "uk_bbc.m3u",
-        "uk_distro.m3u",
-        "uk_pluto.m3u",
-        "uk_rakuten.m3u",
-        "uk_samsung.m3u",
-        "uk_sportstribal.m3u",
+        "dk_pluto.m3u",
       ],
     },
     {
@@ -80,16 +82,6 @@ class StreamsCollector extends BaseCollector {
   ];
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;
-  }
-  /**
-   * Performs a fuzzy match between two names to determine if they are similar or close
-   * @param a name to compare
-   * @param b name to compare
-   *
-   * @returns boolean do they match
-   */
-  private fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a, b) > 0.8;
   }
 
   async collect(

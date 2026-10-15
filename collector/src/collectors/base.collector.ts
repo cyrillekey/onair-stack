@@ -3,6 +3,7 @@ import type { Contract } from "@/prisma/contract.js";
 import type postgres from "@prisma/orm-postgres/runtime";
 import { Temporal } from "temporal-polyfill";
 import { reportError } from "@/utils/sentry.js";
+import similarity from "similarity";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -58,6 +59,16 @@ export abstract class BaseCollector<T = unknown> {
       .replace(/[\s_-]+/g, "-")
       .replace(/^-+/, "")
       .replace(/-+$/, "");
+  }
+  /**
+   * Performs a fuzzy match between two names to determine if they are similar or close
+   * @param a name to compare
+   * @param b name to compare
+   *
+   * @returns boolean do they match
+   */
+  protected fuzzyMatch(a: string, b: string): boolean {
+    return similarity(a, b) > 0.8;
   }
 
   async run(ctx: CollectorContext): Promise<CollectResult<T>> {

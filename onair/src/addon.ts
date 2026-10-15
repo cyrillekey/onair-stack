@@ -13,8 +13,10 @@ import Sentry from "./utils/instrument.js";
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
 const manifest: Manifest = {
   id: "community.onair",
-  version: "0.0.1",
+  version: "1.0.0",
   logo: appConfig.logo,
+  // background: appConfig.background,
+  contactEmail: "cyrilleotieno7@gmail.com",
   behaviorHints: { configurable: false, epgProvider: true },
   catalogs: [
     {
@@ -31,7 +33,7 @@ const manifest: Manifest = {
     },
     {
       id: "NEWS",
-      name: "NEWS",
+      name: "News",
       type: "tv",
       extra: [{ name: "skip" }, { name: "date" }],
     },
@@ -45,7 +47,8 @@ const manifest: Manifest = {
   resources: ["catalog", "stream", "meta"],
   types: ["tv"],
   name: "Onair",
-  description: "Live tv",
+  description:
+    "Live TV for Stremio with a native EPG programme guide. Browse Entertainment, General, News and Sports channel catalogs and watch live channels from Discover or the guide grid.",
 };
 
 const builder = new addonBuilder(manifest);
@@ -164,19 +167,17 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
   if (extra?.date) {
     Sentry.metrics.count("catalog-epg-request", 1);
     const window = guideWindow(extra.date);
-    const channels = await db.orm.public.Channel
-      .include("schedule", (schedule) =>
+    const channels = await db.orm.public.Channel.include(
+      "schedule",
+      (schedule) =>
         schedule
           .where((programme) => programme.endTime.gt(window.start))
           .where((programme) => programme.startTime.lt(window.end))
           .orderBy((programme) => programme.startTime.asc()),
-      )
+    )
       .where({ category: type })
       .where((channel) => channel.streams.some())
-      .orderBy([
-        (channel) => channel.name.asc(),
-        (channel) => channel.id.asc(),
-      ])
+      .orderBy([(channel) => channel.name.asc(), (channel) => channel.id.asc()])
       .offset(pageOffset(extra.skip))
       .limit(PAGE_SIZE)
       .all();
@@ -192,13 +193,9 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
     };
   }
 
-  const channels = await db.orm.public.Channel
-    .where({ category: type })
+  const channels = await db.orm.public.Channel.where({ category: type })
     .where((channel) => channel.streams.some())
-    .orderBy([
-      (channel) => channel.name.asc(),
-      (channel) => channel.id.asc(),
-    ])
+    .orderBy([(channel) => channel.name.asc(), (channel) => channel.id.asc()])
     .offset(pageOffset(extra?.skip))
     .limit(PAGE_SIZE)
     .all();
@@ -230,8 +227,9 @@ builder.defineMetaHandler(async (params) => {
   // The details page refreshes meta regularly and would lose its schedule
   // across midnight, so return the current UTC day plus the next one.
   const window = guideWindow(undefined, 2);
-  const schedule = await db.orm.public.Schedule
-    .where((programme) => programme.channelId.eq(id))
+  const schedule = await db.orm.public.Schedule.where((programme) =>
+    programme.channelId.eq(id),
+  )
     .where((programme) => programme.endTime.gt(window.start))
     .where((programme) => programme.startTime.lt(window.end))
     .orderBy((programme) => programme.startTime.asc())
