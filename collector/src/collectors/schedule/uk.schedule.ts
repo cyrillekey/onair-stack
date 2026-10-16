@@ -13,7 +13,7 @@ dayjs.extend(utc);
 class UkScheduler extends BaseCollector {
   readonly name = "uk.schedule";
   readonly schedule = "15 03 * * *";
-  private apiUrl = "https://www.freeview.co.uk/api/tv-guide?nid=64257&start=";
+  private apiUrl = "https://www.freely.co.uk/api/tv-guide?nid=64865&&start=";
   private async collectChannels(): Promise<BbcChannel[]> {
     try {
       const date = dayjs().utc().startOf("date").unix();
@@ -27,7 +27,11 @@ class UkScheduler extends BaseCollector {
       return channels;
     } catch (error) {
       logger.error({ error }, "Failed to fetch channels");
-      reportError(error, { job: this.name, message: "Failed to fetch channels", url: this.apiUrl });
+      reportError(error, {
+        job: this.name,
+        message: "Failed to fetch channels",
+        url: this.apiUrl,
+      });
       return [];
     }
   }
@@ -119,7 +123,7 @@ export interface BbcChannel {
   events: Event[];
 }
 
-interface Event {
+export interface Event {
   program_id: string;
   event_locator: string;
   main_title: string;
@@ -133,7 +137,17 @@ interface Event {
   uuid: string;
 }
 
-interface OnDemand {
+export interface OnDemand {
   start_of_availability: string;
   end_of_availability: string;
+  player_links: PlayerLinks;
+}
+
+export interface PlayerLinks {
+  tv: Tv;
+}
+
+export interface Tv {
+  program_url: string;
+  template_url: string;
 }
