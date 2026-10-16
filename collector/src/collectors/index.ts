@@ -79,6 +79,17 @@ class StreamsCollector extends BaseCollector {
       baseUrl: "https://raw.githubusercontent.com/BuddyChewChew/pluto/main/",
       sources: ["pluto_us.m3u", "pluto_gb.m3u"],
     },
+    {
+      baseUrl:
+        "https://raw.githubusercontent.com/freecasthub/public-iptv/refs/heads/main/",
+      sources: [
+        "education.m3u",
+        "news.m3u",
+        "playlist.m3u",
+        "sports.m3u",
+        "weather.m3u",
+      ],
+    },
   ];
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;

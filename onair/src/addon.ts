@@ -1,5 +1,6 @@
 import {
   addonBuilder,
+  publishToCentral,
   type Manifest,
   type MetaDetail,
   type MetaVideo,
@@ -259,5 +260,7 @@ builder.defineStreamHandler(async ({ id }) => {
     })),
   });
 });
-
+if (process.env.NODE_ENV === "production" && process.env.CENTRAL_URL) {
+  void publishToCentral(process.env.CENTRAL_URL);
+}
 export const addonInterface = builder.getInterface();
