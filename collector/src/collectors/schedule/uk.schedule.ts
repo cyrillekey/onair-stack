@@ -12,7 +12,7 @@ dayjs.extend(utc);
 
 class UkScheduler extends BaseCollector {
   readonly name = "uk.schedule";
-  readonly schedule = "15 03 * * *";
+  readonly schedule = "15 02 * * *";
   private apiUrl = "https://www.freely.co.uk/api/tv-guide?nid=64865&&start=";
   private async collectChannels(): Promise<BbcChannel[]> {
     try {

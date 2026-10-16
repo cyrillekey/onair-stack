@@ -13,7 +13,7 @@ import FamelackCollecter from "./famelack.collector.js";
 
 class StreamsCollector extends BaseCollector {
   name = "StreamCollector";
-  schedule = "0 0,08,16 * * *";
+  schedule = "0 */6 * * *";
 
   private ipTSources: { baseUrl: string; sources: string[] }[] = [
     {

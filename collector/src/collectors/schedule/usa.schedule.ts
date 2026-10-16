@@ -14,7 +14,7 @@ class ScheduleCollector extends BaseCollector {
   name = "Schedule";
   private baseUrl = "https://online-television.com";
 
-  schedule = "15 00 * * *";
+  schedule = "15 01 * * *";
 
   private buildLink(name: string): string {
     const date = dayjs();

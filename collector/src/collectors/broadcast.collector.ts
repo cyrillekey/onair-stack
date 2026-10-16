@@ -46,7 +46,7 @@ export interface PlaybackOption {
 
 class BroadcastCollector extends BaseCollector {
   name = "Broadcast";
-  schedule = "0 0,08,16 * * *";
+  schedule = "0 */4 * * *";
   private baseUrl = "https://broadcastatlas.com/api/channels/ranked?offset=";
 
   private async collectStreams(): Promise<Channel[]> {

@@ -26,9 +26,10 @@ const envSchema = z.object({
   SENTRY_DSN: z.string().optional().default(""),
   SENTRY_ENVIRONMENT: z.string().optional().default(""),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(1),
+  CRONITOR_API_KEY: z.string().optional().default(""),
 });
 
-export type AppConfig = z.infer<typeof envSchema>
+export type AppConfig = z.infer<typeof envSchema>;
 
 function loadConfig(): AppConfig {
   const parsed = envSchema.safeParse(process.env);
@@ -38,7 +39,7 @@ function loadConfig(): AppConfig {
       .join("; ");
     throw new Error(`Invalid environment config: ${details}`);
   }
-  return { ...parsed.data,  };
+  return { ...parsed.data };
 }
 
 export const config = loadConfig();

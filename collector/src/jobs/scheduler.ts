@@ -1,9 +1,16 @@
-import cron from "node-cron";
+import nodeCron from "node-cron";
+
 import type { Logger } from "pino";
 import { config } from "@/config/index.js";
-import type { BaseCollector, CollectorContext } from "@/collectors/base.collector.js";
+import monitor from "cronitor";
+import type {
+  BaseCollector,
+  CollectorContext,
+} from "@/collectors/base.collector.js";
 import { reportError, reportMessage } from "@/utils/sentry.js";
 
+const cron = monitor(config.CRONITOR_API_KEY);
+cron.wraps(nodeCron);
 export interface ScheduledHandle {
   job: string;
   stop: () => void;
@@ -13,7 +20,11 @@ export function filterCollectors(all: BaseCollector[]): BaseCollector[] {
   return all.filter((c) => c.enabled);
 }
 
-function guardOverlap(job: string, log: Logger, fn: () => Promise<void>): () => void {
+function guardOverlap(
+  job: string,
+  log: Logger,
+  fn: () => Promise<void>,
+): () => void {
   let running = false;
   return () => {
     if (running) {
@@ -39,10 +50,16 @@ export function startScheduler(
   buildCtx: () => CollectorContext,
   log: Logger,
 ): ScheduledHandle[] {
+  if (cron?.schedule === undefined) {
+    throw new Error("Cronitor not loaded");
+  }
   const handles: ScheduledHandle[] = [];
   for (const collector of collectors) {
-    if (!cron.validate(collector.schedule)) {
-      log.error({ job: collector.name, schedule: collector.schedule }, "invalid cron expression, skipping");
+    if (!nodeCron.validate(collector.schedule)) {
+      log.error(
+        { job: collector.name, schedule: collector.schedule },
+        "invalid cron expression, skipping",
+      );
       reportMessage("invalid cron expression, skipping job", "error", {
         job: collector.name,
         schedule: collector.schedule,
@@ -61,18 +78,25 @@ export function startScheduler(
         });
       }
     });
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const task = cron.schedule(
+      collector.name,
       collector.schedule,
       () => {
         tick();
       },
       { timezone: config.TZ },
     );
-    log.info({ job: collector.name, schedule: collector.schedule }, "job scheduled");
+    log.info(
+      { job: collector.name, schedule: collector.schedule },
+      "job scheduled",
+    );
     handles.push({
       job: collector.name,
       stop: () => {
-        void task.stop();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        void task?.stop();
       },
     });
   }

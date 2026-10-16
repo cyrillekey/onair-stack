@@ -37,7 +37,7 @@ export const FamelackMediaElementSchema = z
 export type FamelackMedia = z.infer<typeof FamelackMediaElementSchema>;
 
 class FamelackCollecter extends BaseCollector {
-  schedule = "30 01 * * *";
+  schedule = "0 */5 * * *";
   name = "Famelack";
   private country: string;
   private baseUrl =
