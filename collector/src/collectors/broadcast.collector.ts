@@ -58,7 +58,12 @@ class BroadcastCollector extends BaseCollector {
         const url = `${this.baseUrl}${offset}`;
         const res = await fetch(url);
         const data: BroadcastMedia = res.json() as unknown as BroadcastMedia;
-        streams.push(...data.channels);
+        if (
+          data.channels != null &&
+          data.channels != undefined &&
+          data.channels.length > 0
+        )
+          streams.push(...data.channels);
         hasMore = data.hasMore;
         offset = data.nextOffset;
       }
