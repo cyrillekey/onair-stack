@@ -80,14 +80,14 @@ class StreamHealthCollector extends BaseCollector<string> {
       });
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err);
-      return { outcome: "transient", reason };
+      return { outcome: "broken", reason };
     }
     if (verification.isValid && verification.isPlayable) {
       return { outcome: "healthy", resolution: verification.resolution };
     }
     const reason = verification.error ?? "unplayable playlist";
     if (isTransientError(reason)) {
-      return { outcome: "transient", reason };
+      return { outcome: "broken", reason };
     }
     return { outcome: "broken", reason };
   }
@@ -161,10 +161,7 @@ class StreamHealthCollector extends BaseCollector<string> {
 
     const checked = healthy + broken.length + transient.length;
     const deleteRatio = checked > 0 ? broken.length / checked : 0;
-    if (
-      checked >= 10 &&
-      deleteRatio > config.STREAM_HEALTH_MAX_DELETE_RATIO
-    ) {
+    if (checked >= 10 && deleteRatio > config.STREAM_HEALTH_MAX_DELETE_RATIO) {
       ctx.log.error(
         {
           checked,

@@ -187,12 +187,12 @@ class StreamsCollector extends BaseCollector {
         create: {
           channelId: record.channelId!,
           name: record.name!,
-          slug: record.slug!,
+          slug: this.slugifyUrl(record.url!),
           url: record.url!,
           resolution: record.resolution,
         },
         update: record,
-        conflictOn: { slug: record.slug! },
+        conflictOn: { slug: this.slugifyUrl(record.url!) },
       });
     } catch (error) {
       logger.error({ error });
