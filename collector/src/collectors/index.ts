@@ -217,23 +217,24 @@ class StreamsCollector extends BaseCollector {
           logger.info(`Found ${streams.length} streams to ingest`);
           if (streams.length > 0) {
             logger.info({ streams: streams.length }, "streams collected");
-          }
-          for (const channel of allChannels) {
-            const matching = streams.filter((a) =>
-              this.fuzzyMatch(this.slugify(a.name), channel.slug),
-            );
-            // for all matching upsert streams
-            await Promise.all(
-              matching.map((a) =>
-                this.upsertRecord(ctx, {
-                  channelId: channel.id,
-                  name: a.name,
-                  slug: this.slugify(a.name),
-                  url: a.streamLink,
-                  resolution: a.resolution,
-                }),
-              ),
-            );
+
+            for (const channel of allChannels) {
+              const matching = streams.filter((a) =>
+                this.fuzzyMatch(a.name, channel.name),
+              );
+              // for all matching upsert streams
+              await Promise.all(
+                matching.map((a) =>
+                  this.upsertRecord(ctx, {
+                    channelId: channel.id,
+                    name: a.name,
+                    slug: this.slugify(a.name),
+                    url: a.streamLink,
+                    resolution: a.resolution,
+                  }),
+                ),
+              );
+            }
           }
           logger.info(`Finished ingestion for ${task.sources[index]}`);
         }
@@ -251,7 +252,7 @@ class StreamsCollector extends BaseCollector {
           // for all matching upsert streams
           for (const channel of allChannels) {
             const channelStreams = (famelack.streams ?? []).filter((a) =>
-              this.fuzzyMatch(this.slugify(a.name), channel.slug),
+              this.fuzzyMatch(a.name, channel.name),
             );
             const promises = [];
             for (const stream of channelStreams) {

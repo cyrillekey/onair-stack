@@ -53,7 +53,7 @@ class FamelackCollecter extends BaseCollector {
   private async initMedia() {
     try {
       const media = await fetchJson<FamelackMedia[]>(this.buildLink());
-      return media.filter((a) => !a.isGeoBlocked);
+      return media.filter((a) => !a.isGeoBlocked).filter((a)=>a.languages.includes("eng"));
     } catch (error) {
       logger.error({ error }, "failed to fetch streams");
       reportError(error, {

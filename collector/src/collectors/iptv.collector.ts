@@ -1,4 +1,3 @@
-import ProgressBar from "progress";
 import { logger } from "@/utils/logger.js";
 import { reportError } from "@/utils/sentry.js";
 import { isVerifiableM3U8Url, verifyM3U8 } from "@/utils/url.js";
@@ -21,7 +20,6 @@ class IPTVCollector extends BaseCollector<Stream> {
   async collect(
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<Stream>, "job" | "durationMs">> {
-    let bar: ProgressBar | null = null;
     try {
       logger.info({ url: this.url }, "fetching streams");
       const streams = await this.fetchStreams();
@@ -30,23 +28,8 @@ class IPTVCollector extends BaseCollector<Stream> {
       const skipped = streams.filter(
         (s) => !isVerifiableM3U8Url(s.streamLink),
       ).length;
-      let completed = 0;
-      let validCount = 0;
-      let lastLoggedPct = -1;
       // Single in-place bar on TTY (throttled redraws); throttled logs otherwise.
-      bar =
-        total > 0 && process.stderr.isTTY
-          ? new ProgressBar(
-              "verify [:bar] :percent (:current/:total) valid :valid eta :eta s",
-              {
-                total,
-                width: 30,
-                complete: "█",
-                incomplete: "░",
-                renderThrottle: 100,
-              },
-            )
-          : null;
+
       logger.info({ streams: total }, "total fetched streams");
       const chunks = this.chunk(streams);
       let globalIndex = 0;
@@ -57,26 +40,7 @@ class IPTVCollector extends BaseCollector<Stream> {
         );
         const chunk = chunks[index];
         const result = await Promise.all(
-          chunk.map((stream, i) =>
-            this.verifyLink(stream, globalIndex + i).then((verified) => {
-              completed += 1;
-              if (verified) validCount += 1;
-              if (bar) {
-                bar.tick({ valid: validCount });
-              } else {
-                const pct =
-                  total > 0 ? Math.floor((completed / total) * 100) : 100;
-                if (pct >= lastLoggedPct + 10 || completed === total) {
-                  lastLoggedPct = pct;
-                  ctx.log.info(
-                    { completed, total, valid: validCount },
-                    `verify ${pct}% (${completed}/${total})`,
-                  );
-                }
-              }
-              return verified;
-            }),
-          ),
+          chunk.map((stream, i) => this.verifyLink(stream, globalIndex + i)),
         );
         globalIndex += chunk.length;
         const valid = result.filter((a): a is Stream => a !== null);
@@ -98,9 +62,12 @@ class IPTVCollector extends BaseCollector<Stream> {
         streams: validated,
       };
     } catch (error) {
-      if (bar && !bar.complete) bar.terminate();
       ctx.log.error({ error }, "Error collecting");
-      reportError(error, { job: this.name, message: "Error collecting", url: this.url });
+      reportError(error, {
+        job: this.name,
+        message: "Error collecting",
+        url: this.url,
+      });
       return {
         fetched: 0,
         stored: 0,
@@ -113,12 +80,18 @@ class IPTVCollector extends BaseCollector<Stream> {
   private async fetchStreams() {
     try {
       const media = await parseM3U(this.url);
-      const nonGeoLocked = media.filter((a) => !a.isGeoBlocked);
+      const nonGeoLocked = media
+        .filter((a) => !a.isGeoBlocked)
+        .filter((a) => isVerifiableM3U8Url(a.streamLink));
       const formated = this.formatNames(nonGeoLocked);
       return formated;
     } catch (error) {
       logger.error({ error }, "failed to fetch streams");
-      reportError(error, { job: this.name, message: "failed to fetch streams", url: this.url });
+      reportError(error, {
+        job: this.name,
+        message: "failed to fetch streams",
+        url: this.url,
+      });
       return [];
     }
   }
@@ -155,7 +128,7 @@ class IPTVCollector extends BaseCollector<Stream> {
       const formattedMedia = media.map((a) => {
         return {
           ...a,
-          name: a.name.split("(")?.at(0)?.trim() ?? a.name,
+          name: this.formatName(a.name),
         };
       });
       return formattedMedia;

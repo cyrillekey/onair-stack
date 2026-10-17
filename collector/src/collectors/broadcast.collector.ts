@@ -67,7 +67,7 @@ class BroadcastCollector extends BaseCollector {
         hasMore = data.hasMore;
         offset = data.nextOffset;
       }
-      return streams;
+      return streams.map((a) => ({ ...a, name: this.formatName(a.name) }));
     } catch (error) {
       Sentry.captureException(error);
       logger.error({ error }, "Failed to fetch streams");
@@ -152,7 +152,7 @@ class BroadcastCollector extends BaseCollector {
       let stored = 0;
       for (const channel of channels) {
         const matching = valid.filter((a) =>
-          this.fuzzyMatch(this.slugify(a.name), channel.slug),
+          this.fuzzyMatch(a.name, channel.name),
         );
         if (matching.length > 0) {
           await ctx.db.orm.public.Stream.createAll(

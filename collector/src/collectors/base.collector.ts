@@ -100,4 +100,7 @@ export abstract class BaseCollector<T = unknown> {
       };
     }
   }
+  protected formatName(name: string) {
+    return name?.split("(")?.at(0)?.trim() ?? name;
+  }
 }
