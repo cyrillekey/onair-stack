@@ -4,6 +4,7 @@ import type postgres from "@prisma/orm-postgres/runtime";
 import { Temporal } from "temporal-polyfill";
 import { reportError } from "@/utils/sentry.js";
 import similarity from "similarity";
+import { createHash } from "node:crypto";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -45,11 +46,7 @@ export abstract class BaseCollector<T = unknown> {
     return instant;
   }
   protected slugifyUrl(url: string) {
-    return url
-      .replace(/[^a-z0-9]/gi, "-")
-      .replace(/-{2,}/g, "-")
-      .replace(/^-+/, "")
-      .replace(/-+$/, "");
+    return createHash("sha256").update(url, "utf8").digest("hex");
   }
   protected slugify(str: string): string {
     return str
@@ -69,6 +66,9 @@ export abstract class BaseCollector<T = unknown> {
    */
   protected fuzzyMatch(a: string, b: string): boolean {
     return similarity(a, b) > 0.8;
+  }
+  protected getUniqueArray<X>(arr: X[]) {
+    return Array.from(new Set(arr));
   }
 
   async run(ctx: CollectorContext): Promise<CollectResult<T>> {

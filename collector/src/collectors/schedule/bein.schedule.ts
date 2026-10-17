@@ -1,0 +1,194 @@
+import Sentry from "@/utils/instrument.js";
+import {
+  BaseCollector,
+  type CollectorContext,
+  type CollectResult,
+} from "../base.collector.js";
+import { logger } from "@/utils/logger.js";
+import { fetchJson } from "@/utils/http.js";
+import { URLSearchParams } from "url";
+import dayjs from "dayjs";
+
+class BeinScheduler extends BaseCollector<BeinSchedule> {
+  schedule = "00 01 * * *";
+  name = "Bein Schedule";
+  baseUrl = "https://www.beinsports.com/api/opta/tv-event";
+  private baseLogoUrl = "https://prod-media.beinsports.com/image/";
+  private buildUrl() {
+    const queryParams = new URLSearchParams();
+    queryParams.append("startBefore", dayjs().endOf("day").toISOString());
+    queryParams.append("endAfter", dayjs().startOf("day").toISOString());
+
+    return `${this.baseUrl}?${queryParams.toString()}`;
+  }
+  private buildLogoUrl(id: string) {
+    return `${this.baseLogoUrl}${id}.png`;
+  }
+  private async collectSchedule() {
+    try {
+      const response = await fetchJson<{ rows: BeinSchedule[] }>(
+        this.buildUrl(),
+      );
+      const schedule = response.rows;
+      return schedule;
+    } catch (error) {
+      Sentry.captureException(error);
+      logger.error({ error }, "Failed to fetch schedule");
+      return [];
+    }
+  }
+  private async upsertSchedule(
+    ctx: CollectorContext,
+    channel: Channel,
+    schedules: BeinSchedule[],
+  ) {
+    try {
+      const channelSlug = this.slugify(channel.name);
+      const channelId = await ctx.db.orm.public.Channel.upsert({
+        create: {
+          country: "USA",
+          slug: channelSlug,
+          name: channel.name,
+          poster: this.buildLogoUrl(channel.externalUniqueId),
+          category: "SPORTS",
+        },
+        update: {
+          country: "USA",
+          slug: channelSlug,
+          name: channel.name,
+          poster: this.buildLogoUrl(channel.externalUniqueId),
+          category: "SPORTS",
+        },
+        conflictOn: {
+          slug: channelSlug,
+        },
+      });
+      await ctx.db.orm.public.Schedule.createAll(
+        schedules.map((schedule) => ({
+          channelId: channelId.id,
+          date: this.buildTemporalDate(dayjs(schedule.startDate).toDate()),
+          endTime: this.buildTemporalDate(dayjs(schedule.endDate).toDate()),
+          name: schedule.title,
+          startTime: this.buildTemporalDate(dayjs(schedule.startDate).toDate()),
+          poster: this.buildLogoUrl(channel.externalUniqueId),
+        })),
+      );
+    } catch (error) {
+      ctx.log.error({ error }, "Failed to upsert schedule");
+      Sentry.captureException(error);
+      return false;
+    }
+  }
+  async collect(
+    ctx: CollectorContext,
+  ): Promise<Omit<CollectResult<BeinSchedule>, "job" | "durationMs">> {
+    try {
+      const schedule = await this.collectSchedule();
+      const channels = this.getUniqueArray(schedule.map((a) => a.channel.id));
+      for (let index = 0; index < channels.length; index++) {
+        const channelId = channels[index];
+        const channelSchedule = schedule.filter(
+          (a) => a.channel.id == channelId,
+        );
+        if (channelSchedule.length > 0)
+          await this.upsertSchedule(
+            ctx,
+            channelSchedule[0].channel,
+            channelSchedule,
+          );
+      }
+      return {
+        fetched: schedule.length,
+        stored: schedule.length,
+        skipped: 0,
+      };
+    } catch (error) {
+      ctx.log.error({ error }, "collect failed");
+      Sentry.captureException(error);
+      return {
+        fetched: 0,
+        stored: 0,
+        skipped: 0,
+        error: String(error),
+      };
+    }
+  }
+}
+
+export default BeinScheduler;
+
+export interface BeinSchedule {
+  data: BeinScheduleData;
+  duration: number;
+  id: string;
+  externalId: string;
+  title: string;
+  startDate: Date;
+  endDate: Date;
+  live: boolean;
+  replay: boolean;
+  category: string;
+  genre: null;
+  synopsis: null;
+  description: string;
+  categoryArabic: null;
+  synopsisArabic: null;
+  descriptionArabic: null;
+  channelId: string;
+  sportTypeId: null;
+  createdAt: Date;
+  updatedAt: Date;
+  channel: Channel;
+  sportType: null;
+}
+
+export interface Channel {
+  data: ChannelData;
+  id: string;
+  externalId: string;
+  name: string;
+  providerId: string;
+  externalUniqueId: string;
+  createdAt: Date;
+  updatedAt: Date;
+  provider: Provider;
+}
+
+export interface ChannelData {
+  id: string;
+  displayName: string;
+}
+
+export interface Provider {
+  id: string;
+  name: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface BeinScheduleData {
+  startDate: Date;
+  endDate: Date;
+  channelId: string;
+  eventId: string;
+  matchId: string;
+  title: string;
+  subTitle: string;
+  desc: string;
+  category: string;
+  length: string;
+  episodeNum: string;
+  video: Video;
+  live: string;
+  audio: Audio;
+}
+
+export interface Audio {
+  present: boolean;
+  stereo: string;
+}
+
+export interface Video {
+  present: boolean;
+  colour: boolean;
+}
