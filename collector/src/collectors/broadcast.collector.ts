@@ -167,6 +167,7 @@ class BroadcastCollector extends BaseCollector {
                 })),
               )
               .flat(),
+            { onConflict: "skip" },
           );
           stored += 1;
         }
