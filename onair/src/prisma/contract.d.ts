@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'241b605840eb2e244e1bbbb9f73968f8a788113eafca04325ae139cba8b31c80'>;
+  StorageHashBase<'09d5e2a881d3dff89097e8e520ddf08e24458cc32ff04b2dedbfcb512725254a'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -250,7 +250,24 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 export type FieldOutputTypes = {
   readonly public: {
     readonly Channel: {
-      readonly category: 'SPORTS' | 'NEWS' | 'ENTERTAINMENT' | 'GENERAL';
+      readonly category:
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL';
       readonly country: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
@@ -288,7 +305,24 @@ export type FieldOutputTypes = {
 export type FieldInputTypes = {
   readonly public: {
     readonly Channel: {
-      readonly category: 'SPORTS' | 'NEWS' | 'ENTERTAINMENT' | 'GENERAL';
+      readonly category:
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL';
       readonly country: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
@@ -326,7 +360,24 @@ export type FieldInputTypes = {
 export type StorageColumnTypes = {
   readonly public: {
     readonly channel: {
-      readonly category: 'SPORTS' | 'NEWS' | 'ENTERTAINMENT' | 'GENERAL';
+      readonly category:
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL';
       readonly country: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly description: CodecTypes['pg/text@1']['output'] | null;
@@ -364,7 +415,24 @@ export type StorageColumnTypes = {
 export type StorageColumnInputTypes = {
   readonly public: {
     readonly channel: {
-      readonly category: 'SPORTS' | 'NEWS' | 'ENTERTAINMENT' | 'GENERAL';
+      readonly category:
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL';
       readonly country: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly description: CodecTypes['pg/text@1']['input'] | null;
@@ -402,7 +470,24 @@ export type StorageColumnInputTypes = {
 
 export namespace Models {
   export type public_Channel = {
-    category: 'SPORTS' | 'NEWS' | 'ENTERTAINMENT' | 'GENERAL';
+    category:
+      | 'ENTERTAINMENT'
+      | 'SPORTS'
+      | 'MOVIES'
+      | 'NEWS'
+      | 'INTERNATIONAL'
+      | 'RADIO'
+      | 'RELIGIOUS'
+      | 'DOCUMENTARY'
+      | 'MUSIC'
+      | 'KIDS'
+      | 'SHOPPING'
+      | 'LIFESTYLE'
+      | 'CLASSIC_TV'
+      | 'CRIME'
+      | 'ADULT'
+      | 'OUTDOORS_AUTO'
+      | 'GENERAL';
     country: CodecTypes['pg/text@1']['output'];
     createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     description: CodecTypes['pg/text@1']['output'] | null;
@@ -700,7 +785,25 @@ type ContractBase = Omit<
           readonly valueSet: {
             readonly Category: {
               readonly kind: 'valueSet';
-              readonly values: readonly ['SPORTS', 'NEWS', 'ENTERTAINMENT', 'GENERAL'];
+              readonly values: readonly [
+                'ENTERTAINMENT',
+                'SPORTS',
+                'MOVIES',
+                'NEWS',
+                'INTERNATIONAL',
+                'RADIO',
+                'RELIGIOUS',
+                'DOCUMENTARY',
+                'MUSIC',
+                'KIDS',
+                'SHOPPING',
+                'LIFESTYLE',
+                'CLASSIC_TV',
+                'CRIME',
+                'ADULT',
+                'OUTDOORS_AUTO',
+                'GENERAL',
+              ];
             };
           };
         };
@@ -975,9 +1078,22 @@ type ContractBase = Omit<
           readonly Category: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
-              { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
-              { readonly name: 'NEWS'; readonly value: 'NEWS' },
               { readonly name: 'ENTERTAINMENT'; readonly value: 'ENTERTAINMENT' },
+              { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
+              { readonly name: 'MOVIES'; readonly value: 'MOVIES' },
+              { readonly name: 'NEWS'; readonly value: 'NEWS' },
+              { readonly name: 'INTERNATIONAL'; readonly value: 'INTERNATIONAL' },
+              { readonly name: 'RADIO'; readonly value: 'RADIO' },
+              { readonly name: 'RELIGIOUS'; readonly value: 'RELIGIOUS' },
+              { readonly name: 'DOCUMENTARY'; readonly value: 'DOCUMENTARY' },
+              { readonly name: 'MUSIC'; readonly value: 'MUSIC' },
+              { readonly name: 'KIDS'; readonly value: 'KIDS' },
+              { readonly name: 'SHOPPING'; readonly value: 'SHOPPING' },
+              { readonly name: 'LIFESTYLE'; readonly value: 'LIFESTYLE' },
+              { readonly name: 'CLASSIC_TV'; readonly value: 'CLASSIC_TV' },
+              { readonly name: 'CRIME'; readonly value: 'CRIME' },
+              { readonly name: 'ADULT'; readonly value: 'ADULT' },
+              { readonly name: 'OUTDOORS_AUTO'; readonly value: 'OUTDOORS_AUTO' },
               { readonly name: 'GENERAL'; readonly value: 'GENERAL' },
             ];
           };

@@ -8,46 +8,26 @@ import {
 import { Temporal } from "temporal-polyfill";
 import { db } from "./prisma/db.js";
 import appConfig from "./config/index.js";
-import type { CATALOG_TYPE } from "./global.js";
+import { catalogTypes, toReadableString, type CATALOG_TYPE } from "./global.js";
 import Sentry from "./utils/instrument.js";
 
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
 const manifest: Manifest = {
   id: "community.onair",
-  version: "1.0.0",
+  version: "1.0.1",
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleotieno7@gmail.com",
-  behaviorHints: { configurable: false, epgProvider: true },  
-  catalogs: [
-    {
-      type: "tv",
-      id: "ENTERTAINMENT",
-      name: "Entertainment",
-      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
-    },
-    {
-      id: "GENERAL",
-      name: "General",
-      type: "tv",
-      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
-    },
-    {
-      id: "NEWS",
-      name: "News",
-      type: "tv",
-      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
-    },
-    {
-      id: "SPORTS",
-      name: "Sports",
-      type: "tv",
-      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
-    },
-  ],
-  resources: ["catalog", "stream", "meta",],
+  behaviorHints: { configurable: false, epgProvider: true },
+  catalogs: catalogTypes.map((a) => ({
+    type: "tv",
+    id: a,
+    name: toReadableString(a),
+    extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
+  })),
+  resources: ["catalog", "stream", "meta"],
   types: ["tv"],
-  name: "Onair",  
+  name: "Onair",
   description:
     "Live TV for Stremio with a native EPG programme guide. Browse Entertainment, General, News and Sports channel catalogs and watch live channels from Discover or the guide grid.",
 };
@@ -156,15 +136,9 @@ function toChannelMeta(
 }
 
 builder.defineCatalogHandler(async ({ id, extra }) => {
-  const allowedTypes = [
-    "ENTERTAINMENT",
-    "GENERAL",
-    "NEWS",
-    "SPORTS",
-  ] satisfies CATALOG_TYPE[];
   const type = id as unknown as CATALOG_TYPE;
   Sentry.metrics.count("catalog-request", 1);
-  if (!allowedTypes.includes(type)) {
+  if (!catalogTypes.includes(type)) {
     return { metas: [] };
   }
 

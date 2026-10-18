@@ -25,16 +25,68 @@
             "codecId": "pg/text@1",
             "members": [
               {
+                "name": "ENTERTAINMENT",
+                "value": "ENTERTAINMENT"
+              },
+              {
                 "name": "SPORTS",
                 "value": "SPORTS"
+              },
+              {
+                "name": "MOVIES",
+                "value": "MOVIES"
               },
               {
                 "name": "NEWS",
                 "value": "NEWS"
               },
               {
-                "name": "ENTERTAINMENT",
-                "value": "ENTERTAINMENT"
+                "name": "INTERNATIONAL",
+                "value": "INTERNATIONAL"
+              },
+              {
+                "name": "RADIO",
+                "value": "RADIO"
+              },
+              {
+                "name": "RELIGIOUS",
+                "value": "RELIGIOUS"
+              },
+              {
+                "name": "DOCUMENTARY",
+                "value": "DOCUMENTARY"
+              },
+              {
+                "name": "MUSIC",
+                "value": "MUSIC"
+              },
+              {
+                "name": "KIDS",
+                "value": "KIDS"
+              },
+              {
+                "name": "SHOPPING",
+                "value": "SHOPPING"
+              },
+              {
+                "name": "LIFESTYLE",
+                "value": "LIFESTYLE"
+              },
+              {
+                "name": "CLASSIC_TV",
+                "value": "CLASSIC_TV"
+              },
+              {
+                "name": "CRIME",
+                "value": "CRIME"
+              },
+              {
+                "name": "ADULT",
+                "value": "ADULT"
+              },
+              {
+                "name": "OUTDOORS_AUTO",
+                "value": "OUTDOORS_AUTO"
               },
               {
                 "name": "GENERAL",
@@ -440,8 +492,8 @@
             "channel": {
               "checks": [
                 {
-                  "expression": "\"category\" IN ('SPORTS', 'NEWS', 'ENTERTAINMENT', 'GENERAL')",
-                  "name": "channel_category_check_ec5d660c",
+                  "expression": "\"category\" IN ('ENTERTAINMENT', 'SPORTS', 'MOVIES', 'NEWS', 'INTERNATIONAL', 'RADIO', 'RELIGIOUS', 'DOCUMENTARY', 'MUSIC', 'KIDS', 'SHOPPING', 'LIFESTYLE', 'CLASSIC_TV', 'CRIME', 'ADULT', 'OUTDOORS_AUTO', 'GENERAL')",
+                  "name": "channel_category_check_4a50aa63",
                   "prefix": "channel_category_check"
                 }
               ],
@@ -737,9 +789,22 @@
             "Category": {
               "kind": "valueSet",
               "values": [
-                "SPORTS",
-                "NEWS",
                 "ENTERTAINMENT",
+                "SPORTS",
+                "MOVIES",
+                "NEWS",
+                "INTERNATIONAL",
+                "RADIO",
+                "RELIGIOUS",
+                "DOCUMENTARY",
+                "MUSIC",
+                "KIDS",
+                "SHOPPING",
+                "LIFESTYLE",
+                "CLASSIC_TV",
+                "CRIME",
+                "ADULT",
+                "OUTDOORS_AUTO",
                 "GENERAL"
               ]
             }
@@ -749,7 +814,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "241b605840eb2e244e1bbbb9f73968f8a788113eafca04325ae139cba8b31c80"
+    "storageHash": "09d5e2a881d3dff89097e8e520ddf08e24458cc32ff04b2dedbfcb512725254a"
   },
   "capabilities": {
     "postgres": {

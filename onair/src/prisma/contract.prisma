@@ -46,9 +46,42 @@ model Schedule {
   @@map("schedule")
 }
 
+/// Channel category taxonomy (16 values).
+/// Values match the `category` field in channel_classified.json exactly.
 enum Category {
-  SPORTS
-  NEWS
+  /// General networks, scripted and reality TV (ITV, BBC One, TNT, Lifetime)
   ENTERTAINMENT
+  /// beIN, NBA League Pass, regional sports networks, ESPN, Fox Sports
+  SPORTS
+  /// Movie channels and premium multiplexes (HBO, Cinemax, Starz, Showtime, MGM+)
+  MOVIES
+  /// News, business news, weather, international news
+  NEWS
+  /// Foreign-language / diaspora general channels (Univision, Telemundo, KBS, Zee)
+  INTERNATIONAL
+  /// Audio-only stations (BBC radio, Heart, Capital, LBC, talkSPORT)
+  RADIO
+  /// Faith-based networks (EWTN, TBN, 3ABN, Daystar)
+  RELIGIOUS
+  /// Factual and educational (Discovery, Nat Geo, History, Curiosity, Quest)
+  DOCUMENTARY
+  /// Music video and music-focused channels (Vevo, MTV, VH1, AXS TV)
+  MUSIC
+  /// Children's channels (Nickelodeon, Disney, Cartoon Network, CBBC)
+  KIDS
+  /// Home shopping (QVC, HSN, Jewelry Television, Ideal World)
+  SHOPPING
+  /// Food, home, travel, pets (Food Network, HGTV, Tastemade)
+  LIFESTYLE
+  /// Classic and retro TV (MeTV, Antenna TV, TV Land, Rewind)
+  CLASSIC_TV
+  /// True crime and justice (Court TV, Investigation Discovery, Law and Crime)
+  CRIME
+  /// Adult content (Playboy, Hustler, Penthouse)
+  ADULT
+  /// Outdoors, hunting, fishing and motoring (Outdoor Channel, MotorTrend)
+  OUTDOORS_AUTO
+  /// Fallback category
   GENERAL
 }
+
