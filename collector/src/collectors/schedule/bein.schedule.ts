@@ -18,6 +18,8 @@ class BeinScheduler extends BaseCollector<BeinSchedule> {
     const queryParams = new URLSearchParams();
     queryParams.append("startBefore", dayjs().endOf("day").toISOString());
     queryParams.append("endAfter", dayjs().startOf("day").toISOString());
+    queryParams.append("limit", "10000");
+
 
     return `${this.baseUrl}?${queryParams.toString()}`;
   }
