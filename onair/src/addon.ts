@@ -20,7 +20,7 @@ const manifest: Manifest = {
   contactEmail: "cyrilleotieno7@gmail.com",
   behaviorHints: { configurable: false, epgProvider: true },
   catalogs: catalogTypes.map((a) => ({
-    type: "tv",
+    type: "tv",    
     id: a,
     name: toReadableString(a),
     extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],

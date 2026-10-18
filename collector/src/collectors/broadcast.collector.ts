@@ -47,15 +47,19 @@ export interface PlaybackOption {
 class BroadcastCollector extends BaseCollector {
   name = "Broadcast";
   schedule = "0 */4 * * *";
-  private baseUrl = "https://broadcastatlas.com/api/channels/ranked?offset=";
+  private baseUrl = "https://broadcastatlas.com/api/channels/ranked";
+  private countries = ["UK", "US"];
 
-  private async collectStreams(): Promise<Channel[]> {
+  private async collectStreams(country: string): Promise<Channel[]> {
     try {
       let offset = 0;
       let hasMore = true;
       const streams: Channel[] = [];
       while (hasMore) {
-        const url = `${this.baseUrl}${offset}`;
+        const queryParams = new URLSearchParams();
+        queryParams.append("country", country);
+        queryParams.append("offset", offset.toString());
+        const url = `${this.baseUrl}?${queryParams.toString()}`;
         const res = await fetch(url);
         const data: BroadcastMedia = res.json() as unknown as BroadcastMedia;
         if (
@@ -146,36 +150,43 @@ class BroadcastCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
-      const streams = await this.collectStreams();
-      const valid = await this.verifyStreams(streams);
       const channels = await ctx.db.orm.public.Channel.all();
       let stored = 0;
-      for (const channel of channels) {
-        const matching = valid.filter((a) =>
-          this.fuzzyMatch(a.name, channel.name),
-        );
-        if (matching.length > 0) {
-          await ctx.db.orm.public.Stream.createAll(
-            matching
-              .map((a) =>
-                a.playbackOptions.map((b) => ({
-                  channelId: channel.id,
-                  name: b.title,
-                  slug: this.slugifyUrl(b.url, channel.id),
-                  url: b.url,
-                  resolution: b.quality,
-                })),
-              )
-              .flat(),
-            { onConflict: "skip" },
+      let totalStreams = 0;
+      let skipped = 0;
+      for (const country of this.countries) {
+        const streams = await this.collectStreams(country);
+        totalStreams += streams.length;
+        const valid = await this.verifyStreams(streams);
+        skipped += streams.length - valid.length;
+        for (const channel of channels) {
+          const matching = valid.filter((a) =>
+            this.fuzzyMatch(a.name, channel.name),
           );
-          stored += 1;
+          if (matching.length > 0) {
+            await ctx.db.orm.public.Stream.createAll(
+              matching
+                .map((a) =>
+                  a.playbackOptions.map((b) => ({
+                    channelId: channel.id,
+                    name: b.title,
+                    slug: this.slugifyUrl(b.url, channel.id),
+                    url: b.url,
+                    resolution: b.quality,
+                  })),
+                )
+                .flat(),
+              { onConflict: "skip" },
+            );
+            stored += 1;
+          }
         }
       }
+
       return {
-        fetched: streams.length,
+        fetched: totalStreams,
         stored,
-        skipped: streams.length - stored,
+        skipped,
       };
     } catch (error) {
       ctx.log.error({ error }, "collect failed");
