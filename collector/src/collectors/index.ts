@@ -190,6 +190,7 @@ class StreamsCollector extends BaseCollector {
         "us-wa.m3u",
         "us-wi.m3u",
         "us.m3u",
+        "int.m3u",
       ],
     },
   ];
