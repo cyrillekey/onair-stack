@@ -18,7 +18,7 @@ const manifest: Manifest = {
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleotieno7@gmail.com",
-  behaviorHints: { configurable: false, epgProvider: true },
+  behaviorHints: { configurable: false, epgProvider: true },  
   catalogs: [
     {
       type: "tv",
@@ -45,9 +45,9 @@ const manifest: Manifest = {
       extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
     },
   ],
-  resources: ["catalog", "stream", "meta"],
+  resources: ["catalog", "stream", "meta",],
   types: ["tv"],
-  name: "Onair",
+  name: "Onair",  
   description:
     "Live TV for Stremio with a native EPG programme guide. Browse Entertainment, General, News and Sports channel catalogs and watch live channels from Discover or the guide grid.",
 };

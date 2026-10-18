@@ -67,7 +67,7 @@ export abstract class BaseCollector<T = unknown> {
    * @returns boolean do they match
    */
   protected fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a.toLowerCase(), b.toLowerCase()) > 0.85;
+    return similarity(a.toLowerCase(), b.toLowerCase()) > 0.9;
   }
   protected getUniqueArray<X>(arr: X[]) {
     return Array.from(new Set(arr));
