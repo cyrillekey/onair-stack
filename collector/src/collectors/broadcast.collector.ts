@@ -161,7 +161,7 @@ class BroadcastCollector extends BaseCollector {
                 a.playbackOptions.map((b) => ({
                   channelId: channel.id,
                   name: b.title,
-                  slug: this.slugifyUrl(b.url),
+                  slug: this.slugifyUrl(b.url, channel.id),
                   url: b.url,
                   resolution: b.quality,
                 })),

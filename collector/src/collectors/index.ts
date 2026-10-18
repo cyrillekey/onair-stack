@@ -264,7 +264,7 @@ class StreamsCollector extends BaseCollector {
                     this.upsertRecord(ctx, {
                       channelId: channel.id,
                       name: channel.name,
-                      slug: this.slugifyUrl(a.url),
+                      slug: this.slugifyUrl(a.url, channel.id),
                       resolution: a.resoulution,
                       url: a.url,
                       youtubeId: a.youtubeId,
@@ -298,16 +298,17 @@ class StreamsCollector extends BaseCollector {
     record: Partial<DefaultModelRow<Contract, "Stream", never>>,
   ) {
     try {
+      const streamSlug = this.slugifyUrl(record.url!, record.channelId!);
       await ctx.db.orm.public.Stream.upsert({
         create: {
           channelId: record.channelId!,
           name: record.name!,
-          slug: this.slugifyUrl(record.url!),
+          slug: streamSlug,
           url: record.url!,
           resolution: record.resolution,
         },
         update: record,
-        conflictOn: { slug: this.slugifyUrl(record.url!) },
+        conflictOn: { slug: streamSlug },
       });
     } catch (error) {
       logger.error({ error });

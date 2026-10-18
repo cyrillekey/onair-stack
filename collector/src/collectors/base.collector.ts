@@ -45,8 +45,10 @@ export abstract class BaseCollector<T = unknown> {
     const instant = Temporal.Instant.from(date.toISOString());
     return instant;
   }
-  protected slugifyUrl(url: string) {
-    return createHash("sha256").update(url, "utf8").digest("hex");
+  protected slugifyUrl(url: string, channelId: string): string {
+    return createHash("sha256")
+      .update(`${url}:${channelId}`, "utf8")
+      .digest("hex");
   }
   protected slugify(str: string): string {
     return str

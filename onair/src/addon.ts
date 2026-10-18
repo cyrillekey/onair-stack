@@ -24,25 +24,25 @@ const manifest: Manifest = {
       type: "tv",
       id: "ENTERTAINMENT",
       name: "Entertainment",
-      extra: [{ name: "skip" }, { name: "date" }],
+      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
     },
     {
       id: "GENERAL",
       name: "General",
       type: "tv",
-      extra: [{ name: "skip" }, { name: "date" }],
+      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
     },
     {
       id: "NEWS",
       name: "News",
       type: "tv",
-      extra: [{ name: "skip" }, { name: "date" }],
+      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
     },
     {
       id: "SPORTS",
       name: "Sports",
       type: "tv",
-      extra: [{ name: "skip" }, { name: "date" }],
+      extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
     },
   ],
   resources: ["catalog", "stream", "meta"],
@@ -94,6 +94,11 @@ function resolveGuideDay(date?: string): Temporal.PlainDate {
 function pageOffset(skip: unknown): number {
   const value = Number(skip);
   return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+/** Escape SQL LIKE wildcard characters so a search term matches literally. */
+function escapeLike(value: string): string {
+  return value.replace(/[%_\\]/g, (ch) => `\\${ch}`);
 }
 
 /** Half-open UTC window, `days` long, the guide wants schedules for. */
@@ -165,7 +170,8 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
 
   // Native EPG requests carry the `date` extra and expect full channel meta
   // with the programmes airing that UTC day instead of a plain channel list.
-  if (extra?.date) {
+  // A search term takes precedence and returns a plain channel list instead.
+  if (extra?.date && !extra?.search) {
     Sentry.metrics.count("catalog-epg-request", 1);
     const window = guideWindow(extra.date);
     const channels = await db.orm.public.Channel.include(
@@ -194,8 +200,21 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
     };
   }
 
-  const channels = await db.orm.public.Channel.where({ category: type })
-    .where((channel) => channel.streams.some())
+  // Base query: channels of this category with at least one playable stream.
+  let query = db.orm.public.Channel.where({ category: type }).where((channel) =>
+    channel.streams.some(),
+  );
+
+  // When Stremio invokes the catalog for a search, `extra.search` holds the
+  // user's query. Match channels whose name contains it (case-insensitive).
+  const search = extra?.search;
+  if (search) {
+    const term = `%${escapeLike(search)}%`;
+    query = query.where((channel) => channel.name.ilike(term));
+    Sentry.metrics.count("catalog-search-request", 1);
+  }
+
+  const channels = await query
     .orderBy([(channel) => channel.name.asc(), (channel) => channel.id.asc()])
     .offset(pageOffset(extra?.skip))
     .limit(PAGE_SIZE)
