@@ -14,6 +14,8 @@ export interface Stream {
   streamLink: string;
   /** tvg-id attribute from #EXTINF, if present */
   tvgId?: string;
+  tvgLogo?: string;
+  tvgGroupTitle?: string;
   /** Any #EXTVLCOPT:http-referrer=... value associated with this entry, if present */
   httpReferrer?: string;
   logo?: string;
@@ -82,12 +84,15 @@ export function parseM3UContent(content: string): Stream[] {
   let pendingName: string | undefined;
   let pendingTvgId: string | undefined;
   let pendingReferrer: string | undefined;
-
+  let pendingLogo: string | undefined;
+  let pendingGroupTitle: string | undefined;
   for (const line of lines) {
     if (line.startsWith("#EXTINF")) {
       // A new entry begins; reset pending state.
       pendingName = extractName(line);
       pendingTvgId = extractAttribute(line, "tvg-id");
+      pendingGroupTitle = extractAttribute(line, "group-title");
+      pendingLogo = extractAttribute(line, "tvg-logo");
       pendingReferrer = undefined;
     } else if (line.startsWith("#EXTVLCOPT")) {
       const referrer = extractReferrer(line);
@@ -114,12 +119,17 @@ export function parseM3UContent(content: string): Stream[] {
         streamLink: line,
         tvgId: pendingTvgId,
         httpReferrer: pendingReferrer,
+        logo: pendingLogo,
+        tvgLogo: pendingLogo,
+        tvgGroupTitle: pendingGroupTitle,
       });
 
       // Reset so a stray URL line can't be reused for a later entry.
       pendingName = undefined;
       pendingTvgId = undefined;
       pendingReferrer = undefined;
+      pendingLogo = undefined;
+      pendingGroupTitle = undefined;
     }
   }
 

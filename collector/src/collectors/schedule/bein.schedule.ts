@@ -10,26 +10,30 @@ import { URLSearchParams } from "url";
 import dayjs from "dayjs";
 
 class BeinScheduler extends BaseCollector<BeinSchedule> {
-  schedule = "00 01 * * *";
+  schedule = "00 03 * * *";
   name = "Bein Schedule";
   baseUrl = "https://www.beinsports.com/api/opta/tv-event";
   private baseLogoUrl = "https://prod-media.beinsports.com/image/";
-  private buildUrl() {
+  sources: { name: "USA" | "MENA"; region: string }[] = [
+    { name: "USA", region: "en-us" },
+    { name: "MENA", region: "en-mena" },
+  ];
+  private buildUrl(region: string) {
     const queryParams = new URLSearchParams();
     queryParams.append("startBefore", dayjs().endOf("day").toISOString());
     queryParams.append("endAfter", dayjs().startOf("day").toISOString());
-    queryParams.append("limit", "10000");
-
+    queryParams.append("region", region);
+    queryParams.append("limit", "30000");
 
     return `${this.baseUrl}?${queryParams.toString()}`;
   }
   private buildLogoUrl(id: string) {
     return `${this.baseLogoUrl}${id}.png`;
   }
-  private async collectSchedule() {
+  private async collectSchedule(region: string): Promise<BeinSchedule[]> {
     try {
       const response = await fetchJson<{ rows: BeinSchedule[] }>(
-        this.buildUrl(),
+        this.buildUrl(region),
       );
       const schedule = response.rows;
       return schedule;
@@ -43,19 +47,20 @@ class BeinScheduler extends BaseCollector<BeinSchedule> {
     ctx: CollectorContext,
     channel: Channel,
     schedules: BeinSchedule[],
+    region: "USA" | "MENA",
   ) {
     try {
       const channelSlug = this.slugify(channel.name);
       const channelId = await ctx.db.orm.public.Channel.upsert({
         create: {
-          country: "USA",
+          country: region,
           slug: channelSlug,
           name: channel.name,
           poster: this.buildLogoUrl(channel.externalUniqueId),
           category: "SPORTS",
         },
         update: {
-          country: "USA",
+          country: region,
           slug: channelSlug,
           name: channel.name,
           poster: this.buildLogoUrl(channel.externalUniqueId),
@@ -85,23 +90,29 @@ class BeinScheduler extends BaseCollector<BeinSchedule> {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<BeinSchedule>, "job" | "durationMs">> {
     try {
-      const schedule = await this.collectSchedule();
-      const channels = this.getUniqueArray(schedule.map((a) => a.channel.id));
-      for (let index = 0; index < channels.length; index++) {
-        const channelId = channels[index];
-        const channelSchedule = schedule.filter(
-          (a) => a.channel.id == channelId,
-        );
-        if (channelSchedule.length > 0)
-          await this.upsertSchedule(
-            ctx,
-            channelSchedule[0].channel,
-            channelSchedule,
+      let fetched = 0;
+
+      for (const source of this.sources) {
+        const schedule = await this.collectSchedule(source.region);
+        fetched += schedule.length;
+        const channels = this.getUniqueArray(schedule.map((a) => a.channel.id));
+        for (let index = 0; index < channels.length; index++) {
+          const channelId = channels[index];
+          const channelSchedule = schedule.filter(
+            (a) => a.channel.id == channelId,
           );
+          if (channelSchedule.length > 0)
+            await this.upsertSchedule(
+              ctx,
+              channelSchedule[0].channel,
+              channelSchedule,
+              source.name,
+            );
+        }
       }
       return {
-        fetched: schedule.length,
-        stored: schedule.length,
+        fetched: fetched,
+        stored: fetched,
         skipped: 0,
       };
     } catch (error) {
