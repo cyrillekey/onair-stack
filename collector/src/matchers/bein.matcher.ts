@@ -50,6 +50,7 @@ class BeinMatcher extends BaseCollector {
               name: a.name,
               slug: this.slugifyUrl(a.url, channel.id),
               url: a.url,
+              language: "English",
             })),
           );
         }
@@ -65,27 +66,13 @@ class BeinMatcher extends BaseCollector {
               name: a.name,
               slug: this.slugifyUrl(a.url, channel.id),
               url: a.url,
+              language: "MENA",
             })),
             { onConflict: "skip" },
           );
         }
       }
-      for (const channel of menaChannels) {
-        const matching = mena.filter((a) =>
-          this.fuzzyMatch(a.name, channel.name),
-        );
-        if (matching.length > 0) {
-          await ctx.db.orm.public.Stream.createAll(
-            matching.map((a) => ({
-              channelId: channel.id,
-              name: a.name,
-              slug: this.slugifyUrl(a.url, channel.id),
-              url: a.url,
-            })),
-            { onConflict: "skip" },
-          );
-        }
-      }
+
       return {
         fetched: this.streams.length,
         stored: 0,

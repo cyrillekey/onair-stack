@@ -355,6 +355,7 @@ class StreamsCollector extends BaseCollector {
           slug: streamSlug,
           url: record.url!,
           resolution: record.resolution,
+          language: "English",
         },
         update: record,
         conflictOn: { slug: streamSlug },

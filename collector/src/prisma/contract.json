@@ -385,6 +385,13 @@
                   "kind": "scalar"
                 }
               },
+              "language": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "name": {
                 "nullable": false,
                 "type": {
@@ -456,6 +463,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "language": {
+                  "column": "language"
                 },
                 "name": {
                   "column": "name"
@@ -710,6 +720,11 @@
                   },
                   "nullable": false
                 },
+                "language": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
                 "name": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -820,7 +835,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "0bb6e6b75e90e7a7756dbda26ad9943f5e521575f5686bee1db9b80c7b9e2c80"
+    "storageHash": "6f03841263f277f665a114cb997db8e68cbd3fab0e1be2bdf8f426712165b642"
   },
   "capabilities": {
     "postgres": {

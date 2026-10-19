@@ -22,6 +22,7 @@ model Stream {
   resolution String?
   slug       String   @unique
   url        String
+  language   String
   youtubeId  String?
   channel    Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
   channelId  String

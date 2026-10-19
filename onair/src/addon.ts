@@ -20,7 +20,7 @@ const manifest: Manifest = {
   contactEmail: "cyrilleotieno7@gmail.com",
   behaviorHints: { configurable: false, epgProvider: true },
   catalogs: catalogTypes.map((a) => ({
-    type: "tv",    
+    type: "tv",
     id: a,
     name: toReadableString(a),
     extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
@@ -118,7 +118,7 @@ function toProgramme(
 }
 
 function toChannelMeta(
-  channel: { id: string; name: string; poster: string | null },
+  channel: { id: string; name: string; poster: string | null; country: string },
   videos: MetaVideo[],
 ): MetaDetail {
   return {
@@ -126,7 +126,7 @@ function toChannelMeta(
     name: channel.name,
     type: "tv",
     description: channel.name,
-    language: "eng",
+    language: channel.country,
     poster: channel.poster ?? appConfig.fallbackImage,
     posterShape: "landscape",
     logo: channel.poster ?? appConfig.fallbackImage,
@@ -249,7 +249,7 @@ builder.defineStreamHandler(async ({ id }) => {
     streams: streams.map((a) => ({
       url: a.url,
       name: a?.name || "",
-      title: a.resolution ?? "SD",
+      description: `${a.resolution ?? "SD"} - ${a?.language}`,
     })),
   });
 });

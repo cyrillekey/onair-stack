@@ -184,6 +184,7 @@ class BroadcastCollector extends BaseCollector {
                     slug: this.slugifyUrl(b.url, channel.id),
                     url: b.url,
                     resolution: b.quality,
+                    language: a.languages?.at(0) ?? "English",
                   })),
                 )
                 .flat(),

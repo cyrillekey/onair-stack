@@ -22,6 +22,7 @@ model Stream {
   resolution String?
   slug       String   @unique
   url        String
+  language   String?
   youtubeId  String?
   channel    Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
   channelId  String
@@ -45,6 +46,7 @@ model Schedule {
 
   @@map("schedule")
 }
+
 
 /// Channel category taxonomy (16 values).
 /// Values match the `category` field in channel_classified.json exactly.
@@ -84,4 +86,5 @@ enum Category {
   /// Fallback category
   GENERAL
 }
+
 
