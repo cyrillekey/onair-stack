@@ -19,7 +19,14 @@ export function getDb(): ReturnType<typeof postgres<Contract>> {
   const url = process.env["DATABASE_URL"];
   if (!url) throw new Error("DATABASE_URL is required");
 
-  cached = postgres<Contract>({ contractJson, url });
+  cached = postgres<Contract>({
+    contractJson,
+    url,
+    poolOptions: {
+      connectionTimeoutMillis: 20_000,
+      idleTimeoutMillis: 30_000,
+    },
+  });
   return cached;
 }
 

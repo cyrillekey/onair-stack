@@ -312,7 +312,6 @@ class StreamsCollector extends BaseCollector {
                     this.upsertRecord(ctx, {
                       channelId: channel.id,
                       name: channel.name,
-                      slug: this.slugifyUrl(a.url, channel.id),
                       resolution: a.resoulution,
                       url: a.url,
                       youtubeId: a.youtubeId,
