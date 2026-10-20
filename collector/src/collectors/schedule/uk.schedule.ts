@@ -52,7 +52,6 @@ class UkScheduler extends BaseCollector {
           slug: this.slugify(channel.title),
           name: channel.title,
           poster: channelLogo?.fallback_image_url ?? "",
-          category: "GENERAL",
         },
         conflictOn: {
           slug: this.slugify(channel.title),
@@ -71,6 +70,7 @@ class UkScheduler extends BaseCollector {
 
           name: event.main_title,
           poster: event.image_url ?? event.fallback_image_url,
+          description: event?.main_title,
         })),
       );
       return true;

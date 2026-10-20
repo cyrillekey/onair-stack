@@ -4,7 +4,7 @@ import {
   BaseCollector,
   type CollectorContext,
   type CollectResult,
-} from "./base.collector.js";
+} from "../base.collector.js";
 import { fetchJson } from "@/utils/http.js";
 import { z } from "zod";
 import { verifyM3U8 } from "@/utils/url.js";

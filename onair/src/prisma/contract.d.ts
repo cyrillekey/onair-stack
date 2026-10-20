@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'6757ab80d522a096fcafc1ac4e125e27e7cb546460497ed5aa47b91277097dc1'>;
+  StorageHashBase<'87778bd7b49c76bfea0cc34dde13d7b65ae3579e421fcb28f36fc99f90314775'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -294,7 +294,7 @@ export type FieldOutputTypes = {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly language: CodecTypes['pg/text@1']['output'] | null;
+      readonly language: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly resolution: CodecTypes['pg/text@1']['output'] | null;
       readonly slug: CodecTypes['pg/text@1']['output'];
@@ -351,7 +351,7 @@ export type FieldInputTypes = {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly language: CodecTypes['pg/text@1']['input'] | null;
+      readonly language: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly resolution: CodecTypes['pg/text@1']['input'] | null;
       readonly slug: CodecTypes['pg/text@1']['input'];
@@ -408,7 +408,7 @@ export type StorageColumnTypes = {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly language: CodecTypes['pg/text@1']['output'] | null;
+      readonly language: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly resolution: CodecTypes['pg/text@1']['output'] | null;
       readonly slug: CodecTypes['pg/text@1']['output'];
@@ -465,7 +465,7 @@ export type StorageColumnInputTypes = {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly language: CodecTypes['pg/text@1']['input'] | null;
+      readonly language: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly resolution: CodecTypes['pg/text@1']['input'] | null;
       readonly slug: CodecTypes['pg/text@1']['input'];
@@ -527,7 +527,7 @@ export namespace Models {
     channelId: CodecTypes['pg/text@1']['output'];
     createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
-    language: CodecTypes['pg/text@1']['output'] | null;
+    language: CodecTypes['pg/text@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
     resolution: CodecTypes['pg/text@1']['output'] | null;
     slug: CodecTypes['pg/text@1']['output'];
@@ -742,7 +742,7 @@ type ContractBase = Omit<
                 readonly language: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: true;
+                  readonly nullable: false;
                 };
                 readonly name: {
                   readonly nativeType: 'text';
@@ -1041,7 +1041,7 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly language: {
-                readonly nullable: true;
+                readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly name: {

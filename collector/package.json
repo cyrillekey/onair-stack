@@ -26,6 +26,7 @@
     "cronitor": "^2.6.1",
     "dayjs": "^1.11.23",
     "dotenv": "^18.0.3",
+    "fast-xml-parser": "^5.11.2",
     "node-cron": "^4.6.0",
     "pino": "^9.6.0",
     "progress": "^2.0.3",
@@ -44,7 +45,6 @@
     "prisma": "^8.0.0-rc.23",
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
-    "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.70.1"
   }

@@ -3,7 +3,7 @@ import {
   BaseCollector,
   type CollectorContext,
   type CollectResult,
-} from "./base.collector.js";
+} from "../base.collector.js";
 import { verifyM3U8 } from "@/utils/url.js";
 import Sentry from "@/utils/instrument.js";
 import BeinMatcher from "@/matchers/bein.matcher.js";

@@ -67,7 +67,10 @@ class ScheduleCollector extends BaseCollector {
       return body;
     } catch (error) {
       logger.error({ error }, "failed to build schedule");
-      reportError(error, { job: this.name, message: "failed to build schedule" });
+      reportError(error, {
+        job: this.name,
+        message: "failed to build schedule",
+      });
       return [];
     }
   }
@@ -104,12 +107,16 @@ class ScheduleCollector extends BaseCollector {
                   name: program.name,
                   startTime: this.buildTemporalDate(program.startTime),
                   poster: `${this.baseUrl}${program.poster}`,
+                  description: program?.description,
                 })),
                 { onConflict: "skip" },
               );
             await this.sleep();
           } catch (error) {
-            logger.error({ error, channelId: channel.id }, "failed to build schedule");
+            logger.error(
+              { error, channelId: channel.id },
+              "failed to build schedule",
+            );
             reportError(error, {
               job: this.name,
               message: "failed to build schedule for channel",
@@ -127,7 +134,10 @@ class ScheduleCollector extends BaseCollector {
       };
     } catch (error) {
       logger.error({ error }, "failed to build schedule");
-      reportError(error, { job: this.name, message: "failed to build schedule" });
+      reportError(error, {
+        job: this.name,
+        message: "failed to build schedule",
+      });
       return {
         fetched: 0,
         stored: 0,

@@ -102,6 +102,7 @@ function toProgramme(
   programme: {
     name: string;
     poster: string | null;
+    description: string | null;
     startTime: Temporal.Instant;
     endTime: Temporal.Instant;
   },
@@ -110,6 +111,7 @@ function toProgramme(
   return {
     id: `${channel.id}:epg:${startTime}`,
     title: programme.name,
+    overview: programme.description ?? undefined,
     released: startTime,
     startTime,
     endTime: programme.endTime.toString(),
@@ -118,14 +120,20 @@ function toProgramme(
 }
 
 function toChannelMeta(
-  channel: { id: string; name: string; poster: string | null; country: string },
+  channel: {
+    id: string;
+    name: string;
+    poster: string | null;
+    country: string;
+    description: string | null;
+  },
   videos: MetaVideo[],
 ): MetaDetail {
   return {
     id: channel.id,
     name: channel.name,
     type: "tv",
-    description: channel.name,
+    description: channel?.description || channel.name,
     language: channel.country,
     poster: channel.poster ?? appConfig.fallbackImage,
     posterShape: "landscape",
