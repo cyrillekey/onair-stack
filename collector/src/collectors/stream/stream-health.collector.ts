@@ -5,7 +5,7 @@ import {
   BaseCollector,
   type CollectorContext,
   type CollectResult,
-} from "./base.collector.js";
+} from "../base.collector.js";
 
 interface SavedStream {
   id: string;
