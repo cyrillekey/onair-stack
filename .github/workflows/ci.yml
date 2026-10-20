@@ -1,29 +1,79 @@
 name: CI
 
 on:
+  push:
+    branches: [main]
   pull_request:
     branches: [main]
+  merge_group:
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Only supersede in-flight PR runs. Every commit on main and every
+  # merge-queue entry should run to completion so its result is recorded.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Keep in sync with the filter names in the `changes` job.
+  ALL_MODULES: '["collector","onair"]'
 
 jobs:
-  typecheck-and-build:
-    name: ${{ matrix.module }}
+  changes:
+    name: Detect changed modules
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      modules: ${{ steps.result.outputs.modules }}
+    steps:
+      # On pull requests this uses the GitHub API, so no checkout is needed.
+      - name: Filter changed paths
+        id: filter
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            collector:
+              - 'collector/**'
+              - '.github/workflows/ci.yml'
+            onair:
+              - 'onair/**'
+              - '.github/workflows/ci.yml'
+
+      - name: Resolve modules to build
+        id: result
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          CHANGED: ${{ steps.filter.outputs.changes }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            modules="$CHANGED"
+          else
+            # push to main, merge_group, workflow_dispatch: run everything
+            modules="$ALL_MODULES"
+          fi
+          echo "modules=$modules" >> "$GITHUB_OUTPUT"
+          echo "Modules to build: $modules"
+
+  typecheck-and-build:
+    name: typecheck-and-build (${{ matrix.module }})
+    needs: changes
+    if: needs.changes.outputs.modules != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: ${{ matrix.module }}
     strategy:
       fail-fast: false
       matrix:
-        module:
-          - collector
-          - onair
+        module: ${{ fromJSON(needs.changes.outputs.modules) }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,10 +86,40 @@ jobs:
           cache-dependency-path: ${{ matrix.module }}/package-lock.json
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Lint
+        run: npm run lint --if-present
 
       - name: Typecheck
         run: npm run typecheck
 
+      - name: Test
+        run: npm test --if-present
+
       - name: Build
         run: npm run build
+
+  # Stable, matrix-free check for GitHub rulesets. Rulesets match required
+  # status checks by name, and matrix jobs only produce their expanded names
+  # ("collector", "onair") while the matrix runs. Require this job in the
+  # ruleset so the check stays discoverable and adding/removing modules does
+  # not require editing the ruleset.
+  ci-status:
+    name: CI success
+    if: always()
+    needs: [changes, typecheck-and-build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Verify all CI jobs passed
+        # "skipped" is acceptable for the build job: it is skipped when a PR
+        # touches no module. A failed `changes` job must still fail the check.
+        if: >-
+          needs.changes.result != 'success' ||
+          (needs.typecheck-and-build.result != 'success' &&
+           needs.typecheck-and-build.result != 'skipped')
+        run: |
+          echo "changes result: ${{ needs.changes.result }}"
+          echo "typecheck-and-build result: ${{ needs.typecheck-and-build.result }}"
+          exit 1
