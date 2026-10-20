@@ -6,7 +6,7 @@ import {
   BaseCollector,
   type CollectResult,
   type CollectorContext,
-} from "./base.collector.js";
+} from "../base.collector.js";
 
 class IPTVCollector extends BaseCollector<Stream> {
   private url: string;

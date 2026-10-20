@@ -98,6 +98,7 @@ class BeinScheduler extends BaseCollector<BeinSchedule> {
           name: schedule.title,
           startTime: this.buildTemporalDate(dayjs(schedule.startDate).toDate()),
           poster: this.buildLogoUrl(channel.externalUniqueId),
+          description: schedule.description,
         })),
       );
     } catch (error) {

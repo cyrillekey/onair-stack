@@ -4,7 +4,7 @@ import {
   BaseCollector,
   type CollectorContext,
   type CollectResult,
-} from "./base.collector.js";
+} from "../base.collector.js";
 import IPTVCollector from "./iptv.collector.js";
 
 import type { DefaultModelRow } from "@prisma/orm-postgres/orm-client";
