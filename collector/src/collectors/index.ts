@@ -194,6 +194,15 @@ class StreamsCollector extends BaseCollector {
         "int.m3u",
       ],
     },
+    {
+      baseUrl:
+        "https://raw.githubusercontent.com/chingithub1/iptv/refs/heads/main/",
+      sources: ["Old%20My%20Personal%20List", "Original", "SPORTS%20CHANNELS"],
+    },
+    {
+      baseUrl: "https://gitlab.com/doms9/iptv/-/raw/default/M3U8",
+      sources: ["kodi.m3u8", "TV.m3u8", "base.m3u8"],
+    },
   ];
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;
