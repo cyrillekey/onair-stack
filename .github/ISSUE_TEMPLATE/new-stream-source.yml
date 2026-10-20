@@ -1,0 +1,36 @@
+name: New Stream Source
+description: Suggest a new stream source to add to OnAir.
+title: "[New Stream Source]: "
+labels: ["stream source request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve OnAir! Please provide as much detail as possible about the stream source.
+
+  - type: input
+    id: source-name
+    attributes:
+      label: Source name
+      description: The name of the channel or stream source.
+      placeholder: e.g. BBC One
+    validations:
+      required: true
+
+  - type: input
+    id: source-url
+    attributes:
+      label: Source URL
+      description: Direct link to the stream or playlist (e.g. an HLS/m3u8 URL).
+      placeholder: https://example.com/stream.m3u8
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Any additional context, such as the country, category, quality, or whether the stream is geo-restricted.
+      placeholder: Anything else we should know about this source.
+    validations:
+      required: true
