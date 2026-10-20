@@ -55,7 +55,6 @@ class UkSportScheduler extends BaseCollector<EpgProgramme> {
               country: source.country,
               name: source.name,
               slug: this.slugify(source.name),
-              category: "SPORTS",
               description: source.description,
               poster: source.logo,
             },
