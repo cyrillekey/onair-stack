@@ -24,7 +24,7 @@ model Stream {
   url        String
   language   String
   youtubeId  String?
-  channel    Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
+  channel    Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId  String
   createdat  DateTime @default(now())
   updatedat  DateTime @default(now())
@@ -33,20 +33,20 @@ model Stream {
 }
 
 model Schedule {
-  id        String   @id @default(sql`gen_random_uuid()`)
-  name      String
-  poster    String?
-  date      DateTime
-  startTime DateTime
-  endTime   DateTime
-  channel   Channel  @relation(fields:[channelId], references:[id], onDelete: Cascade)
-  channelId String
-  createdat DateTime @default(now())
-  updatedat DateTime @default(now())
+  id          String   @id @default(sql`gen_random_uuid()`)
+  name        String
+  poster      String?
+  date        DateTime
+  startTime   DateTime
+  endTime     DateTime
+  description String?
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId   String
+  createdat   DateTime @default(now())
+  updatedat   DateTime @default(now())
 
   @@map("schedule")
 }
-
 
 /// Channel category taxonomy (16 values).
 /// Values match the `category` field in channel_classified.json exactly.
@@ -86,5 +86,3 @@ enum Category {
   /// Fallback category
   GENERAL
 }
-
-

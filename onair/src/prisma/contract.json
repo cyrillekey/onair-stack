@@ -267,6 +267,13 @@
                   "kind": "scalar"
                 }
               },
+              "description": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
               "endTime": {
                 "nullable": false,
                 "type": {
@@ -338,6 +345,9 @@
                 },
                 "date": {
                   "column": "date"
+                },
+                "description": {
+                  "column": "description"
                 },
                 "endTime": {
                   "column": "endTime"
@@ -617,6 +627,11 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "description": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
+                },
                 "endTime": {
                   "codecId": "pg/timestamptz-temporal@1",
                   "nativeType": "timestamptz",
@@ -829,7 +844,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "ad4427112857e42c150b24899e841a172a87411ec9a644e501790173a0dc5031"
+    "storageHash": "6757ab80d522a096fcafc1ac4e125e27e7cb546460497ed5aa47b91277097dc1"
   },
   "capabilities": {
     "postgres": {
