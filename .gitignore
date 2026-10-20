@@ -1,0 +1,4 @@
+# Root environment file for docker-compose (see .env.example).
+.env
+
+.DS_Store

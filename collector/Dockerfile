@@ -12,6 +12,17 @@ COPY src ./src
 
 RUN npm run build
 
+# Prisma CLI stage: keeps the dev dependencies (the `prisma` CLI) together with
+# the contract and the migration history, so the database can be created before
+# the services start. `prisma db init` is additive and idempotent.
+FROM builder AS migrate
+
+COPY prisma.config.ts ./
+COPY src/prisma ./src/prisma
+COPY migrations ./migrations
+
+CMD ["node_modules/.bin/prisma", "db", "init"]
+
 FROM node:24-alpine AS runner
 
 ENV NODE_ENV=production
