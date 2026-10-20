@@ -1,0 +1,68 @@
+name: Bug Report
+description: Report a problem with OnAir.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug! Please fill out as much of the form as you can.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug.
+      placeholder: What went wrong?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce
+      description: How can we reproduce the issue?
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: What actually happened? Include logs or screenshots if available.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-service
+    attributes:
+      label: Affected service
+      description: Which part of the stack is affected?
+      options:
+        - onair (Stremio addon)
+        - collector
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      description: The version, image tag, or commit where you saw the bug.
+      placeholder: e.g. main @ a1b2c3d
+    validations:
+      required: false

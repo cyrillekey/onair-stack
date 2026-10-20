@@ -1,0 +1,55 @@
+name: Feature Request
+description: Suggest an idea or enhancement for OnAir.
+title: "[Feature Request]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for suggesting an improvement! Please describe the problem and the solution you have in mind.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+      description: What problem are you trying to solve? Is your request related to a limitation or frustration?
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature or change you would like to see.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any alternative solutions or workarounds you have tried.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: affected-service
+    attributes:
+      label: Affected service
+      description: Which part of the stack would this change?
+      options:
+        - onair (Stremio addon)
+        - collector
+        - Both
+        - Not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Add any other context, mockups, or examples about the request.
+    validations:
+      required: false
