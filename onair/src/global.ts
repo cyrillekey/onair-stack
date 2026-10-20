@@ -30,7 +30,6 @@ export const catalogTypes: CATALOG_TYPE[] = [
   "LIFESTYLE",
   "CLASSIC_TV",
   "CRIME",
-  "ADULT",
   "OUTDOORS_AUTO",
 ];
 
