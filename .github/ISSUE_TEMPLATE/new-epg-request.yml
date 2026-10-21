@@ -1,0 +1,45 @@
+name: New EPG Request
+description: Suggest a new EPG (TV guide) source to add to OnAir.
+title: "[New EPG Request]: "
+labels: ["new epg request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve OnAir! Please provide as much detail as possible about the EPG source.
+
+  - type: input
+    id: name
+    attributes:
+      label: Name
+      description: The name of the EPG source or guide (e.g. the broadcaster or provider).
+      placeholder: e.g. BBC iPlayer
+    validations:
+      required: true
+
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      description: The country the EPG covers.
+      placeholder: e.g. United Kingdom
+    validations:
+      required: true
+
+  - type: input
+    id: epg-link
+    attributes:
+      label: EPG link
+      description: Direct link to the EPG feed (e.g. an XMLTV file) or to the guide page.
+      placeholder: https://example.com/epg.xml
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: updated-periodically
+    attributes:
+      label: Updated periodically
+      description: Does this EPG refresh on a regular schedule (e.g. hourly or daily)?
+      options:
+        - label: Yes, the EPG is updated periodically
+          required: true

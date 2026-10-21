@@ -20,17 +20,35 @@ body:
   - type: input
     id: source-url
     attributes:
-      label: Source URL
+      label: Playlist URL
       description: Direct link to the stream or playlist (e.g. an HLS/m3u8 URL).
       placeholder: https://example.com/stream.m3u8
     validations:
       required: true
 
+  - type: input
+    id: country
+    attributes:
+      label: Country
+      description: The country the channel broadcasts from (optional).
+      placeholder: e.g. United Kingdom
+    validations:
+      required: false
+
+  - type: input
+    id: epg-link
+    attributes:
+      label: EPG link
+      description: Direct link to the EPG feed for this channel (optional).
+      placeholder: https://example.com/epg.xml
+    validations:
+      required: false
+
   - type: textarea
     id: notes
     attributes:
       label: Notes
-      description: Any additional context, such as the country, category, quality, or whether the stream is geo-restricted.
+      description: Any additional context, such as the category, quality, or whether the stream is geo-restricted.
       placeholder: Anything else we should know about this source.
     validations:
       required: true

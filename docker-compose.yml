@@ -1,0 +1,173 @@
+# onair-stack — one-command deployment.
+#
+#   cp .env.example .env        # optional: override ports, credentials, Sentry
+#   docker compose up -d --build
+#
+# Brings up Postgres, bootstraps the schema from the shared contract, then starts
+# the addon and the worker. The addon is served on http://localhost:8080/manifest.json
+# — paste that URL into Stremio's "Install addon" dialog.
+#
+# Remote installs (other devices, public server): Stremio needs HTTPS for
+# non-local addons. Enable the optional TLS proxy:
+#
+#   ONAIR_DOMAIN=addon.example.com docker compose --profile proxy up -d
+#
+# NOTE: DATABASE_URL is built by plain string interpolation. If POSTGRES_USER or
+# POSTGRES_PASSWORD contains any of  @ : / # ? %  it must be percent-encoded in
+# .env (e.g. "@" -> "%40"), or the connection string will be malformed. Prefer
+# a long alphanumeric password.
+
+name: onair-stack
+
+# Shared log rotation so long-running containers can't fill the disk.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-onair}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-onair}
+      POSTGRES_DB: ${POSTGRES_DB:-onair}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      # Bound to loopback only: Docker's port publishing bypasses UFW/most host
+      # firewalls, so "5432:5432" would expose Postgres (default credentials!)
+      # to the network. Remove this block entirely if you don't need psql or
+      # Prisma Studio from the host.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-onair} -d ${POSTGRES_DB:-onair}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    logging: *default-logging
+
+  # One-shot job: creates the tables from the shared contract and signs the
+  # database. Additive and idempotent, so it is safe to run on every deploy.
+  # Both services wait for it to succeed before starting.
+  migrate:
+    build:
+      context: ./collector
+      dockerfile: Dockerfile
+      target: migrate
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-onair}:${POSTGRES_PASSWORD:-onair}@db:5432/${POSTGRES_DB:-onair}
+      TZ: ${TZ:-UTC}
+      DO_NOT_TRACK: "1"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    logging: *default-logging
+
+  # The Stremio addon.
+  onair:
+    build:
+      context: ./onair
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-onair}:${POSTGRES_PASSWORD:-onair}@db:5432/${POSTGRES_DB:-onair}
+      NODE_ENV: production
+      PORT: 8080
+      TZ: ${TZ:-UTC}
+      DO_NOT_TRACK: "1"
+      # Optional values with no default are listed WITHOUT a value on purpose:
+      # Compose passes them through from the shell/.env when set, and leaves
+      # them truly unset in the container otherwise (instead of as ""), so
+      # `process.env.X ?? fallback` and `new URL(process.env.X)` behave.
+      # (Keep them commented out or absent in .env rather than "X=".)
+      LOGO_URL:
+      CENTRAL_URL:
+      SENTRY_DSN:
+      SENTRY_ENVIRONMENT:
+    ports:
+      - "${ONAIR_PORT:-8080}:8080"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      # BusyBox wget ships with node:*-alpine (the onair image's base). If you
+      # ever switch the base image to a -slim variant, wget is missing there.
+      test:
+        [
+          "CMD-SHELL",
+          "wget -qO- http://127.0.0.1:8080/manifest.json >/dev/null || exit 1",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *default-logging
+
+  # The scraper worker. Runs its own in-process cron scheduler by default;
+  # set RUN_ONCE=true to turn it into a one-shot pass (for an external scheduler).
+  collector:
+    build:
+      context: ./collector
+    # Set COLLECTOR_RESTART=no together with RUN_ONCE=true, otherwise Docker
+    # keeps restarting the finished one-shot pass.
+    restart: "${COLLECTOR_RESTART:-unless-stopped}"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-onair}:${POSTGRES_PASSWORD:-onair}@db:5432/${POSTGRES_DB:-onair}
+      TZ: ${TZ:-UTC}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      RUN_ONCE: ${RUN_ONCE:-false}
+      HTTP_TIMEOUT_MS: ${HTTP_TIMEOUT_MS:-15000}
+      HTTP_MAX_RETRIES: ${HTTP_MAX_RETRIES:-3}
+      HTTP_USER_AGENT: ${HTTP_USER_AGENT:-onair-collector/0.0.1}
+      STREAM_HEALTH_BATCH_SIZE: ${STREAM_HEALTH_BATCH_SIZE:-20}
+      STREAM_HEALTH_TIMEOUT_MS: ${STREAM_HEALTH_TIMEOUT_MS:-15000}
+      STREAM_HEALTH_DEEP_CHECK: ${STREAM_HEALTH_DEEP_CHECK:-true}
+      # Safety guard against mass deletion (e.g. during a network outage).
+      # Lowered from 0.9; raise it if a legitimate cleanup is being blocked.
+      STREAM_HEALTH_MAX_DELETE_RATIO: ${STREAM_HEALTH_MAX_DELETE_RATIO:-0.5}
+      # Defaults to 10% tracing; set to 1 temporarily when debugging.
+      SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.1}
+      # Optional, no default — see the note in the onair service.
+      SENTRY_DSN:
+      SENTRY_ENVIRONMENT:
+      CRONITOR_API_KEY:
+      CLOUDINARY_CLOUD_NAME:
+      CLOUDINARY_API_KEY:
+      CLOUDINARY_API_SECRET:
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    logging: *default-logging
+
+  # Optional HTTPS front for remote Stremio installs. Not started by default;
+  # enable with `--profile proxy`. Needs ports 80/443 free and, for a real
+  # certificate, ONAIR_DOMAIN pointing at this host. With the default
+  # (localhost) Caddy issues a locally-trusted internal certificate instead.
+  proxy:
+    image: caddy:2-alpine
+    profiles: ["proxy"]
+    restart: unless-stopped
+    command: caddy reverse-proxy --from ${ONAIR_DOMAIN:-localhost} --to onair:8080
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      onair:
+        condition: service_started
+    logging: *default-logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
