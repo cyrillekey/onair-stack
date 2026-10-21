@@ -11,12 +11,16 @@ import { filterCollectors, runOnce, startScheduler } from "@/jobs/scheduler.js";
 import { logger } from "@/utils/logger.js";
 import { flushSentry, reportError } from "@/utils/sentry.js";
 import { v2 as cloudinary } from "cloudinary";
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+// Cloudinary is optional: without credentials the artwork uploads are skipped
+// instead of failing on every call.
+if (config.CLOUDINARY_CLOUD_NAME) {
+  cloudinary.config({
+    cloud_name: config.CLOUDINARY_CLOUD_NAME,
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+}
 // Worker entrypoint. Intentionally exposes NO HTTP port:
 // collection is triggered by in-process cron (or a single
 // RUN_ONCE pass when deployed as a Kubernetes CronJob).x

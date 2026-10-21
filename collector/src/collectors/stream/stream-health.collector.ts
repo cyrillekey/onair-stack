@@ -56,7 +56,7 @@ function isTransientError(message: string | undefined): boolean {
  */
 class StreamHealthCollector extends BaseCollector<string> {
   name = "StreamHealth";
-  schedule = "*/30 * * * *";
+  readonly schedule = config.STREAM_HEALTH_CRON;
 
   private isYoutube(row: SavedStream): boolean {
     return row.youtubeId != null || YOUTUBE_URL_PATTERN.test(row.url);

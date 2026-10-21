@@ -54,7 +54,7 @@ Registered in `src/jobs/registry.ts`; cron expressions are evaluated in `TZ` (de
 
 | Job | Cron | Source | What it does |
 | --- | --- | --- | --- |
-| `StreamHealth` | `*/30 * * * *` | saved `Stream` rows | Re-verifies stored links, deletes dead ones, refreshes resolutions. Keeps transient failures, skips YouTube embeds, trips a safety stop when too many links look broken. |
+| `StreamHealth` | `*/30 * * * *` (override with `STREAM_HEALTH_CRON`) | saved `Stream` rows | Re-verifies stored links, deletes dead ones, refreshes resolutions. Keeps transient failures, skips YouTube embeds, trips a safety stop when too many links look broken. |
 | `Schedule` | `15 01 * * *` | `online-television.com/tv-channel/<externalId>/?pgday=YYYY-MM-DD` | Scrapes the daily programme list per channel and inserts `Schedule` rows. |
 | `StreamCollector` | `0 */6 * * *` | ~150 public m3u playlists + `famelack-data` | Fetches, filters geo-blocked entries, verifies every m3u8, fuzzy-matches names to channels and upserts `Stream` rows. |
 | `uk.schedule` | `15 02 * * *` | `freely.co.uk/api/tv-guide` | Upserts UK channels and their programmes. |
@@ -86,14 +86,16 @@ npm run start:once     # production one-shot (K8s CronJob)
 Deploy `start:once` as a Kubernetes CronJob if you prefer external scheduling over
 in-process cron. A `RUN_ONCE` run exits non-zero when a job fails.
 
-Config (env): `DATABASE_URL`, `RUN_ONCE`, `TZ`, `LOG_LEVEL`, `HTTP_TIMEOUT_MS`,
-`HTTP_MAX_RETRIES`, `HTTP_USER_AGENT`, `STREAM_HEALTH_BATCH_SIZE`,
+Config (env): `DATABASE_URL`, `NODE_ENV`, `RUN_ONCE`, `TZ`, `LOG_LEVEL`, `HTTP_TIMEOUT_MS`,
+`HTTP_MAX_RETRIES`, `HTTP_USER_AGENT`, `STREAM_HEALTH_CRON`, `STREAM_HEALTH_BATCH_SIZE`,
 `STREAM_HEALTH_TIMEOUT_MS`, `STREAM_HEALTH_DEEP_CHECK`, `STREAM_HEALTH_MAX_DELETE_RATIO`,
-`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `CRONITOR_API_KEY`.
+`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `CRONITOR_API_KEY`,
+`CRONITOR_ENVIRONMENT`, `CRONITOR_REGION`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
+`CLOUDINARY_API_SECRET`. See [`.env.example`](.env.example) for the full list and defaults.
 
-> `ENABLED_JOBS` and `STREAM_HEALTH_CRON` are still listed in `.env.example` but are not
-> read by the worker: jobs are toggled with the `enabled` flag on the collector class, and
-> `StreamHealth`'s cron is hardcoded.
+> Cronitor is optional: with no `CRONITOR_API_KEY` the plain `node-cron` scheduler is used
+> and no ping is sent. Jobs are toggled with the `enabled` flag on the collector class,
+> not with an env var.
 
 ## DB
 

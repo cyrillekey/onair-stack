@@ -9,8 +9,15 @@ import type {
 } from "@/collectors/base.collector.js";
 import { reportError, reportMessage } from "@/utils/sentry.js";
 
-const cron = monitor(config.CRONITOR_API_KEY);
-cron.wraps(nodeCron);
+// Cronitor is optional. Without an API key the plain node-cron scheduler is
+// used, so no ping is attempted (and no error is logged) on every tick.
+const cronitorEnabled = config.CRONITOR_API_KEY.length > 0;
+const cron = monitor(config.CRONITOR_API_KEY, {
+  env: config.CRONITOR_ENVIRONMENT || undefined,
+  region: config.CRONITOR_REGION || undefined,
+});
+if (cronitorEnabled) cron.wraps(nodeCron);
+
 export interface ScheduledHandle {
   job: string;
   stop: () => void;
@@ -50,7 +57,7 @@ export function startScheduler(
   buildCtx: () => CollectorContext,
   log: Logger,
 ): ScheduledHandle[] {
-  if (cron?.schedule === undefined) {
+  if (cronitorEnabled && cron.schedule === undefined) {
     throw new Error("Cronitor not loaded");
   }
   const handles: ScheduledHandle[] = [];
@@ -80,14 +87,13 @@ export function startScheduler(
     });
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const task = cron.schedule(
-      collector.name,
-      collector.schedule,
-      () => {
-        tick();
-      },
-      { timezone: config.TZ },
-    );
+    const task = cronitorEnabled
+      ? cron.schedule?.(collector.name, collector.schedule, () => {
+          tick();
+        }, { timezone: config.TZ })
+      : nodeCron.schedule(collector.schedule, () => {
+          tick();
+        }, { timezone: config.TZ });
     log.info(
       { job: collector.name, schedule: collector.schedule },
       "job scheduled",

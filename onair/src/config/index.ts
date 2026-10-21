@@ -5,7 +5,9 @@ const artworkUrl =
 const appConfig = {
   port: process.env.PORT || 8080,
   env: process.env.NODE_ENV,
-  logo: process.env.LOGO_URL,
+  // An empty LOGO_URL must stay `undefined`: the manifest omits the field
+  // instead of advertising an empty logo.
+  logo: process.env.LOGO_URL || undefined,
   background: artworkUrl,
   fallbackImage: artworkUrl,
 };

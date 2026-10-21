@@ -242,5 +242,11 @@
             "verified-best.m3u",
             "verified.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/sahadat-savar/AutoIPTVPlaylist/main/output/",
+        "sources": [
+            "AllPlaylist.m3u"
+        ]
     }
 ]
