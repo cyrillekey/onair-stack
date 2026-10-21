@@ -248,5 +248,13 @@
         "sources": [
             "AllPlaylist.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/doms9/iptv/refs/heads/default/M3U8/",
+        "sources": [
+            "TV.m3u8",
+            "base.m3u8",
+            "kodi.m3u8"
+        ]
     }
 ]
