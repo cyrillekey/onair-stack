@@ -203,6 +203,16 @@ class StreamsCollector extends BaseCollector {
       baseUrl: "https://gitlab.com/doms9/iptv/-/raw/default/M3U8/",
       sources: ["kodi.m3u8", "TV.m3u8", "base.m3u8"],
     },
+    {
+      baseUrl:
+        "https://raw.githubusercontent.com/abusaeeidx/Mrgify-BDIX-IPTV/refs/heads/main/",
+      sources: ["playlist.m3u"],
+    },
+    {
+      baseUrl:
+        "https://raw.githubusercontent.com/manikiptv/freecatv.github.io/refs/heads/main/",
+      sources: ["freecatv.m3u8"],
+    },
   ];
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;
