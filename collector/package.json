@@ -11,6 +11,7 @@
     "build": "rimraf dist && tsc && tsc-alias -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "validate:playlist": "tsx src/utils/playlist.validator.ts",
     "start": "node dist/src/main.js",
     "start:once": "RUN_ONCE=true node dist/src/main.js"
   },

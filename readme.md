@@ -110,7 +110,9 @@ it never scrapes.
 - **Docker** — `onair/Dockerfile` (node:26-alpine), exposes `8080`,
   `CMD ["node", "dist/src/server.js"]`.
 
-Config (env): `DATABASE_URL`, `PORT`, `LOGO_URL`, `SENTRY_DSN`, `CENTRAL_URL`.
+Config (env): `DATABASE_URL`, `PORT`, `NODE_ENV`, `LOGO_URL`, `CENTRAL_URL`, `SENTRY_DSN`,
+`SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`. See
+[`onair/.env.example`](onair/.env.example) for the full list and defaults.
 
 Run:
 
@@ -136,10 +138,13 @@ one-shot `RUN_ONCE=true` pass, which is what a Kubernetes CronJob runs.
 The list of registered jobs, their cron schedules and their sources is documented in
 [`collector/README.md`](collector/README.md).
 
-Config (env): `DATABASE_URL`, `RUN_ONCE`, `TZ`, `LOG_LEVEL`, `HTTP_TIMEOUT_MS`,
-`HTTP_MAX_RETRIES`, `HTTP_USER_AGENT`, `STREAM_HEALTH_BATCH_SIZE`,
+Config (env): `DATABASE_URL`, `NODE_ENV`, `RUN_ONCE`, `TZ`, `LOG_LEVEL`, `HTTP_TIMEOUT_MS`,
+`HTTP_MAX_RETRIES`, `HTTP_USER_AGENT`, `STREAM_HEALTH_CRON`, `STREAM_HEALTH_BATCH_SIZE`,
 `STREAM_HEALTH_TIMEOUT_MS`, `STREAM_HEALTH_DEEP_CHECK`, `STREAM_HEALTH_MAX_DELETE_RATIO`,
-`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `CRONITOR_API_KEY`.
+`SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `CRONITOR_API_KEY`,
+`CRONITOR_ENVIRONMENT`, `CRONITOR_REGION`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
+`CLOUDINARY_API_SECRET`. See [`collector/.env.example`](collector/.env.example) for the
+full list and defaults.
 
 Run:
 
@@ -176,7 +181,5 @@ Both services use the Prisma 8 contract pattern:
 
 ## Notes
 
-- `ENABLED_JOBS` and `STREAM_HEALTH_CRON` are still listed in `collector/.env.example` but
-  are **not read** by the worker: jobs are toggled with the `enabled` flag on the
-  collector class, and `StreamHealth`'s cron is hardcoded.
+- Jobs are toggled with the `enabled` flag on the collector class, not with an env var.
 - `GENERAL` is a valid `Channel.category` but is not exposed as a Stremio catalog.

@@ -11,22 +11,27 @@ const envSchema = z.object({
   LOG_LEVEL: z
     .enum(["fatal", "error", "warn", "info", "debug", "trace"])
     .default("info"),
-  HTTP_TIMEOUT_MS: z.coerce.number().int().positive().default(30000),
+  HTTP_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
   HTTP_MAX_RETRIES: z.coerce.number().int().min(0).max(10).default(3),
   HTTP_USER_AGENT: z.string().default("onair-collector/0.0.1"),
   NODE_ENV: z.string().default("development"),
-  STREAM_HEALTH_CRON: z.string().default("0 4 * * *"),
+  STREAM_HEALTH_CRON: z.string().default("*/30 * * * *"),
   STREAM_HEALTH_BATCH_SIZE: z.coerce.number().int().positive().default(20),
   STREAM_HEALTH_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
   STREAM_HEALTH_DEEP_CHECK: z
     .string()
     .default("true")
     .transform((v) => v.toLowerCase() === "true"),
-  STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.9),
+  STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.5),
   SENTRY_DSN: z.string().optional().default(""),
   SENTRY_ENVIRONMENT: z.string().optional().default(""),
-  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(1),
+  SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),
   CRONITOR_API_KEY: z.string().optional().default(""),
+  CRONITOR_ENVIRONMENT: z.string().optional().default(""),
+  CRONITOR_REGION: z.string().optional().default(""),
+  CLOUDINARY_CLOUD_NAME: z.string().optional().default(""),
+  CLOUDINARY_API_KEY: z.string().optional().default(""),
+  CLOUDINARY_API_SECRET: z.string().optional().default(""),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;

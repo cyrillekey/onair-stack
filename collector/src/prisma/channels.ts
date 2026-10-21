@@ -7,12 +7,15 @@ import { getDb } from "../db/client.js";
 import { load } from "cheerio";
 import { fetchHtml } from "@/utils/http.js";
 import { v2 as cloudinary } from "cloudinary";
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
-});
+import { config } from "../config/index.js";
+if (config.CLOUDINARY_CLOUD_NAME) {
+  cloudinary.config({
+    cloud_name: config.CLOUDINARY_CLOUD_NAME,
+    api_key: config.CLOUDINARY_API_KEY,
+    api_secret: config.CLOUDINARY_API_SECRET,
+    secure: true,
+  });
+}
 async function channelCollector(page: number) {
   try {
     const html = await fetchHtml(
