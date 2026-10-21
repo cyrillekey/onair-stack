@@ -29,7 +29,7 @@ class BeinMatcher extends BaseCollector {
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
       const _channels = await ctx.db.orm.public.Channel.where((c) =>
-        c.slug.like("%bein-%"),
+        c.slug.like("bein%"),
       ).all();
       const [usa, mena] = [
         this.streams.filter((a) => a.type == "USA"),

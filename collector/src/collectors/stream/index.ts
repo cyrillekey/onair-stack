@@ -27,7 +27,7 @@ class StreamsCollector extends BaseCollector {
   ): Promise<Omit<CollectResult<null>, "job" | "durationMs">> {
     try {
       const allChannels = await ctx.db.orm.public.Channel.where((c) =>
-        c.slug.like("%bein-%").not(),
+        c.slug.like("bein%").not(),
       ).all();
       const beinChannels: BeinStream[] = [];
       for (const task of this.ipTSources) {
