@@ -213,6 +213,11 @@ class StreamsCollector extends BaseCollector {
         "https://raw.githubusercontent.com/manikiptv/freecatv.github.io/refs/heads/main/",
       sources: ["freecatv.m3u8"],
     },
+    {
+      baseUrl:
+        "https://raw.githubusercontent.com/abusaeeidx/IPTV-Scraper-Zilla/refs/heads/main/",
+      sources: ["combined-playlist.m3u"],
+    },
   ];
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;
