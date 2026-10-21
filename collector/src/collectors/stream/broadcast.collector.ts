@@ -152,7 +152,7 @@ class BroadcastCollector extends BaseCollector {
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
       const channels = await ctx.db.orm.public.Channel.where((c) =>
-        c.slug.like("%bein-%").not(),
+        c.slug.like("bein%").not(),
       ).all();
       let stored = 0;
       let totalStreams = 0;
