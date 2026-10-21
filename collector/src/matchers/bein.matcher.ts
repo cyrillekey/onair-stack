@@ -36,7 +36,9 @@ class BeinMatcher extends BaseCollector {
         this.streams.filter((a) => a.type == "MENA"),
       ];
       const [usaChannels, menaChannels] = [
-        _channels.filter((a) => a.country == "USA"),
+        _channels.filter(
+          (a) => a.country == "USA" || a.country == "United States",
+        ),
         _channels.filter((a) => a.country == "MENA"),
       ];
       for (const channel of usaChannels) {
