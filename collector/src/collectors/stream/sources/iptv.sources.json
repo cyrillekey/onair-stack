@@ -256,5 +256,32 @@
             "base.m3u8",
             "kodi.m3u8"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Zaman-Topu/Ip-tv-Collection/refs/heads/main/",
+        "sources": [
+            "FINAL_IPTV_ACTIVE.m3u",
+            "FINAL_IPTV_COMPLETE.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/abusaeeidx/CrestSport-IPTV-Collection/refs/heads/main/",
+        "sources": [
+            "default.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Whitey2024/Custom_US_IPTV_No_Sportz/refs/heads/main/",
+        "sources": [
+            "Timmy-Chew-Chew.m3u8",
+            "_Custom Tim v2.3.m3u",
+            "_Custom Tim v2.4.m3u",
+            "_FoxNewsmaxOann.m3u",
+            "_Kev_v1.1.m3u"
+        ]
+    },
+    {
+        "baseUrl":"https://raw.githubusercontent.com/DutcherC/IPTV-Sports2006/refs/heads/main/",
+        "sources":["playlist.m3u8"]
     }
 ]
