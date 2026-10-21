@@ -200,7 +200,7 @@ class StreamsCollector extends BaseCollector {
       sources: ["Old%20My%20Personal%20List", "Original", "SPORTS%20CHANNELS"],
     },
     {
-      baseUrl: "https://gitlab.com/doms9/iptv/-/raw/default/M3U8",
+      baseUrl: "https://gitlab.com/doms9/iptv/-/raw/default/M3U8/",
       sources: ["kodi.m3u8", "TV.m3u8", "base.m3u8"],
     },
   ];
