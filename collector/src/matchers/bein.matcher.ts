@@ -22,7 +22,7 @@ class BeinMatcher extends BaseCollector {
   }
   // override fuzzyMatch with a higher treshold for bein channels comparison
   protected fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a.toLowerCase().trim(), b.toLowerCase().trim()) > 0.99;
+    return similarity(a.toLowerCase().trim(), b.toLowerCase().trim()) > 0.95;
   }
   async collect(
     ctx: CollectorContext,
