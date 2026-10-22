@@ -17,6 +17,15 @@ class StreamsCollector extends BaseCollector {
   name = "StreamCollector";
   schedule = "0 */6 * * *";
 
+  // General stream matching: allow subset matching, lower threshold for variety
+  protected streamMatcherConfig = {
+    minConfidence: 0.75,
+    requireVariantMatch: true,
+    allowVariantSubset: true, // Allow "Sports 1" <-> "Sports" for general channels
+    qualityBonus: 0.05,
+    regionBonus: 0.05,
+  };
+
   private ipTSources = sources;
   private buildLink({ baseUrl, source }: { baseUrl: string; source: string }) {
     return `${baseUrl}${source}`;
@@ -53,11 +62,9 @@ class StreamsCollector extends BaseCollector {
           const bein: BeinStream[] = allStreams
             .filter(
               (a) =>
-                !(
-                  a.name?.toLowerCase().includes("bein") ||
-                  a.tvgId?.toLowerCase().includes("bein") ||
-                  a.tvgGroupTitle?.toLowerCase().includes("bein")
-                ),
+                a.name?.toLowerCase().includes("bein") ||
+                a.tvgId?.toLowerCase().includes("bein") ||
+                a.tvgGroupTitle?.toLowerCase().includes("bein"),
             )
             .map((a) => {
               const type =

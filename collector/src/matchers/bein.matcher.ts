@@ -4,7 +4,6 @@ import {
   type CollectResult,
 } from "@/collectors/base.collector.js";
 import Sentry from "@/utils/instrument.js";
-import similarity from "similarity";
 
 export interface BeinStream {
   url: string;
@@ -15,14 +14,18 @@ export interface BeinStream {
 class BeinMatcher extends BaseCollector {
   schedule = "-";
   name = "BeinMatcher";
+  
+  // Strict matching for beIN: no subset matching, higher confidence threshold
+  protected streamMatcherConfig = {
+    minConfidence: 0.85,
+    requireVariantMatch: true,
+    allowVariantSubset: false, // "beIN Sports 1" must match "beIN Sports 1" exactly
+  };
+
   private streams: BeinStream[];
   constructor(streams: BeinStream[]) {
     super();
     this.streams = streams;
-  }
-  // override fuzzyMatch with a higher treshold for bein channels comparison
-  protected fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a.toLowerCase().trim(), b.toLowerCase().trim()) > 0.95;
   }
   async collect(
     ctx: CollectorContext,
