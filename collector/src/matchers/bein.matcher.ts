@@ -28,9 +28,11 @@ class BeinMatcher extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
+      ctx.log.info(`Bein matcher invoked with ${this.streams.length} streams`)
       const _channels = await ctx.db.orm.public.Channel.where((c) =>
         c.slug.like("bein%"),
       ).all();
+      let stored = 0
       const [usa, mena] = [
         this.streams.filter((a) => a.type == "USA"),
         this.streams.filter((a) => a.type == "MENA"),
@@ -55,6 +57,7 @@ class BeinMatcher extends BaseCollector {
               language: "English",
             })),
           );
+          stored += matching.length
         }
       }
       for (const channel of menaChannels) {
@@ -72,12 +75,13 @@ class BeinMatcher extends BaseCollector {
             })),
             { onConflict: "skip" },
           );
+          stored += matching.length
         }
       }
-
+      ctx.log.info(`Bein matcher finished with ${stored} streams saved out of ${this.streams.length}`)
       return {
         fetched: this.streams.length,
-        stored: 0,
+        stored: stored,
       };
     } catch (error) {
       Sentry.captureException(error);

@@ -29,7 +29,7 @@ export abstract class BaseCollector<T = unknown> {
   /** Set false to disable without removing the job. */
   readonly enabled = true;
 
-  protected readonly batchSize = 50;
+  protected readonly batchSize = 100;
 
   abstract collect(
     ctx: CollectorContext,

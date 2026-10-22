@@ -9,6 +9,7 @@ import {
   type CollectorContext,
   type CollectResult,
 } from "../base.collector.js";
+import { stripQualityTags } from "@/utils/urlparser.js";
 
 class ScheduleCollector extends BaseCollector {
   name = "Schedule";
@@ -84,6 +85,7 @@ class ScheduleCollector extends BaseCollector {
   ): Promise<Omit<CollectResult, "job" | "durationMs">> {
     try {
       ctx.log.info("Starting schedule collector");
+
       const date = dayjs();
       const channels = (await ctx.db.orm.public.Channel.all()).filter(
         (a) => !!a.externalId && a.externalId != null,
@@ -104,7 +106,7 @@ class ScheduleCollector extends BaseCollector {
                   channelId: channel.id,
                   date: this.buildTemporalDate(date.toDate()),
                   endTime: this.buildTemporalDate(program.endTime),
-                  name: program.name,
+                  name: stripQualityTags(program.name),
                   startTime: this.buildTemporalDate(program.startTime),
                   poster: `${this.baseUrl}${program.poster}`,
                   description: program?.description,

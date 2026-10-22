@@ -179,11 +179,18 @@ class StreamsCollector extends BaseCollector {
           resolution: record.resolution,
           language: "English",
         },
-        update: record,
+        update: {
+          slug: streamSlug,
+          url: record.url,
+        },
         conflictOn: { slug: streamSlug },
       });
     } catch (error) {
-      logger.error({ error });
+      logger.error({
+        error,
+        location: "iptv upsert stream record",
+        datum: record,
+      });
       reportError(error, {
         job: this.name,
         message: "Stream upsert failed",

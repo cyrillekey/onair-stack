@@ -6,7 +6,10 @@
  */
 
 export interface Stream {
-  /** Display name of the channel, with any "[Geo-blocked]" marker stripped out */
+  /**
+   * Display name of the channel, with any "[Geo-blocked]" marker and quality
+   * tags (HD, SD, 4K, ...) stripped out.
+   */
   name: string;
   /** Whether the channel name indicated it is geo-blocked */
   isGeoBlocked: boolean;
@@ -23,6 +26,47 @@ export interface Stream {
 }
 
 const GEO_BLOCKED_PATTERN = /\s*\[geo-blocked\]\s*/i;
+
+/**
+ * Quality markers that playlists staple onto channel names, in any casing and
+ * with optional brackets around them: "BBC One HD", "CNN (HD)", "Sky Sports
+ * [4K]", "Discovery SD".
+ *
+ * The lookarounds keep the match on a whole word, so names like "HDTV" or
+ * "4Kids" survive untouched.
+ */
+const QUALITY_TAG_PATTERN =
+  /(?<![\p{L}\p{N}])(?:8k|4k|uhd|fhd|hd|sd)(?![\p{L}\p{N}])/giu;
+
+/** Bracket pairs left empty once their content was stripped. */
+const EMPTY_BRACKET_PATTERN = /[([{]\s*[)\]}]/g;
+
+/** Separators left dangling at either end of a name after stripping. */
+const LEFTOVER_SEPARATOR_PATTERN = /^[\s\-–—|,;:.·]+|[\s\-–—|,;:.·]+$/g;
+
+/**
+ * Remove quality markers (HD, SD, 4K, ...) from a channel display name and
+ * tidy up the leftovers: empty brackets, dangling separators and repeated
+ * whitespace.
+ *
+ * Names that consist solely of a quality marker (e.g. a channel literally
+ * named "HD") are left untouched rather than blanked out.
+ */
+export function stripQualityTags(name: string): string {
+  const withoutTags = name.replace(QUALITY_TAG_PATTERN, " ");
+  if (withoutTags === name) {
+    // Nothing matched; leave the name exactly as it was.
+    return name.trim();
+  }
+
+  const cleaned = withoutTags
+    .replace(EMPTY_BRACKET_PATTERN, "")
+    .replace(LEFTOVER_SEPARATOR_PATTERN, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+
+  return cleaned.length > 0 ? cleaned : name.trim();
+}
 
 /**
  * Extract the value of a quoted attribute (e.g. tvg-id="foo") from an #EXTINF line.
@@ -111,7 +155,9 @@ export function parseM3UContent(content: string): Stream[] {
       }
 
       const isGeoBlocked = GEO_BLOCKED_PATTERN.test(pendingName);
-      const name = pendingName.replace(GEO_BLOCKED_PATTERN, "").trim();
+      const name = stripQualityTags(
+        pendingName.replace(GEO_BLOCKED_PATTERN, "").trim(),
+      );
 
       streams.push({
         name,

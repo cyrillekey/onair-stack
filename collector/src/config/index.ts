@@ -20,7 +20,7 @@ const envSchema = z.object({
   STREAM_HEALTH_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
   STREAM_HEALTH_DEEP_CHECK: z
     .string()
-    .default("true")
+    .default("false")
     .transform((v) => v.toLowerCase() === "true"),
   STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.5),
   SENTRY_DSN: z.string().optional().default(""),
