@@ -29,7 +29,7 @@ export abstract class BaseCollector<T = unknown> {
   /** Set false to disable without removing the job. */
   readonly enabled = true;
 
-  protected readonly batchSize = 100;
+  protected readonly batchSize = 200;
 
   /** Configuration for stream-to-channel matching. Override in subclasses for custom behavior. */
   protected streamMatcherConfig: Partial<StreamMatcherConfig> = {

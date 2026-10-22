@@ -281,7 +281,15 @@
         ]
     },
     {
-        "baseUrl":"https://raw.githubusercontent.com/DutcherC/IPTV-Sports2006/refs/heads/main/",
-        "sources":["playlist.m3u8"]
+        "baseUrl": "https://raw.githubusercontent.com/DutcherC/IPTV-Sports2006/refs/heads/main/",
+        "sources": [
+            "playlist.m3u8"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Mrbotrx/Tvbox_KB/refs/heads/main/output/",
+        "sources": [
+            "bd_fifa.m3u8"
+        ]
     }
 ]
