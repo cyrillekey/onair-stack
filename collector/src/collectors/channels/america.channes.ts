@@ -68,7 +68,9 @@ class TvChannelCollector extends BaseCollector {
             name: a.name,
             country: country,
             poster: a.logo,
-            category: "GENERAL",
+            category: a.name?.toLowerCase()?.includes("sport")
+              ? "SPORTS"
+              : "GENERAL",
           })),
           {
             onConflict: "skip",
