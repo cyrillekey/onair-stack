@@ -78,7 +78,7 @@ export interface MatchResult {
 }
 
 const DEFAULT_CONFIG: StreamMatcherConfig = {
-  minConfidence: 0.75,
+  minConfidence: 0.80,
   requireVariantMatch: true,
   allowVariantSubset: true,
   qualityBonus: 0.05,

@@ -51,7 +51,7 @@ class BroadcastCollector extends BaseCollector {
 
   // Broadcast channels: allow subset matching for general channels
   protected streamMatcherConfig = {
-    minConfidence: 0.75,
+    minConfidence: 0.80,
     requireVariantMatch: true,
     allowVariantSubset: true,
     qualityBonus: 0.05,

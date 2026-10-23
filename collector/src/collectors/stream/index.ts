@@ -19,7 +19,7 @@ class StreamsCollector extends BaseCollector {
 
   // General stream matching: allow subset matching, lower threshold for variety
   protected streamMatcherConfig = {
-    minConfidence: 0.75,
+    minConfidence: 0.80,
     requireVariantMatch: true,
     allowVariantSubset: true, // Allow "Sports 1" <-> "Sports" for general channels
     qualityBonus: 0.05,
