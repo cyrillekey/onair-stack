@@ -1,5 +1,5 @@
 import { config } from "@/config/index.js";
-import { isVerifiableM3U8Url, verifyM3U8 } from "@/utils/url.js";
+import { isVerifiableM3U8Url, verifyM3U8, type VerifyResult } from "@/utils/url.js";
 import { reportError, reportMessage } from "@/utils/sentry.js";
 import {
   BaseCollector,
@@ -39,6 +39,46 @@ function isTransientError(message: string | undefined): boolean {
 }
 
 /**
+ * Compact verification evidence for discarded-stream debug logs. Omits the
+ * variant list so a playlist with many renditions cannot bloat the log line.
+ */
+function verificationContext(verification: VerifyResult | undefined) {
+  if (!verification) return undefined;
+  return {
+    httpStatus: verification.httpStatus,
+    contentType: verification.contentType,
+    playlistType: verification.playlistType,
+    playabilityStatus: verification.playabilityStatus,
+    isValid: verification.isValid,
+    isPlayable: verification.isPlayable,
+    deepCheckPassed: verification.deepCheckPassed,
+    variantCount: verification.variantCount,
+    segmentCount: verification.segmentCount,
+    partCount: verification.partCount,
+    isLive: verification.isLive,
+    checkedResolution: verification.resolution,
+  };
+}
+
+/**
+ * Whether the configured deep check actually ran. `deepCheckPassed` is only
+ * set once variant/segment probing starts, so an undefined value means the
+ * check never got that far (shallow mode, invalid playlist, HTTP failure, ...).
+ */
+function deepCheckContext(verification: VerifyResult | undefined) {
+  return {
+    requested: config.STREAM_HEALTH_DEEP_CHECK,
+    performed: verification?.deepCheckPassed !== undefined,
+    passed: verification?.deepCheckPassed,
+  };
+}
+
+type CheckOutcome =
+  | { outcome: "healthy"; resolution: string }
+  | { outcome: "broken"; reason: string; verification?: VerifyResult }
+  | { outcome: "transient"; reason: string; verification?: VerifyResult };
+
+/**
  * Periodically re-verifies every saved stream and deletes broken links.
  *
  * - YouTube embeds (`youtubeId` set or youtube URL) are skipped: they are
@@ -62,17 +102,11 @@ class StreamHealthCollector extends BaseCollector<string> {
     return row.youtubeId != null || YOUTUBE_URL_PATTERN.test(row.url);
   }
 
-  private async checkRow(
-    row: SavedStream,
-  ): Promise<
-    | { outcome: "healthy"; resolution: string }
-    | { outcome: "broken"; reason: string }
-    | { outcome: "transient"; reason: string }
-  > {
+  private async checkRow(row: SavedStream): Promise<CheckOutcome> {
     if (!isVerifiableM3U8Url(row.url)) {
       return { outcome: "broken", reason: "not a verifiable HTTP(S) URL" };
     }
-    let verification;
+    let verification: VerifyResult;
     try {
       verification = await verifyM3U8(row.url, {
         timeoutMs: config.STREAM_HEALTH_TIMEOUT_MS,
@@ -87,9 +121,11 @@ class StreamHealthCollector extends BaseCollector<string> {
     }
     const reason = verification.error ?? "unplayable playlist";
     if (isTransientError(reason)) {
-      return { outcome: "broken", reason };
+      // NOTE: intentionally kept as "broken" to preserve existing deletion
+      // behavior for now; the transient outcome below is handled but unused.
+      return { outcome: "broken", reason, verification };
     }
-    return { outcome: "broken", reason };
+    return { outcome: "broken", reason, verification };
   }
 
   async collect(
@@ -124,6 +160,16 @@ class StreamHealthCollector extends BaseCollector<string> {
       for (const result of results) {
         if (result.outcome === "youtube") {
           skippedYoutube += 1;
+          ctx.log.debug(
+            {
+              id: result.row.id,
+              url: result.row.url,
+              youtubeId: result.row.youtubeId,
+              outcome: "skipped-youtube",
+              deepCheck: deepCheckContext(undefined),
+            },
+            "skipped stream: youtube embed is not an M3U8 playlist",
+          );
           continue;
         }
         if (result.outcome === "healthy") {
@@ -141,8 +187,16 @@ class StreamHealthCollector extends BaseCollector<string> {
         }
         if (result.outcome === "broken") {
           ctx.log.debug(
-            { id: result.row.id, url: result.row.url, reason: result.reason },
-            "broken stream",
+            {
+              id: result.row.id,
+              url: result.row.url,
+              reason: result.reason,
+              outcome: "discarded",
+              currentResolution: result.row.resolution,
+              deepCheck: deepCheckContext(result.verification),
+              verification: verificationContext(result.verification),
+            },
+            "discarded stream",
           );
           broken.push({
             id: result.row.id,
@@ -152,7 +206,15 @@ class StreamHealthCollector extends BaseCollector<string> {
           continue;
         }
         ctx.log.debug(
-          { id: result.row.id, url: result.row.url, reason: result.reason },
+          {
+            id: result.row.id,
+            url: result.row.url,
+            reason: result.reason,
+            outcome: "kept-transient",
+            currentResolution: result.row.resolution,
+            deepCheck: deepCheckContext(result.verification),
+            verification: verificationContext(result.verification),
+          },
           "transient check failure, keeping stream",
         );
         transient.push({ id: result.row.id, reason: result.reason });
@@ -258,6 +320,7 @@ class StreamHealthCollector extends BaseCollector<string> {
         keptTransient: transient.length,
         skippedYoutube,
         refreshedResolution: refreshed,
+        deepCheckRequested: config.STREAM_HEALTH_DEEP_CHECK,
       },
       "stream health check finished",
     );
