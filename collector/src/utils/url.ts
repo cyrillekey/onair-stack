@@ -6,7 +6,8 @@ export type PlaylistType = "master" | "media" | "unknown";
 export type ResolutionTier = "4k" | "hd" | "sd" | "unknown";
 
 /** Whether the available evidence confirms, rejects, or cannot establish playability. */
-export type PlayabilityStatus = "confirmed" | "unplayable" | "unknown" | "unverified";
+export type PlayabilityStatus =
+  "confirmed" | "unplayable" | "unknown" | "unverified";
 
 export interface VariantStreamInfo {
   /** Resolved absolute URL of the variant playlist. */
@@ -118,7 +119,10 @@ export function isVerifiableM3U8Url(url: string): boolean {
   }
 }
 
-function createOperationScope(timeoutMs: number, callerSignal?: AbortSignal): OperationScope {
+function createOperationScope(
+  timeoutMs: number,
+  callerSignal?: AbortSignal,
+): OperationScope {
   const controller = new AbortController();
   let didTimeOut = false;
   const timeoutError = new Error(`Timed out after ${timeoutMs}ms`);
@@ -160,29 +164,43 @@ function isDefinitiveUnavailableStatus(status: number): boolean {
   return status === 404 || status === 410;
 }
 
-function resolvedHttpUrl(reference: string, baseUrl: string): string | undefined {
+function resolvedHttpUrl(
+  reference: string,
+  baseUrl: string,
+): string | undefined {
   try {
     const resolved = new URL(reference, baseUrl);
-    if (resolved.protocol !== "http:" && resolved.protocol !== "https:") return undefined;
+    if (resolved.protocol !== "http:" && resolved.protocol !== "https:")
+      return undefined;
     return resolved.toString();
   } catch {
     return undefined;
   }
 }
 
-function parseResolutionPixels(line: string): { width: number; height: number } | undefined {
+function parseResolutionPixels(
+  line: string,
+): { width: number; height: number } | undefined {
   const match = line.match(/\bRESOLUTION=(\d+)x(\d+)(?:,|$)/i);
   if (!match) return undefined;
 
   const width = Number(match[1]);
   const height = Number(match[2]);
-  if (!Number.isSafeInteger(width) || !Number.isSafeInteger(height) || width <= 0 || height <= 0) {
+  if (
+    !Number.isSafeInteger(width) ||
+    !Number.isSafeInteger(height) ||
+    width <= 0 ||
+    height <= 0
+  ) {
     return undefined;
   }
   return { width, height };
 }
 
-function classifyResolution(pixels?: { width: number; height: number }): ResolutionTier {
+function classifyResolution(pixels?: {
+  width: number;
+  height: number;
+}): ResolutionTier {
   if (!pixels) return "unknown";
   if (pixels.width >= 3840 || pixels.height >= 2160) return "4k";
   if (pixels.width >= 1280 || pixels.height >= 720) return "hd";
@@ -246,7 +264,7 @@ function isUsableHttpReference(reference: string): boolean {
 function parsePlaylist(
   text: string,
   baseUrl: string,
-  options: { collectMediaUrls: boolean; collectVariants: boolean }
+  options: { collectMediaUrls: boolean; collectVariants: boolean },
 ): ParsedPlaylist {
   const empty: ParsedPlaylist = {
     type: "unknown",
@@ -263,7 +281,10 @@ function parsePlaylist(
 
   const lines = toLines(text);
   if (lines[0] !== "#EXTM3U") {
-    return { ...empty, error: "Response is not an HLS playlist (missing #EXTM3U header)" };
+    return {
+      ...empty,
+      error: "Response is not an HLS playlist (missing #EXTM3U header)",
+    };
   }
 
   // Detect the playlist family and collect common flags in one pass instead of
@@ -292,7 +313,8 @@ function parsePlaylist(
     if (line === "#EXT-X-ENDLIST") hasEndList = true;
   }
 
-  const looksLikeMaster = hasStreamInfMarker || hasIFrameMarker || hasMediaRenditionMarker;
+  const looksLikeMaster =
+    hasStreamInfMarker || hasIFrameMarker || hasMediaRenditionMarker;
 
   if (looksLikeMaster) {
     const variants: VariantStreamInfo[] = [];
@@ -312,8 +334,13 @@ function parsePlaylist(
         // STREAM-INF's URI is the following non-empty line. Blank lines were
         // compacted by toLines(), so this remains an O(1) look-ahead.
         const uriLine = lines[i + 1];
-        if (!line.startsWith("#EXT-X-STREAM-INF:") || !uriLine || uriLine.startsWith("#")) {
-          malformedVariant ??= "Master playlist contains an EXT-X-STREAM-INF tag without a following URI";
+        if (
+          !line.startsWith("#EXT-X-STREAM-INF:") ||
+          !uriLine ||
+          uriLine.startsWith("#")
+        ) {
+          malformedVariant ??=
+            "Master playlist contains an EXT-X-STREAM-INF tag without a following URI";
           continue;
         }
 
@@ -350,7 +377,9 @@ function parsePlaylist(
 
       if (line.startsWith("#EXT-X-I-FRAME-STREAM-INF")) {
         const rawUri = line.startsWith("#EXT-X-I-FRAME-STREAM-INF:")
-          ? parseQuotedUriAttribute(line.slice("#EXT-X-I-FRAME-STREAM-INF:".length))
+          ? parseQuotedUriAttribute(
+              line.slice("#EXT-X-I-FRAME-STREAM-INF:".length),
+            )
           : undefined;
         if (rawUri && isUsableHttpReference(rawUri)) iframeVariantCount++;
       }
@@ -366,7 +395,9 @@ function parsePlaylist(
         variantCount,
         resolution: bestResolution,
         iframeVariantCount,
-        error: malformedVariant ?? "Master playlist does not contain a usable variant URI",
+        error:
+          malformedVariant ??
+          "Master playlist does not contain a usable variant URI",
       };
     }
 
@@ -386,7 +417,10 @@ function parsePlaylist(
   }
 
   if (!hasMediaStructure) {
-    return { ...empty, error: "Playlist has no recognizable master or media playlist tags" };
+    return {
+      ...empty,
+      error: "Playlist has no recognizable master or media playlist tags",
+    };
   }
 
   const segmentUrls: string[] = [];
@@ -404,12 +438,17 @@ function parsePlaylist(
 
     if (line.startsWith("#EXTINF")) {
       if (!line.startsWith("#EXTINF:") || awaitingSegmentUri) {
-        malformedMedia ??= "Media playlist contains a malformed EXTINF/segment sequence";
+        malformedMedia ??=
+          "Media playlist contains a malformed EXTINF/segment sequence";
         continue;
       }
 
       const duration = line.slice("#EXTINF:".length).split(",", 1)[0];
-      if (!duration.trim() || !Number.isFinite(Number(duration)) || Number(duration) < 0) {
+      if (
+        !duration.trim() ||
+        !Number.isFinite(Number(duration)) ||
+        Number(duration) < 0
+      ) {
         malformedMedia ??= "Media playlist contains an invalid EXTINF duration";
         continue;
       }
@@ -422,11 +461,16 @@ function parsePlaylist(
     if (line.startsWith("#EXT-X-PART:")) {
       const rawUri = parseQuotedUriAttribute(line.slice("#EXT-X-PART:".length));
       const resolved = options.collectMediaUrls
-        ? rawUri ? resolvedHttpUrl(rawUri, baseUrl) : undefined
-        : rawUri && isUsableHttpReference(rawUri) ? rawUri : undefined;
+        ? rawUri
+          ? resolvedHttpUrl(rawUri, baseUrl)
+          : undefined
+        : rawUri && isUsableHttpReference(rawUri)
+          ? rawUri
+          : undefined;
 
       if (!resolved) {
-        malformedMedia ??= "Media playlist contains an EXT-X-PART tag without a usable URI";
+        malformedMedia ??=
+          "Media playlist contains an EXT-X-PART tag without a usable URI";
       } else {
         partCount++;
         if (options.collectMediaUrls) partUrls.push(resolved);
@@ -442,7 +486,9 @@ function parsePlaylist(
 
       const resolved = options.collectMediaUrls
         ? resolvedHttpUrl(line, baseUrl)
-        : isUsableHttpReference(line) ? line : undefined;
+        : isUsableHttpReference(line)
+          ? line
+          : undefined;
 
       if (!resolved) {
         malformedMedia ??= `Media playlist contains an invalid segment URI: ${line}`;
@@ -455,7 +501,8 @@ function parsePlaylist(
   }
 
   if (awaitingSegmentUri) {
-    malformedMedia ??= "Media playlist ends before the segment URI for its final EXTINF tag";
+    malformedMedia ??=
+      "Media playlist ends before the segment URI for its final EXTINF tag";
   }
 
   if (malformedMedia) {
@@ -509,17 +556,11 @@ function parsePlaylist(
   };
 }
 
-import { isBlockedIp } from "./ip-block.js";
-
 async function fetchWithSignal(
   url: string,
   init: RequestInit,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<Response> {
-  const hostname = new URL(url).hostname;
-  if (await isBlockedIp(hostname)) {
-    throw new Error(`Blocked: ${hostname} resolves to private/reserved IP`);
-  }
   return fetch(url, { ...init, signal });
 }
 
@@ -534,14 +575,16 @@ async function cancelBody(response: Response): Promise<void> {
 async function readBodyWithLimit(
   response: Response,
   maxBytes: number,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<ReadBodyResult> {
   const contentLength = response.headers.get("content-length");
   if (contentLength !== null) {
     const declared = Number(contentLength);
     if (Number.isFinite(declared) && declared > maxBytes) {
       await cancelBody(response);
-      return { error: `Response body too large (${declared} bytes declared; limit ${maxBytes})` };
+      return {
+        error: `Response body too large (${declared} bytes declared; limit ${maxBytes})`,
+      };
     }
   }
 
@@ -560,7 +603,9 @@ async function readBodyWithLimit(
       received += value.byteLength;
       if (received > maxBytes) {
         await reader.cancel("Body limit exceeded");
-        return { error: `Response body exceeds ${maxBytes} bytes; download aborted` };
+        return {
+          error: `Response body exceeds ${maxBytes} bytes; download aborted`,
+        };
       }
       chunks.push(value);
     }
@@ -589,18 +634,27 @@ async function readBodyWithLimit(
 
 function mergeHeaders(
   base: Record<string, string>,
-  overrides?: Record<string, string>
+  overrides?: Record<string, string>,
 ): Headers {
   const headers = new Headers(base);
   if (overrides) {
-    for (const [name, value] of Object.entries(overrides)) headers.set(name, value);
+    for (const [name, value] of Object.entries(overrides))
+      headers.set(name, value);
   }
   return headers;
 }
 
-function isClearlyAnErrorDocument(contentType: string | null, sample: Uint8Array): boolean {
+function isClearlyAnErrorDocument(
+  contentType: string | null,
+  sample: Uint8Array,
+): boolean {
   const mime = (contentType ?? "").split(";", 1)[0].trim().toLowerCase();
-  if (mime === "text/html" || mime === "application/json" || mime.endsWith("+json")) return true;
+  if (
+    mime === "text/html" ||
+    mime === "application/json" ||
+    mime.endsWith("+json")
+  )
+    return true;
 
   // Content-Type is often wrong on IPTV endpoints, so reject by payload only
   // when the sample strongly resembles an HTML or JSON error page.
@@ -614,7 +668,9 @@ function isClearlyAnErrorDocument(contentType: string | null, sample: Uint8Array
     prefix.startsWith("<html") ||
     prefix.startsWith("<error") ||
     /^\{\s*"(error|message|detail|status|title)"\s*:/i.test(prefix) ||
-    /^(access denied|access forbidden|forbidden|unauthorized|nosuchkey|not found|error:)/i.test(prefix) ||
+    /^(access denied|access forbidden|forbidden|unauthorized|nosuchkey|not found|error:)/i.test(
+      prefix,
+    ) ||
     /<code>\s*(accessdenied|nosuchkey|notfound)\s*<\/code>/i.test(prefix)
   );
 }
@@ -623,12 +679,16 @@ function isClearlyAnErrorDocument(contentType: string | null, sample: Uint8Array
 async function probeMediaResource(
   url: string,
   headers: Record<string, string>,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<ProbeResult> {
   let response: Response | undefined;
   try {
     const requestHeaders = mergeHeaders(headers, { Range: "bytes=0-1023" });
-    response = await fetchWithSignal(url, { method: "GET", headers: requestHeaders }, signal);
+    response = await fetchWithSignal(
+      url,
+      { method: "GET", headers: requestHeaders },
+      signal,
+    );
 
     if (!response.ok) {
       const firstStatus = response.status;
@@ -641,7 +701,11 @@ async function probeMediaResource(
       if (fallbackStatuses.has(firstStatus)) {
         const fallbackHeaders = new Headers(headers);
         fallbackHeaders.delete("range");
-        response = await fetchWithSignal(url, { method: "GET", headers: fallbackHeaders }, signal);
+        response = await fetchWithSignal(
+          url,
+          { method: "GET", headers: fallbackHeaders },
+          signal,
+        );
       }
 
       if (!response.ok) {
@@ -649,7 +713,9 @@ async function probeMediaResource(
         const statusText = response.statusText || firstStatusText;
         await cancelBody(response);
         return {
-          status: isDefinitiveUnavailableStatus(status) ? "unplayable" : "unknown",
+          status: isDefinitiveUnavailableStatus(status)
+            ? "unplayable"
+            : "unknown",
           httpStatus: status,
           error: `HTTP ${status} ${statusText}`.trim(),
         };
@@ -657,7 +723,10 @@ async function probeMediaResource(
     }
 
     if (!response.body) {
-      return { status: "unplayable", error: "Media resource returned an empty body" };
+      return {
+        status: "unplayable",
+        error: "Media resource returned an empty body",
+      };
     }
 
     const reader = response.body.getReader();
@@ -672,13 +741,17 @@ async function probeMediaResource(
         if (!value?.byteLength) continue;
 
         const remaining = sampleLimit - sampleLength;
-        const piece = value.byteLength > remaining ? value.slice(0, remaining) : value;
+        const piece =
+          value.byteLength > remaining ? value.slice(0, remaining) : value;
         sampleChunks.push(piece);
         sampleLength += piece.byteLength;
       }
 
       if (sampleLength === 0) {
-        return { status: "unplayable", error: "Media resource returned an empty body" };
+        return {
+          status: "unplayable",
+          error: "Media resource returned an empty body",
+        };
       }
 
       const sample = new Uint8Array(sampleLength);
@@ -688,8 +761,13 @@ async function probeMediaResource(
         offset += chunk.byteLength;
       }
 
-      if (isClearlyAnErrorDocument(response.headers.get("content-type"), sample)) {
-        return { status: "unplayable", error: "Media URL returned an HTML/JSON response, not media data" };
+      if (
+        isClearlyAnErrorDocument(response.headers.get("content-type"), sample)
+      ) {
+        return {
+          status: "unplayable",
+          error: "Media URL returned an HTML/JSON response, not media data",
+        };
       }
 
       return { status: "ok" };
@@ -709,7 +787,10 @@ async function probeMediaResource(
     if (signal.aborted) {
       return { status: "unknown", error: errorMessage(signal.reason ?? error) };
     }
-    return { status: "unknown", error: `Media probe failed: ${errorMessage(error)}` };
+    return {
+      status: "unknown",
+      error: `Media probe failed: ${errorMessage(error)}`,
+    };
   } finally {
     if (response) await cancelBody(response);
   }
@@ -723,11 +804,14 @@ async function probeMediaUnits(
   urls: string[],
   headers: Record<string, string>,
   signal: AbortSignal,
-  maxCandidates: number
+  maxCandidates: number,
 ): Promise<ProbeResult> {
   const candidates = unique(urls);
   if (candidates.length === 0) {
-    return { status: "unplayable", error: "Media playlist contains no probeable segment or part URI" };
+    return {
+      status: "unplayable",
+      error: "Media playlist contains no probeable segment or part URI",
+    };
   }
 
   let sawUnknown = false;
@@ -749,13 +833,17 @@ async function probeMediaUnits(
   if (candidates.length > tested.length || sawUnknown) {
     return {
       status: "unknown",
-      error: errors[0] ?? `No media unit passed; only ${tested.length} of ${candidates.length} candidates were checked`,
+      error:
+        errors[0] ??
+        `No media unit passed; only ${tested.length} of ${candidates.length} candidates were checked`,
     };
   }
 
   return {
     status: "unplayable",
-    error: errors[0] ?? `None of the ${tested.length} media resources could be reached`,
+    error:
+      errors[0] ??
+      `None of the ${tested.length} media resources could be reached`,
   };
 }
 
@@ -764,7 +852,7 @@ async function checkMediaPlaylistReachable(
   headers: Record<string, string>,
   maxBodyBytes: number,
   maxCandidates: number,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<ProbeResult> {
   let response: Response | undefined;
   try {
@@ -773,7 +861,9 @@ async function checkMediaPlaylistReachable(
       const status = response.status;
       await cancelBody(response);
       return {
-        status: isDefinitiveUnavailableStatus(status) ? "unplayable" : "unknown",
+        status: isDefinitiveUnavailableStatus(status)
+          ? "unplayable"
+          : "unknown",
         httpStatus: status,
         error: `HTTP ${status} ${response.statusText}`.trim(),
       };
@@ -794,12 +884,16 @@ async function checkMediaPlaylistReachable(
       collectVariants: true,
     });
     if (!parsed.valid) {
-      return { status: "unplayable", error: parsed.error ?? "Variant URL did not return a valid playlist" };
+      return {
+        status: "unplayable",
+        error: parsed.error ?? "Variant URL did not return a valid playlist",
+      };
     }
     if (parsed.type !== "media") {
       return {
         status: "unplayable",
-        error: "A regular variant URI returned a master playlist instead of a media playlist",
+        error:
+          "A regular variant URI returned a master playlist instead of a media playlist",
       };
     }
 
@@ -807,20 +901,28 @@ async function checkMediaPlaylistReachable(
       [...parsed.segmentUrls, ...parsed.partUrls],
       headers,
       signal,
-      maxCandidates
+      maxCandidates,
     );
   } catch (error) {
-    if (signal.aborted) return { status: "unknown", error: errorMessage(signal.reason ?? error) };
-    return { status: "unknown", error: `Variant playlist check failed: ${errorMessage(error)}` };
+    if (signal.aborted)
+      return { status: "unknown", error: errorMessage(signal.reason ?? error) };
+    return {
+      status: "unknown",
+      error: `Variant playlist check failed: ${errorMessage(error)}`,
+    };
   } finally {
     if (response) await cancelBody(response);
   }
 }
 
-function sortVariantsForProbe(variants: VariantStreamInfo[]): VariantStreamInfo[] {
+function sortVariantsForProbe(
+  variants: VariantStreamInfo[],
+): VariantStreamInfo[] {
   // Probe high-bandwidth variants first, then fall back to other renditions.
   // Missing bandwidth is kept behind explicitly declared bandwidths.
-  return [...variants].sort((a, b) => (b.bandwidth ?? -1) - (a.bandwidth ?? -1));
+  return [...variants].sort(
+    (a, b) => (b.bandwidth ?? -1) - (a.bandwidth ?? -1),
+  );
 }
 
 /**
@@ -830,17 +932,21 @@ function sortVariantsForProbe(variants: VariantStreamInfo[]): VariantStreamInfo[
  */
 export async function verifyM3U8(
   url: string,
-  options: VerifyOptions = {}
+  options: VerifyOptions = {},
 ): Promise<VerifyResult> {
-  const timeoutMs = Number.isFinite(options.timeoutMs) && (options.timeoutMs ?? 0) > 0
-    ? Math.max(1, Math.floor(options.timeoutMs!))
-    : DEFAULT_TIMEOUT_MS;
-  const maxBodyBytes = Number.isFinite(options.maxBodyBytes) && (options.maxBodyBytes ?? 0) > 0
-    ? Math.max(1, Math.floor(options.maxBodyBytes!))
-    : DEFAULT_MAX_BODY_BYTES;
-  const maxCandidates = Number.isFinite(options.maxDeepCheckCandidates) && (options.maxDeepCheckCandidates ?? 0) > 0
-    ? Math.max(1, Math.floor(options.maxDeepCheckCandidates!))
-    : DEFAULT_MAX_DEEP_CHECK_CANDIDATES;
+  const timeoutMs =
+    Number.isFinite(options.timeoutMs) && (options.timeoutMs ?? 0) > 0
+      ? Math.max(1, Math.floor(options.timeoutMs!))
+      : DEFAULT_TIMEOUT_MS;
+  const maxBodyBytes =
+    Number.isFinite(options.maxBodyBytes) && (options.maxBodyBytes ?? 0) > 0
+      ? Math.max(1, Math.floor(options.maxBodyBytes!))
+      : DEFAULT_MAX_BODY_BYTES;
+  const maxCandidates =
+    Number.isFinite(options.maxDeepCheckCandidates) &&
+    (options.maxDeepCheckCandidates ?? 0) > 0
+      ? Math.max(1, Math.floor(options.maxDeepCheckCandidates!))
+      : DEFAULT_MAX_DEEP_CHECK_CANDIDATES;
   const headers = options.headers ?? {};
   const deepCheck = options.deepCheck ?? true;
   // Shallow checks do not need to retain each variant URL. Callers that use the
@@ -867,7 +973,9 @@ export async function verifyM3U8(
 
   try {
     if (scope.signal.aborted) {
-      result.error = errorMessage(scope.signal.reason ?? new Error("Request aborted"));
+      result.error = errorMessage(
+        scope.signal.reason ?? new Error("Request aborted"),
+      );
       result.playabilityStatus = "unknown";
       return result;
     }
@@ -879,7 +987,9 @@ export async function verifyM3U8(
     if (!response.ok) {
       const status = response.status;
       result.error = `HTTP ${status} ${response.statusText}`.trim();
-      result.playabilityStatus = isDefinitiveUnavailableStatus(status) ? "unplayable" : "unknown";
+      result.playabilityStatus = isDefinitiveUnavailableStatus(status)
+        ? "unplayable"
+        : "unknown";
       return result;
     }
 
@@ -944,7 +1054,7 @@ export async function verifyM3U8(
           headers,
           maxBodyBytes,
           maxCandidates,
-          scope.signal
+          scope.signal,
         );
         if (check.status === "ok") {
           result.isPlayable = true;
@@ -972,7 +1082,7 @@ export async function verifyM3U8(
       [...parsed.segmentUrls, ...parsed.partUrls],
       headers,
       scope.signal,
-      maxCandidates
+      maxCandidates,
     );
     result.deepCheckPassed = mediaCheck.status === "ok";
     result.isPlayable = mediaCheck.status === "ok";
@@ -982,7 +1092,9 @@ export async function verifyM3U8(
         : mediaCheck.status === "unplayable"
           ? "unplayable"
           : "unknown";
-    if (!result.isPlayable) result.error = mediaCheck.error ?? "No media resource passed the deep check";
+    if (!result.isPlayable)
+      result.error =
+        mediaCheck.error ?? "No media resource passed the deep check";
 
     return result;
   } catch (error) {

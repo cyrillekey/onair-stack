@@ -58,6 +58,22 @@ describe('StreamMatcher', () => {
       expect(result.rawTokens).not.toContain('tv');
       expect(result.rawTokens).not.toContain('channel');
     });
+
+    it('keeps letters from non-Latin scripts (Cyrillic, Greek)', () => {
+      const cyrillic = matcher.parse('Первый канал HD');
+      expect(cyrillic.network).toBe('первый канал');
+      expect(cyrillic.quality).toBe('hd');
+
+      const greek = matcher.parse('ΕΡΤ 1');
+      expect(greek.network).toBe('ερτ');
+      expect(greek.variant).toBe('1');
+    });
+
+    it('splits attached numbers in non-Latin names', () => {
+      const result = matcher.parse('Матч ТВ2');
+      expect(result.network).toBe('матч тв');
+      expect(result.variant).toBe('2');
+    });
   });
 
   describe('match() - Variant hard constraint (CRITICAL)', () => {
@@ -192,6 +208,45 @@ describe('StreamMatcher', () => {
     it('matches at default threshold 0.75', () => {
       const result = matcher.match('beIN Sports 1', 'beIN Sport 1');
       expect(result.matched).toBe(true);
+    });
+  });
+
+  describe('Leading variant names', () => {
+    it('parses a leading variant and keeps the network name', () => {
+      const result = matcher.parse('5 StarMAX East');
+      expect(result.variant).toBe('5');
+      expect(result.network).toBe('starmax east');
+    });
+
+    it('does NOT match names that only share a leading variant', () => {
+      const result = matcher.match('5 Exploring Britain', '5 StarMAX  East');
+      expect(result.matched).toBe(false);
+      expect(result.confidence).toBeLessThan(0.5);
+    });
+
+    it('matches identical leading-variant names', () => {
+      const result = matcher.match('5 StarMAX East HD', '5 StarMAX East');
+      expect(result.matched).toBe(true);
+    });
+
+    it('matches when the whole name is a variant', () => {
+      const result = matcher.match('5 HD', '5');
+      expect(result.matched).toBe(true);
+    });
+
+    it('does not match empty network names without a shared variant', () => {
+      expect(matcher.match('HD', '4K').matched).toBe(false);
+    });
+
+    it('matches identical Cyrillic names', () => {
+      expect(matcher.match('Первый канал HD', 'Первый канал').matched).toBe(true);
+      expect(matcher.match('Матч ТВ2', 'Матч ТВ 2').matched).toBe(true);
+    });
+
+    it('does not match different Cyrillic names sharing a variant', () => {
+      const result = matcher.match('Матч ТВ 2', 'Первый 2');
+      expect(result.matched).toBe(false);
+      expect(result.confidence).toBeLessThan(0.5);
     });
   });
 
