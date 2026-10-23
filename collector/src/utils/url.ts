@@ -299,6 +299,9 @@ function parsePlaylist(
     let variantCount = 0;
     let bestBandwidth = -1;
     let bestResolution: ResolutionTier = "unknown";
+    // Kept only as a diagnostic for a playlist with no usable variant at all:
+    // individual malformed entries are skipped so one bad declaration cannot
+    // invalidate otherwise playable renditions.
     let malformedVariant: string | undefined;
     let iframeVariantCount = 0;
 
@@ -353,20 +356,8 @@ function parsePlaylist(
       }
     }
 
-    if (malformedVariant) {
-      return {
-        ...empty,
-        type: "master",
-        variants,
-        variantCount,
-        resolution: bestResolution,
-        iframeVariantCount,
-        error: malformedVariant,
-      };
-    }
-
-    // I-frame-only playlists are useful for trick-play but do not declare a
-    // regular playback variant.
+    // Malformed variant entries were skipped while scanning. The playlist stays
+    // valid as long as at least one usable variant (regular or I-frame) exists.
     if (variantCount === 0 && iframeVariantCount === 0) {
       return {
         ...empty,
@@ -375,7 +366,7 @@ function parsePlaylist(
         variantCount,
         resolution: bestResolution,
         iframeVariantCount,
-        error: "Master playlist does not contain a usable variant URI",
+        error: malformedVariant ?? "Master playlist does not contain a usable variant URI",
       };
     }
 
