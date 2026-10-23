@@ -9,7 +9,6 @@ import {
   type CollectorContext,
   type CollectResult,
 } from "../base.collector.js";
-import { stripQualityTags } from "@/utils/urlparser.js";
 
 class ScheduleCollector extends BaseCollector {
   name = "Schedule";
@@ -106,7 +105,7 @@ class ScheduleCollector extends BaseCollector {
                   channelId: channel.id,
                   date: this.buildTemporalDate(date.toDate()),
                   endTime: this.buildTemporalDate(program.endTime),
-                  name: stripQualityTags(program.name),
+                  name: program.name,
                   startTime: this.buildTemporalDate(program.startTime),
                   poster: `${this.baseUrl}${program.poster}`,
                   description: program?.description,

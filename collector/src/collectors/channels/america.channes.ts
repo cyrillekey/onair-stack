@@ -8,7 +8,7 @@ import {
   type CollectorContext,
   type CollectResult,
 } from "../base.collector.js";
-import { stripQualityTags } from "@/utils/urlparser.js";
+
 import Sentry from "@/utils/instrument.js";
 
 class TvChannelCollector extends BaseCollector {
@@ -58,7 +58,7 @@ class TvChannelCollector extends BaseCollector {
           })
           .get()
           .map((a) => ({
-            name: stripQualityTags(a.name),
+            name: a.name,
             logo: `${this.baseUrl}${a.logo}`,
             description: a.description,
           }));
