@@ -78,23 +78,79 @@ export interface MatchResult {
 }
 
 const DEFAULT_CONFIG: StreamMatcherConfig = {
-  minConfidence: 0.80,
+  minConfidence: 0.8,
   requireVariantMatch: true,
   allowVariantSubset: true,
   qualityBonus: 0.05,
   regionBonus: 0.05,
   languageBonus: 0.03,
   variantTokens: [
-    '1', '2', '3', '4', '5', '6', '7', '8', '9', '10',
-    'premier', 'news', 'main event', 'f1', 'f2',
-    'action', 'extra', 'plus', 'max', 'select', 'showcase',
-    'cricket', 'golf', 'football', 'tennis', 'racing',
-    'documentary', 'movies', 'kids', 'family', 'entertainment'
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "premier",
+    "news",
+    "main event",
+    "f1",
+    "f2",
+    "action",
+    "extra",
+    "plus",
+    "max",
+    "select",
+    "showcase",
+    "cricket",
+    "golf",
+    "football",
+    "tennis",
+    "racing",
+    "documentary",
+    "movies",
+    "kids",
+    "family",
+    "entertainment",
   ],
-  qualityTokens: ['hd', 'fhd', 'uhd', '4k', '720p', '1080p', '2160p', 'sd'],
-  regionTokens: ['us', 'usa', 'uk', 'mena', 'eu', 'ca', 'au', 'fr', 'de', 'it', 'es', 'br', 'mx', 'latam', 'apac'],
-  languageTokens: ['en', 'ar', 'fr', 'es', 'pt', 'de', 'it', 'tr', 'ru', 'hi', 'zh', 'ja', 'ko'],
-  stopWords: ['live', 'tv', 'channel', 'network', 'stream', 'official'],
+  qualityTokens: ["hd", "fhd", "uhd", "4k", "720p", "1080p", "2160p", "sd"],
+  regionTokens: [
+    "us",
+    "usa",
+    "uk",
+    "mena",
+    "eu",
+    "ca",
+    "au",
+    "fr",
+    "de",
+    "it",
+    "es",
+    "br",
+    "mx",
+    "latam",
+    "apac",
+  ],
+  languageTokens: [
+    "en",
+    "ar",
+    "fr",
+    "es",
+    "pt",
+    "de",
+    "it",
+    "tr",
+    "ru",
+    "hi",
+    "zh",
+    "ja",
+    "ko",
+  ],
+  stopWords: ["live", "tv", "channel", "network", "stream", "official"],
 };
 
 /**
@@ -102,14 +158,19 @@ const DEFAULT_CONFIG: StreamMatcherConfig = {
  * Preserves single-letter + number patterns like F1, F2, G1 (motorsport variants)
  */
 function normalizeToken(token: string): string {
-  return token
-    .toLowerCase()
-    // Don't split single letter + digit (F1, F2, G1, etc.) - these are known variants
-    .replace(/([a-z]{2,})(\d)/g, '$1 $2')    // ESPN2 -> ESPN 2 (but not F1)
-    .replace(/(\d)([a-z]{2,})/g, '$1 $2')    // 2HD -> 2 HD (but not 1F)
-    .replace(/[^\w\s]/g, ' ')                 // remove punctuation
-    .replace(/\s+/g, ' ')
-    .trim();
+  return (
+    token
+      .normalize("NFC") // compose accents so "é" matches "e + combining accent"
+      .toLowerCase()
+      // Don't split single letter + digit (F1, F2, G1, etc.) - these are known variants
+      .replace(/(\p{L}{2,})(\p{N})/gu, "$1 $2") // ESPN2 -> ESPN 2 (but not F1)
+      .replace(/(\p{N})(\p{L}{2,})/gu, "$1 $2") // 2HD -> 2 HD (but not 1F)
+      // Keep letters/numbers/marks from every script (Cyrillic, Greek, Arabic, ...),
+      // not just ASCII like \w does; replace other punctuation with a space.
+      .replace(/[^\p{L}\p{N}\p{M}\s]/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 /**
@@ -118,15 +179,15 @@ function normalizeToken(token: string): string {
 function diceSimilarity(a: string, b: string): number {
   if (!a || !b) return 0;
   if (a === b) return 1;
-  
+
   const aBigrams = new Set<string>();
   for (let i = 0; i < a.length - 1; i++) aBigrams.add(a.slice(i, i + 2));
   const bBigrams = new Set<string>();
   for (let i = 0; i < b.length - 1; i++) bBigrams.add(b.slice(i, i + 2));
-  
+
   let intersection = 0;
   for (const bg of aBigrams) if (bBigrams.has(bg)) intersection++;
-  
+
   return (2 * intersection) / (aBigrams.size + bBigrams.size);
 }
 
@@ -134,14 +195,15 @@ function diceSimilarity(a: string, b: string): number {
  * Jaccard similarity on token sets (0-1)
  */
 function jaccardTokenSimilarity(tokensA: string[], tokensB: string[]): number {
-  if (tokensA.length === 0 && tokensB.length === 0) return 1;
+  // Two empty sets are not evidence of similarity. Returning 1 here would make
+  // unrelated names that parsed to empty networks match with full confidence.
   if (tokensA.length === 0 || tokensB.length === 0) return 0;
-  
+
   const setA = new Set(tokensA);
   const setB = new Set(tokensB);
   let intersection = 0;
   for (const t of setA) if (setB.has(t)) intersection++;
-  
+
   return intersection / (setA.size + setB.size - intersection);
 }
 
@@ -159,59 +221,78 @@ export class StreamMatcher {
     const normalized = normalizeToken(name);
     const tokens = normalized
       .split(/\s+/)
-      .filter(t => t.length > 0 && !this.config.stopWords.includes(t));
+      .filter((t) => t.length > 0 && !this.config.stopWords.includes(t));
 
-    // Find variant from the END (most reliable position for channel numbers/names)
-    // Check multi-word variants first (e.g., "main event")
+    // Locate the variant token(s). Channel numbers/names usually sit at the end
+    // ("beIN Sports 1", "Sky Sports News") but can also prefix the network name
+    // ("5 StarMAX East"), in which case the network is everything after them.
     let variant: string | null = null;
-    let variantEndIndex = tokens.length; // exclusive end index for network tokens
+    let variantStart = -1; // index of the first variant token
+    let variantLength = 0; // number of tokens the variant spans
 
-    // Check multi-word variants (2-3 tokens from end)
+    // Check multi-word variants first (e.g., "main event"), from the end
     for (let wordCount = 3; wordCount >= 2; wordCount--) {
       if (tokens.length >= wordCount) {
-        const candidate = tokens.slice(-wordCount).join(' ');
+        const candidate = tokens.slice(-wordCount).join(" ");
         if (this.config.variantTokens.includes(candidate)) {
           variant = candidate;
-          variantEndIndex = tokens.length - wordCount;
+          variantStart = tokens.length - wordCount;
+          variantLength = wordCount;
           break;
         }
       }
     }
 
-    // If no multi-word variant found, check single tokens from end
+    // Otherwise take the last single-token variant (numbers included)
     if (!variant) {
       for (let i = tokens.length - 1; i >= 0; i--) {
         const token = tokens[i];
         const isNumber = /^\d+$/.test(token);
         const isVariantWord = this.config.variantTokens.includes(token);
-        
+
         if (isNumber || isVariantWord) {
           variant = token;
-          variantEndIndex = i;
+          variantStart = i;
+          variantLength = 1;
           break;
         }
       }
     }
 
-    // Network tokens are everything before the variant
-    let networkTokens = tokens.slice(0, variantEndIndex);
+    // Network tokens are the tokens on the opposite side of the variant:
+    // - variant at the start ("5 StarMAX East") -> everything after it
+    // - variant at the end ("beIN Sports 1")     -> everything before it
+    // - no variant                               -> the whole name
+    let networkTokens: string[];
+    if (variantStart === -1) {
+      networkTokens = [...tokens];
+    } else if (variantStart === 0) {
+      networkTokens = tokens.slice(variantLength);
+    } else {
+      networkTokens = tokens.slice(0, variantStart);
+    }
 
     // Extract quality, region, language (first match anywhere in original tokens)
-    const quality = tokens.find(t => this.config.qualityTokens.includes(t)) ?? null;
-    const region = tokens.find(t => this.config.regionTokens.includes(t)) ?? null;
-    const language = tokens.find(t => this.config.languageTokens.includes(t)) ?? null;
+    const quality =
+      tokens.find((t) => this.config.qualityTokens.includes(t)) ?? null;
+    const region =
+      tokens.find((t) => this.config.regionTokens.includes(t)) ?? null;
+    const language =
+      tokens.find((t) => this.config.languageTokens.includes(t)) ?? null;
 
     // Remove quality/region/language tokens from network tokens
-    const excludeTokens = new Set([quality, region, language].filter(Boolean) as string[]);
-    networkTokens = networkTokens.filter(t => !excludeTokens.has(t));
+    const excludeTokens = new Set(
+      [quality, region, language].filter(Boolean) as string[],
+    );
+    networkTokens = networkTokens.filter((t) => !excludeTokens.has(t));
 
     return {
-      network: networkTokens.join(' '),
+      network: networkTokens.join(" "),
       variant,
       quality,
       region,
       language,
-      rawTokens: tokens
+      rawTokens: tokens,
     };
   }
 
@@ -231,7 +312,7 @@ export class StreamMatcher {
           matchedTokens: [],
           reason: `variant mismatch: "${stream.variant}" ≠ "${channel.variant}"`,
           stream,
-          channel
+          channel,
         };
       }
     }
@@ -245,7 +326,7 @@ export class StreamMatcher {
           matchedTokens: [],
           reason: `stream has variant "${stream.variant}" but channel has none (subset not allowed)`,
           stream,
-          channel
+          channel,
         };
       }
     }
@@ -257,18 +338,33 @@ export class StreamMatcher {
           matchedTokens: [],
           reason: `channel has variant "${channel.variant}" but stream has none (subset not allowed)`,
           stream,
-          channel
+          channel,
         };
       }
     }
 
     // Network-level similarity (primary signal)
-    const networkDice = diceSimilarity(stream.network, channel.network);
-    const networkJaccard = jaccardTokenSimilarity(
-      stream.network.split(/\s+/).filter(Boolean),
-      channel.network.split(/\s+/).filter(Boolean)
-    );
-    const networkScore = Math.max(networkDice, networkJaccard);
+    const streamNetworkTokens = stream.network.split(/\s+/).filter(Boolean);
+    const channelNetworkTokens = channel.network.split(/\s+/).filter(Boolean);
+
+    let networkScore: number;
+    if (streamNetworkTokens.length === 0 && channelNetworkTokens.length === 0) {
+      // Both names consist only of variant/quality/region/language tokens
+      // (e.g. "5 HD" vs "5"), so the variant is the only signal available.
+      networkScore =
+        stream.variant !== null && stream.variant === channel.variant ? 1 : 0;
+    } else if (
+      streamNetworkTokens.length === 0 ||
+      channelNetworkTokens.length === 0
+    ) {
+      // A missing network name on one side is not evidence of similarity.
+      networkScore = 0;
+    } else {
+      networkScore = Math.max(
+        diceSimilarity(stream.network, channel.network),
+        jaccardTokenSimilarity(streamNetworkTokens, channelNetworkTokens),
+      );
+    }
 
     // Soft signal bonuses
     let bonus = 0;
@@ -278,12 +374,20 @@ export class StreamMatcher {
       matchedTokens.push(stream.network);
     }
 
-    if (stream.variant && channel.variant && stream.variant === channel.variant) {
+    if (
+      stream.variant &&
+      channel.variant &&
+      stream.variant === channel.variant
+    ) {
       matchedTokens.push(`variant:${stream.variant}`);
       bonus += 0.1; // Strong bonus for exact variant match
     }
 
-    if (stream.quality && channel.quality && stream.quality === channel.quality) {
+    if (
+      stream.quality &&
+      channel.quality &&
+      stream.quality === channel.quality
+    ) {
       matchedTokens.push(`quality:${stream.quality}`);
       bonus += this.config.qualityBonus;
     } else if (stream.quality || channel.quality) {
@@ -295,31 +399,41 @@ export class StreamMatcher {
       bonus += this.config.regionBonus;
     }
 
-    if (stream.language && channel.language && stream.language === channel.language) {
+    if (
+      stream.language &&
+      channel.language &&
+      stream.language === channel.language
+    ) {
       matchedTokens.push(`lang:${stream.language}`);
       bonus += this.config.languageBonus;
     }
 
     const confidence = Math.min(1, networkScore + bonus);
+
     const matched = confidence >= this.config.minConfidence;
 
     return {
       matched,
       confidence,
       matchedTokens,
-      reason: matched ? 'match' : `low confidence (${confidence.toFixed(2)} < ${this.config.minConfidence})`,
+      reason: matched
+        ? "match"
+        : `low confidence (${confidence.toFixed(2)} < ${this.config.minConfidence})`,
       stream,
-      channel
+      channel,
     };
   }
 
   /**
    * Find the best matching channel from a list
    */
-  findBestMatch(streamName: string, channelNames: string[]): { channel: string; result: MatchResult } | null {
+  findBestMatch(
+    streamName: string,
+    channelNames: string[],
+  ): { channel: string; result: MatchResult } | null {
     const results = channelNames
-      .map(channel => ({ channel, result: this.match(streamName, channel) }))
-      .filter(r => r.result.matched)
+      .map((channel) => ({ channel, result: this.match(streamName, channel) }))
+      .filter((r) => r.result.matched)
       .sort((a, b) => b.result.confidence - a.result.confidence);
 
     return results[0] ?? null;
@@ -334,7 +448,11 @@ export const defaultStreamMatcher = new StreamMatcher();
 /**
  * Convenience function for simple matching
  */
-export function fuzzyMatch(streamName: string, channelName: string, config?: Partial<StreamMatcherConfig>): boolean {
+export function fuzzyMatch(
+  streamName: string,
+  channelName: string,
+  config?: Partial<StreamMatcherConfig>,
+): boolean {
   const matcher = config ? new StreamMatcher(config) : defaultStreamMatcher;
   return matcher.match(streamName, channelName).matched;
 }

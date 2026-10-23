@@ -3,8 +3,12 @@ import type { Contract } from "@/prisma/contract.js";
 import type postgres from "@prisma/orm-postgres/runtime";
 import { Temporal } from "temporal-polyfill";
 import { reportError } from "@/utils/sentry.js";
-import { StreamMatcher, type StreamMatcherConfig } from "@/matching/stream.matcher.js";
+import {
+  StreamMatcher,
+  type StreamMatcherConfig,
+} from "@/matching/stream.matcher.js";
 import { createHash } from "node:crypto";
+import similarity from "similarity";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -92,7 +96,8 @@ export abstract class BaseCollector<T = unknown> {
    * @returns confidence 0-1
    */
   protected matchConfidence(a: string, b: string): number {
-    return this.streamMatcher.match(a, b).confidence;
+    // return this.streamMatcher.match(a, b).confidence;
+    return this.rudimentaryCompare(a, b);
   }
 
   /**
@@ -144,5 +149,17 @@ export abstract class BaseCollector<T = unknown> {
   }
   protected formatName(name: string) {
     return name?.split("(")?.at(0)?.trim() ?? name;
+  }
+  private rudimentaryCompare(a: string, b: string): number {
+    const tokensa = a.split(" ");
+    const tokensb = b.split(" ");
+    const numa = tokensa?.filter((a) => !Number.isNaN(Number.parseInt(a)));
+    const numb = tokensb?.filter((a) => !Number.isNaN(Number.parseInt(a)));
+
+    if (numa.length != numb.length) return 0;
+
+    if (numa.toLocaleString() != numb.toLocaleString()) return 0;
+
+    return similarity(a.toLowerCase(), b.toLowerCase());
   }
 }
