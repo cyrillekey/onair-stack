@@ -47,3 +47,5 @@ export function toReadableString(catalogType: CATALOG_TYPE) {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+export const catalogCountries = ["Canada", "Uk", "India", "Usa"];

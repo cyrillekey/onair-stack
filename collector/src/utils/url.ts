@@ -518,11 +518,17 @@ function parsePlaylist(
   };
 }
 
+import { isBlockedIp } from "./ip-block.js";
+
 async function fetchWithSignal(
   url: string,
   init: RequestInit,
   signal: AbortSignal
 ): Promise<Response> {
+  const hostname = new URL(url).hostname;
+  if (await isBlockedIp(hostname)) {
+    throw new Error(`Blocked: ${hostname} resolves to private/reserved IP`);
+  }
   return fetch(url, { ...init, signal });
 }
 
