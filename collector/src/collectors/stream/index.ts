@@ -17,11 +17,13 @@ class StreamsCollector extends BaseCollector {
   name = "StreamCollector";
   schedule = "0 */6 * * *";
 
-  // General stream matching: allow subset matching, lower threshold for variety
+  // General stream matching: let a variant stream fall back to a generic
+  // channel (e.g. "Sports 1" -> "Sports"), but never promote a generic stream
+  // into a variant channel.
   protected streamMatcherConfig = {
     minConfidence: 0.80,
     requireVariantMatch: true,
-    allowVariantSubset: true, // Allow "Sports 1" <-> "Sports" for general channels
+    allowVariantSubset: true,
     qualityBonus: 0.05,
     regionBonus: 0.05,
   };

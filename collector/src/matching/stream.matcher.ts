@@ -15,12 +15,17 @@ export interface StreamMatcherConfig {
    */
   requireVariantMatch: boolean;
   /**
-   * If true, allow one-sided variant match (e.g., "Sports 1" matches "Sports") (default: true)
+   * If true, allow a stream with a variant to match a channel without one,
+   * e.g. "Sports 1" matches the generic "Sports" channel (default: true).
+   *
+   * The opposite direction is always blocked: a stream without a variant must
+   * never be attached to a more specific channel, e.g. "Willow" must not match
+   * "Willow Cricket" or "Willow 2 Xtra".
    *
    * @example
    * // allowVariantSubset = true (default)
    * matcher.match("beIN Sports 1", "beIN Sports")      // ✅ MATCH: stream has variant, channel doesn't
-   * matcher.match("beIN Sports", "beIN Sports 1")      // ✅ MATCH: channel has variant, stream doesn't
+   * matcher.match("beIN Sports", "beIN Sports 1")      // ❌ BLOCKED: stream lacks the channel's variant
    *
    * @example
    * // allowVariantSubset = false (strict - for beIN, premium channels)
@@ -174,37 +179,90 @@ function normalizeToken(token: string): string {
 }
 
 /**
- * Dice coefficient similarity (0-1)
+ * Dice coefficient similarity (0-1) using multisets of character bigrams.
+ *
+ * Multiset counts matter: with set semantics "bang bang" and "bang" have the
+ * same bigrams, so a repeated word adds no weight and short/prefix names look
+ * artificially similar. Counting duplicates keeps repetition significant.
  */
 function diceSimilarity(a: string, b: string): number {
   if (!a || !b) return 0;
   if (a === b) return 1;
 
-  const aBigrams = new Set<string>();
-  for (let i = 0; i < a.length - 1; i++) aBigrams.add(a.slice(i, i + 2));
-  const bBigrams = new Set<string>();
-  for (let i = 0; i < b.length - 1; i++) bBigrams.add(b.slice(i, i + 2));
+  const aBigrams = new Map<string, number>();
+  let aBigramCount = 0;
+  for (let i = 0; i < a.length - 1; i++) {
+    const bg = a.slice(i, i + 2);
+    aBigrams.set(bg, (aBigrams.get(bg) ?? 0) + 1);
+    aBigramCount++;
+  }
 
+  let bBigramCount = 0;
   let intersection = 0;
-  for (const bg of aBigrams) if (bBigrams.has(bg)) intersection++;
+  for (let i = 0; i < b.length - 1; i++) {
+    const bg = b.slice(i, i + 2);
+    bBigramCount++;
+    const remaining = aBigrams.get(bg) ?? 0;
+    if (remaining > 0) {
+      intersection++;
+      aBigrams.set(bg, remaining - 1);
+    }
+  }
 
-  return (2 * intersection) / (aBigrams.size + bBigrams.size);
+  return (2 * intersection) / (aBigramCount + bBigramCount);
 }
 
 /**
- * Jaccard similarity on token sets (0-1)
+ * How much of `tokens` is accounted for by the other name (0-1).
+ *
+ * A token counts as covered when it appears verbatim in the other name
+ * (including across token boundaries, e.g. "skysports" vs "sky sports") or
+ * when it is a close typo of one of the other name's tokens.
  */
-function jaccardTokenSimilarity(tokensA: string[], tokensB: string[]): number {
-  // Two empty sets are not evidence of similarity. Returning 1 here would make
-  // unrelated names that parsed to empty networks match with full confidence.
-  if (tokensA.length === 0 || tokensB.length === 0) return 0;
+function tokenCoverage(
+  tokens: string[],
+  otherTokens: string[],
+  otherCompact: string,
+): number {
+  if (tokens.length === 0 || otherTokens.length === 0) return 0;
 
-  const setA = new Set(tokensA);
-  const setB = new Set(tokensB);
-  let intersection = 0;
-  for (const t of setA) if (setB.has(t)) intersection++;
+  let covered = 0;
+  for (const token of tokens) {
+    if (otherCompact.includes(token)) {
+      covered += 1;
+      continue;
+    }
 
-  return intersection / (setA.size + setB.size - intersection);
+    let best = 0;
+    for (const other of otherTokens) {
+      best = Math.max(best, diceSimilarity(token, other));
+    }
+    covered += best;
+  }
+
+  return covered / tokens.length;
+}
+
+/**
+ * Network similarity (0-1).
+ *
+ * Character similarity alone is too forgiving for short names: "Bang Bang"
+ * and "Bang U" share almost every bigram despite the mismatched second word.
+ * The token-coverage factor penalizes tokens that the other name does not
+ * account for, so matching requires both character and token agreement.
+ */
+function networkSimilarity(tokensA: string[], tokensB: string[]): number {
+  const compactA = tokensA.join("");
+  const compactB = tokensB.join("");
+  if (!compactA || !compactB) return 0;
+
+  const charScore = diceSimilarity(compactA, compactB);
+  const coverage = Math.min(
+    tokenCoverage(tokensA, tokensB, compactB),
+    tokenCoverage(tokensB, tokensA, compactA),
+  );
+
+  return charScore * coverage;
 }
 
 export class StreamMatcher {
@@ -259,15 +317,19 @@ export class StreamMatcher {
       }
     }
 
-    // Network tokens are the tokens on the opposite side of the variant:
-    // - variant at the start ("5 StarMAX East") -> everything after it
-    // - variant at the end ("beIN Sports 1")     -> everything before it
-    // - no variant                               -> the whole name
+    // Network tokens are all remaining tokens. A leading variant ("5 StarMAX
+    // East") and a trailing variant ("beIN Sports 1") remove only the variant.
+    // A numeric variant in the middle ("Willow 2 Xtra") leaves the trailing
+    // brand token in the network, so it cannot match the plain "Willow 2".
+    // Word variants describe the channel identity ("Sky Sports Premier
+    // League"), so any trailing tokens after them stay ignored.
     let networkTokens: string[];
     if (variantStart === -1) {
       networkTokens = [...tokens];
     } else if (variantStart === 0) {
       networkTokens = tokens.slice(variantLength);
+    } else if (/^\d+$/.test(variant ?? "")) {
+      networkTokens = tokens.filter((_, index) => index !== variantStart);
     } else {
       networkTokens = tokens.slice(0, variantStart);
     }
@@ -330,17 +392,18 @@ export class StreamMatcher {
         };
       }
     }
+    // A channel-specific variant can never be satisfied by a generic stream
+    // name. Allowing this would attach "Willow" to every sibling channel such
+    // as "Willow Cricket" or "Willow 2 Xtra".
     if (!stream.variant && channel.variant) {
-      if (!this.config.allowVariantSubset) {
-        return {
-          matched: false,
-          confidence: 0,
-          matchedTokens: [],
-          reason: `channel has variant "${channel.variant}" but stream has none (subset not allowed)`,
-          stream,
-          channel,
-        };
-      }
+      return {
+        matched: false,
+        confidence: 0,
+        matchedTokens: [],
+        reason: `channel has variant "${channel.variant}" but stream has none`,
+        stream,
+        channel,
+      };
     }
 
     // Network-level similarity (primary signal)
@@ -360,9 +423,9 @@ export class StreamMatcher {
       // A missing network name on one side is not evidence of similarity.
       networkScore = 0;
     } else {
-      networkScore = Math.max(
-        diceSimilarity(stream.network, channel.network),
-        jaccardTokenSimilarity(streamNetworkTokens, channelNetworkTokens),
+      networkScore = networkSimilarity(
+        streamNetworkTokens,
+        channelNetworkTokens,
       );
     }
 
