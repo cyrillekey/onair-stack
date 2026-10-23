@@ -86,7 +86,11 @@ export abstract class BaseCollector<T = unknown> {
    * @returns boolean do they match
    */
   protected fuzzyMatch(a: string, b: string): boolean {
-    return this.streamMatcher.match(a, b).matched;
+    // return this.streamMatcher.match(a, b).matched;
+    return (
+      this.rudimentaryCompare(a, b) >=
+      (this.streamMatcherConfig.minConfidence ?? 0.75)
+    );
   }
 
   /**
@@ -97,7 +101,6 @@ export abstract class BaseCollector<T = unknown> {
    */
   protected matchConfidence(a: string, b: string): number {
     return this.streamMatcher.match(a, b).confidence;
-    // /return this.rudimentaryCompare(a, b);
   }
 
   /**

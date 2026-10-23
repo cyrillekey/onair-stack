@@ -52,6 +52,12 @@ describe('StreamMatcher', () => {
       expect(matcher.parse('Sky Sports F1').variant).toBe('f1');
     });
 
+    it('keeps tokens after a middle variant: Willow 2 Xtra', () => {
+      const result = matcher.parse('Willow 2 Xtra');
+      expect(result.variant).toBe('2');
+      expect(result.network).toBe('willow xtra');
+    });
+
     it('ignores stop words', () => {
       const result = matcher.parse('beIN Sports 1 Live TV Channel HD');
       expect(result.rawTokens).not.toContain('live');
@@ -126,9 +132,34 @@ describe('StreamMatcher', () => {
       expect(result.confidence).toBeGreaterThan(0.7);
     });
 
-    it('ALLOWS: beIN Sports stream -> beIN Sports 1 channel (default allowVariantSubset)', () => {
+    it('BLOCKS: beIN Sports stream -> beIN Sports 1 channel (channel is more specific)', () => {
       const result = matcher.match('beIN Sports', 'beIN Sports 1');
-      expect(result.matched).toBe(true);
+      expect(result.matched).toBe(false);
+      expect(result.reason).toContain('channel has variant');
+    });
+
+    it('BLOCKS: Willow stream -> Willow Cricket channel', () => {
+      const result = matcher.match('Willow', 'Willow Cricket');
+      expect(result.matched).toBe(false);
+      expect(result.confidence).toBe(0);
+      expect(result.reason).toContain('channel has variant');
+    });
+
+    it('BLOCKS: Willow stream -> Willow 2 Xtra channel', () => {
+      const result = matcher.match('Willow', 'Willow 2 Xtra');
+      expect(result.matched).toBe(false);
+      expect(result.confidence).toBe(0);
+      expect(result.reason).toContain('channel has variant');
+    });
+
+    it('BLOCKS: Willow 2 stream -> Willow 2 Xtra channel', () => {
+      const result = matcher.match('Willow 2', 'Willow 2 Xtra');
+      expect(result.matched).toBe(false);
+    });
+
+    it('still matches an exact Willow channel', () => {
+      expect(matcher.match('Willow', 'Willow').matched).toBe(true);
+      expect(matcher.match('Willow HD', 'Willow').matched).toBe(true);
     });
 
     it('BLOCKS when allowVariantSubset=false: beIN Sports 1 -> beIN Sports', () => {
@@ -165,6 +196,22 @@ describe('StreamMatcher', () => {
     it('matches with reordering: Sports beIN 1 -> beIN Sports 1', () => {
       const result = matcher.match('Sports beIN 1', 'beIN Sports 1');
       expect(result.matched).toBe(true);
+    });
+
+    it('does NOT match names that only share a prefix: Bang Bang TV -> Bang U', () => {
+      const result = matcher.match('Bang Bang TV', 'Bang U');
+      expect(result.matched).toBe(false);
+      expect(result.confidence).toBeLessThan(0.75);
+      expect(result.matchedTokens).toEqual([]);
+    });
+
+    it('does NOT match a short name embedded in a longer unrelated name: ESPN -> ESPN U', () => {
+      const result = matcher.match('ESPN', 'ESPN U');
+      expect(result.matched).toBe(false);
+    });
+
+    it('keeps matching repeated words: Bang Bang -> Bang Bang', () => {
+      expect(matcher.match('Bang Bang TV', 'Bang Bang').matched).toBe(true);
     });
   });
 

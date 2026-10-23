@@ -49,7 +49,8 @@ class BroadcastCollector extends BaseCollector {
   name = "Broadcast";
   schedule = "0 */4 * * *";
 
-  // Broadcast channels: allow subset matching for general channels
+  // Broadcast channels: let variant streams fall back to generic channels,
+  // but never promote a generic stream into a variant channel.
   protected streamMatcherConfig = {
     minConfidence: 0.80,
     requireVariantMatch: true,
