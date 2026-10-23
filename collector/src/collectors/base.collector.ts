@@ -96,8 +96,8 @@ export abstract class BaseCollector<T = unknown> {
    * @returns confidence 0-1
    */
   protected matchConfidence(a: string, b: string): number {
-    // return this.streamMatcher.match(a, b).confidence;
-    return this.rudimentaryCompare(a, b);
+    return this.streamMatcher.match(a, b).confidence;
+    // /return this.rudimentaryCompare(a, b);
   }
 
   /**
