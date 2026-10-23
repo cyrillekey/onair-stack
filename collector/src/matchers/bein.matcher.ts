@@ -4,7 +4,6 @@ import {
   type CollectResult,
 } from "@/collectors/base.collector.js";
 import Sentry from "@/utils/instrument.js";
-import similarity from "similarity";
 
 export interface BeinStream {
   url: string;
@@ -15,22 +14,28 @@ export interface BeinStream {
 class BeinMatcher extends BaseCollector {
   schedule = "-";
   name = "BeinMatcher";
+  
+  // Strict matching for beIN: no subset matching, higher confidence threshold
+  protected streamMatcherConfig = {
+    minConfidence: 0.85,
+    requireVariantMatch: true,
+    allowVariantSubset: false, // "beIN Sports 1" must match "beIN Sports 1" exactly
+  };
+
   private streams: BeinStream[];
   constructor(streams: BeinStream[]) {
     super();
     this.streams = streams;
   }
-  // override fuzzyMatch with a higher treshold for bein channels comparison
-  protected fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a.toLowerCase().trim(), b.toLowerCase().trim()) > 0.95;
-  }
   async collect(
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
+      ctx.log.info(`Bein matcher invoked with ${this.streams.length} streams`)
       const _channels = await ctx.db.orm.public.Channel.where((c) =>
         c.slug.like("bein%"),
       ).all();
+      let stored = 0
       const [usa, mena] = [
         this.streams.filter((a) => a.type == "USA"),
         this.streams.filter((a) => a.type == "MENA"),
@@ -55,6 +60,7 @@ class BeinMatcher extends BaseCollector {
               language: "English",
             })),
           );
+          stored += matching.length
         }
       }
       for (const channel of menaChannels) {
@@ -72,12 +78,13 @@ class BeinMatcher extends BaseCollector {
             })),
             { onConflict: "skip" },
           );
+          stored += matching.length
         }
       }
-
+      ctx.log.info(`Bein matcher finished with ${stored} streams saved out of ${this.streams.length}`)
       return {
         fetched: this.streams.length,
-        stored: 0,
+        stored: stored,
       };
     } catch (error) {
       Sentry.captureException(error);

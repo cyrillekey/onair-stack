@@ -14,7 +14,8 @@ export type CATALOG_TYPE =
   | "CLASSIC_TV"
   | "CRIME"
   | "ADULT"
-  | "OUTDOORS_AUTO";
+  | "OUTDOORS_AUTO"
+  | "GENERAL";
 export const catalogTypes: CATALOG_TYPE[] = [
   "ENTERTAINMENT",
   "SPORTS",
@@ -31,6 +32,7 @@ export const catalogTypes: CATALOG_TYPE[] = [
   "CLASSIC_TV",
   "CRIME",
   "OUTDOORS_AUTO",
+  "GENERAL",
 ];
 
 export function toReadableString(catalogType: CATALOG_TYPE) {
@@ -45,3 +47,5 @@ export function toReadableString(catalogType: CATALOG_TYPE) {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+export const catalogCountries = ["Canada", "Uk", "India", "Usa"];

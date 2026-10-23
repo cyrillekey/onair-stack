@@ -3,7 +3,7 @@ import type { Contract } from "@/prisma/contract.js";
 import type postgres from "@prisma/orm-postgres/runtime";
 import { Temporal } from "temporal-polyfill";
 import { reportError } from "@/utils/sentry.js";
-import similarity from "similarity";
+import { StreamMatcher, type StreamMatcherConfig } from "@/matching/stream.matcher.js";
 import { createHash } from "node:crypto";
 
 export interface CollectResult<T = unknown> {
@@ -29,7 +29,22 @@ export abstract class BaseCollector<T = unknown> {
   /** Set false to disable without removing the job. */
   readonly enabled = true;
 
-  protected readonly batchSize = 50;
+  protected readonly batchSize = 200;
+
+  /** Configuration for stream-to-channel matching. Override in subclasses for custom behavior. */
+  protected streamMatcherConfig: Partial<StreamMatcherConfig> = {
+    minConfidence: 0.75,
+    requireVariantMatch: true,
+    allowVariantSubset: true,
+  };
+
+  private _matcher: StreamMatcher | null = null;
+  protected get streamMatcher(): StreamMatcher {
+    if (!this._matcher) {
+      this._matcher = new StreamMatcher(this.streamMatcherConfig);
+    }
+    return this._matcher;
+  }
 
   abstract collect(
     ctx: CollectorContext,
@@ -61,13 +76,38 @@ export abstract class BaseCollector<T = unknown> {
   }
   /**
    * Performs a fuzzy match between two names to determine if they are similar or close
-   * @param a name to compare
-   * @param b name to compare
+   * @param a name to compare (stream name)
+   * @param b name to compare (channel name)
    *
    * @returns boolean do they match
    */
   protected fuzzyMatch(a: string, b: string): boolean {
-    return similarity(a.toLowerCase(), b.toLowerCase()) > 0.9;
+    return this.streamMatcher.match(a, b).matched;
+  }
+
+  /**
+   * Get the match confidence score for ranking multiple candidates
+   * @param a stream name
+   * @param b channel name
+   * @returns confidence 0-1
+   */
+  protected matchConfidence(a: string, b: string): number {
+    return this.streamMatcher.match(a, b).confidence;
+  }
+
+  /**
+   * Find the best matching channel from a list
+   * @param streamName stream name to match
+   * @param channelNames array of channel names
+   * @returns best match or null
+   */
+  protected findBestMatch(
+    streamName: string,
+    channelNames: string[],
+  ): { channel: string; confidence: number } | null {
+    const result = this.streamMatcher.findBestMatch(streamName, channelNames);
+    if (!result) return null;
+    return { channel: result.channel, confidence: result.result.confidence };
   }
   protected getUniqueArray<X>(arr: X[]) {
     return Array.from(new Set(arr));

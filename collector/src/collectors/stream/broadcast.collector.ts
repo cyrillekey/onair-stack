@@ -48,6 +48,16 @@ export interface PlaybackOption {
 class BroadcastCollector extends BaseCollector {
   name = "Broadcast";
   schedule = "0 */4 * * *";
+
+  // Broadcast channels: allow subset matching for general channels
+  protected streamMatcherConfig = {
+    minConfidence: 0.80,
+    requireVariantMatch: true,
+    allowVariantSubset: true,
+    qualityBonus: 0.05,
+    regionBonus: 0.05,
+  };
+
   private baseUrl = "https://broadcastatlas.com/api/channels/ranked";
   private countries = ["UK", "US"];
 
@@ -163,7 +173,7 @@ class BroadcastCollector extends BaseCollector {
         const streams = allstreams.filter(
           (a) => !a.slug.toLowerCase().includes("bein"),
         );
-        const bein = streams.filter((a) =>
+        const bein = allstreams.filter((a) =>
           a.slug.toLowerCase().includes("bein"),
         );
         beinStreams.push(...bein);

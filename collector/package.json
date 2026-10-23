@@ -13,7 +13,9 @@
     "lint": "eslint .",
     "validate:playlist": "tsx src/utils/playlist.validator.ts",
     "start": "node dist/src/main.js",
-    "start:once": "RUN_ONCE=true node dist/src/main.js"
+    "start:once": "RUN_ONCE=true node dist/src/main.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "engines": {
     "node": ">=24.x"
@@ -47,6 +49,7 @@
     "rimraf": "^6.0.1",
     "tsc-alias": "^1.8.10",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.70.1"
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^2.0.0"
   }
 }

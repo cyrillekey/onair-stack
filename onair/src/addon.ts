@@ -7,13 +7,18 @@ import {
 import { Temporal } from "temporal-polyfill";
 import { db } from "./prisma/db.js";
 import appConfig from "./config/index.js";
-import { catalogTypes, toReadableString, type CATALOG_TYPE } from "./global.js";
+import {
+  catalogCountries,
+  catalogTypes,
+  toReadableString,
+  type CATALOG_TYPE,
+} from "./global.js";
 import Sentry from "./utils/instrument.js";
 
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
 const manifest: Manifest = {
   id: "community.onair",
-  version: "1.0.1",
+  version: "1.0.1-beta",
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleotieno7@gmail.com",
@@ -22,7 +27,12 @@ const manifest: Manifest = {
     type: "tv",
     id: a,
     name: toReadableString(a),
-    extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
+    extra: [
+      { name: "skip" },
+      { name: "search" },
+      { name: "date" },
+      { name: "genre", options: catalogCountries },
+    ],
   })),
   resources: ["catalog", "stream", "meta"],
   types: ["tv"],
@@ -38,9 +48,9 @@ const PAGE_SIZE = 100;
 
 /** Programme data goes stale quickly, see the SDK Native EPG docs. */
 const EPG_CACHE = {
-  cacheMaxAge: 300,
-  staleRevalidate: 1800,
-  staleError: 604800,
+  cacheMaxAge: 120, // 2 minutes
+  staleRevalidate: 600, // 10 minutes
+  staleError: 172800, // 2 days
 };
 
 type GuideWindow = {
@@ -146,7 +156,7 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
   const type = id as unknown as CATALOG_TYPE;
   Sentry.metrics.count("catalog-request", 1);
   if (!catalogTypes.includes(type)) {
-    return { metas: [] };
+    return { metas: [], ...EPG_CACHE };
   }
 
   // Native EPG requests carry the `date` extra and expect full channel meta
@@ -194,6 +204,11 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
     query = query.where((channel) => channel.name.ilike(term));
     Sentry.metrics.count("catalog-search-request", 1);
   }
+  if (extra?.genre) {
+    const term = escapeLike(extra.genre);
+    query = query.where((channel) => channel.country.ilike(term));
+    Sentry.metrics.count("catalog-genre-request", 1);
+  }
 
   const channels = await query
     .orderBy([(channel) => channel.name.asc(), (channel) => channel.id.asc()])
@@ -212,6 +227,7 @@ builder.defineCatalogHandler(async ({ id, extra }) => {
       posterShape: "landscape",
       logo: channel.poster ?? appConfig.fallbackImage,
     })),
+    ...EPG_CACHE,
   };
 });
 
