@@ -7,7 +7,7 @@ export const logger = pino({
     target: "@logtail/pino",
     options: {
       sourceToken: config.LOGTAIL_SOURCE_TOKEN,
-      options: { endpoint: "https://$INGESTING_HOST" },
+      options: { endpoint: config.LOGTAIL_INGESTING_HOST },
     },
   },
 });
