@@ -164,7 +164,10 @@ export abstract class BaseCollector<T = unknown> {
 
     if (numa.toLocaleString() != numb.toLocaleString()) return 0;
 
-    return similarity(a.toLowerCase(), b.toLowerCase());
+    return similarity(
+      a.replace(/ TV/i, "").toLowerCase(),
+      b.replace(/ TV/i, "").toLowerCase(),
+    );
   }
   protected classifyChannel(name: string) {
     return classifyTvChannel(name);
