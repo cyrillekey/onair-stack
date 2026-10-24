@@ -68,6 +68,7 @@ class StreamsCollector extends BaseCollector {
                     slug: this.slugify(a.name),
                     url: a.streamLink,
                     resolution: a.resolution,
+                    language: a.countryName,
                   }),
                 ),
               );
@@ -142,7 +143,7 @@ class StreamsCollector extends BaseCollector {
           slug: streamSlug,
           url: record.url!,
           resolution: record.resolution,
-          language: "English",
+          language: record.language ?? "",
         },
         update: {
           slug: streamSlug,
