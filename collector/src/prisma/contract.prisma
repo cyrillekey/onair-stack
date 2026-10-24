@@ -45,6 +45,7 @@ model Schedule {
   createdat   DateTime @default(now())
   updatedat   DateTime @default(now())
 
+  @@unique([channelId, date, startTime])
   @@map("schedule")
 }
 

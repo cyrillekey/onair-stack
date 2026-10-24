@@ -6,7 +6,6 @@ import {
 } from "../base.collector.js";
 import { verifyM3U8 } from "@/utils/url.js";
 import Sentry from "@/utils/instrument.js";
-import BeinMatcher from "@/matchers/bein.matcher.js";
 
 export interface BroadcastMedia {
   channels: Channel[];
@@ -52,7 +51,7 @@ class BroadcastCollector extends BaseCollector {
   // Broadcast channels: let variant streams fall back to generic channels,
   // but never promote a generic stream into a variant channel.
   protected streamMatcherConfig = {
-    minConfidence: 0.80,
+    minConfidence: 0.8,
     requireVariantMatch: true,
     allowVariantSubset: true,
     qualityBonus: 0.05,
@@ -162,22 +161,12 @@ class BroadcastCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
-      const channels = await ctx.db.orm.public.Channel.where((c) =>
-        c.slug.like("bein%").not(),
-      ).all();
+      const channels = await ctx.db.orm.public.Channel.all();
       let stored = 0;
       let totalStreams = 0;
       let skipped = 0;
-      const beinStreams = [];
       for (const country of this.countries) {
-        const allstreams = await this.collectStreams(country);
-        const streams = allstreams.filter(
-          (a) => !a.slug.toLowerCase().includes("bein"),
-        );
-        const bein = allstreams.filter((a) =>
-          a.slug.toLowerCase().includes("bein"),
-        );
-        beinStreams.push(...bein);
+        const streams = await this.collectStreams(country);
         totalStreams += streams.length;
         const valid = await this.verifyStreams(streams);
         skipped += streams.length - valid.length;
@@ -205,14 +194,6 @@ class BroadcastCollector extends BaseCollector {
           }
         }
       }
-      const matcher = new BeinMatcher(
-        beinStreams.map((a) => ({
-          name: a.name,
-          url: a.url,
-          type: a.countryName == "United States" ? "USA" : "MENA",
-        })),
-      );
-      await matcher.collect(ctx);
 
       return {
         fetched: totalStreams,

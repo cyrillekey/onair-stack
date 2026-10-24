@@ -10,7 +10,6 @@ import IPTVCollector from "./iptv.collector.js";
 import type { DefaultModelRow } from "@prisma/orm-postgres/orm-client";
 import type { Contract } from "@/prisma/contract.js";
 import FamelackCollecter from "./famelack.collector.js";
-import BeinMatcher, { type BeinStream } from "@/matchers/bein.matcher.js";
 import sources from "./sources/iptv.sources.json" with { type: "json" };
 
 class StreamsCollector extends BaseCollector {
@@ -21,7 +20,7 @@ class StreamsCollector extends BaseCollector {
   // channel (e.g. "Sports 1" -> "Sports"), but never promote a generic stream
   // into a variant channel.
   protected streamMatcherConfig = {
-    minConfidence: 0.80,
+    minConfidence: 0.8,
     requireVariantMatch: true,
     allowVariantSubset: true,
     qualityBonus: 0.05,
@@ -37,10 +36,8 @@ class StreamsCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<null>, "job" | "durationMs">> {
     try {
-      const allChannels = await ctx.db.orm.public.Channel.where((c) =>
-        c.slug.like("bein%").not(),
-      ).all();
-      const beinChannels: BeinStream[] = [];
+      const allChannels = await ctx.db.orm.public.Channel.all();
+
       for (const task of this.ipTSources) {
         for (let index = 0; index < task.sources.length; index++) {
           logger.info(`Starting ingestion for ${task.sources[index]}`);
@@ -52,37 +49,7 @@ class StreamsCollector extends BaseCollector {
             url,
             task.sources[index],
           ).collect(ctx);
-          const allStreams = collecter.streams ?? [];
-          const streams = allStreams.filter(
-            (a) =>
-              !(
-                a.name?.toLowerCase().includes("bein") ||
-                a.tvgId?.toLowerCase().includes("bein") ||
-                a.tvgGroupTitle?.toLowerCase().includes("bein")
-              ),
-          );
-          const bein: BeinStream[] = allStreams
-            .filter(
-              (a) =>
-                a.name?.toLowerCase().includes("bein") ||
-                a.tvgId?.toLowerCase().includes("bein") ||
-                a.tvgGroupTitle?.toLowerCase().includes("bein"),
-            )
-            .map((a) => {
-              const type =
-                a?.name?.toLowerCase().includes("us") ||
-                a?.tvgId?.toLowerCase().includes("us") ||
-                a?.tvgGroupTitle?.toLowerCase().includes("us")
-                  ? "USA"
-                  : "MENA";
-              return {
-                name: a.name ?? "",
-                url: a.streamLink ?? "",
-                type,
-              };
-            });
-
-          beinChannels.push(...bein);
+          const streams = collecter.streams ?? [];
 
           logger.info(`Found ${streams.length} streams to ingest`);
           if (streams.length > 0) {
@@ -113,20 +80,10 @@ class StreamsCollector extends BaseCollector {
       // collect from famelack
       for (const country of countries) {
         const famelack = await new FamelackCollecter(country).collect(ctx);
-        const allstreams = (famelack.streams ?? []).filter(
+        const streams = (famelack.streams ?? []).filter(
           (a) => (a.streams?.length ?? 0) > 0,
         );
-        const streams = allstreams.filter(
-          (a) => !a.name.toLowerCase().includes("bein"),
-        );
-        const beinStreams: BeinStream[] = allstreams
-          .filter((a) => a.name.toLowerCase().includes("bein"))
-          .map((a) => ({
-            name: a.name,
-            url: a.streams?.find((a) => a.url)?.url ?? "",
-            type: "USA",
-          }));
-        beinChannels.push(...beinStreams);
+
         logger.info(`Found ${streams.length} famelack streams to ingest`);
         if (streams.length > 0) {
           logger.info({ streams: streams.length }, "streams collected");
@@ -156,7 +113,6 @@ class StreamsCollector extends BaseCollector {
           }
         }
       }
-      await new BeinMatcher(beinChannels).collect(ctx);
       return {
         fetched: 0,
         stored: 0,

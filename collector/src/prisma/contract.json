@@ -708,7 +708,15 @@
                   "id"
                 ]
               },
-              "uniques": []
+              "uniques": [
+                {
+                  "columns": [
+                    "channelId",
+                    "date",
+                    "startTime"
+                  ]
+                }
+              ]
             },
             "stream": {
               "columns": {
@@ -850,7 +858,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "364685ed49fccdadfbe9685eafba0bbae6c073a025a2649e7cd4c6661eb81e14"
+    "storageHash": "b5492de6df75b38bfb812f9a11896e66e52d0fd729a18ddb15aad83a1915a7d7"
   },
   "capabilities": {
     "postgres": {
