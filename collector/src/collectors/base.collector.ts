@@ -163,7 +163,7 @@ export abstract class BaseCollector<T = unknown> {
     if (numa.length != numb.length) return 0;
 
     if (numa.toLocaleString() != numb.toLocaleString()) return 0;
-
+    // TODO: handle channels ending in TV even when mistaken spelling in name i.e AMCTV and AMC TV should be the same
     return similarity(
       a.replace(/ TV/i, "").toLowerCase(),
       b.replace(/ TV/i, "").toLowerCase(),
