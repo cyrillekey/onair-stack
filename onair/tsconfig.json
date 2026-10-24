@@ -1,21 +1,8 @@
 {
+  "extends": "fastify-tsconfig",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "rootDir": ".",
     "outDir": "dist",
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "noEmitOnError": true,
-    "resolveJsonModule": true,
-    "types": ["node"],        
+    "sourceMap": true
   },
-  "include": ["src/**/*.ts", "prisma.config.ts"],
-  "exclude": ["dist", "node_modules"]
+  "include": ["src/**/*.ts"]
 }
