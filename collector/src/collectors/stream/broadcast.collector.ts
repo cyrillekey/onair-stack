@@ -52,7 +52,7 @@ class BroadcastCollector extends BaseCollector {
   // Broadcast channels: let variant streams fall back to generic channels,
   // but never promote a generic stream into a variant channel.
   protected streamMatcherConfig = {
-    minConfidence: 0.8,
+    minConfidence: 0.85,
     requireVariantMatch: true,
     allowVariantSubset: true,
     qualityBonus: 0.05,

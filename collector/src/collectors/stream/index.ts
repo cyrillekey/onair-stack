@@ -20,7 +20,7 @@ class StreamsCollector extends BaseCollector {
   // channel (e.g. "Sports 1" -> "Sports"), but never promote a generic stream
   // into a variant channel.
   protected streamMatcherConfig = {
-    minConfidence: 0.8,
+    minConfidence: 0.85,
     requireVariantMatch: true,
     allowVariantSubset: true,
     qualityBonus: 0.05,
