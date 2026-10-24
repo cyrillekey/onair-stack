@@ -74,6 +74,7 @@ class EpgScheduler extends BaseCollector<Channel> {
                   endTime: this.buildTemporalDate(a.endTime),
                   name: a.title,
                   description: a?.description,
+                  poster: schedule.logo,
                 })),
                 {
                   onConflict: "skip",
