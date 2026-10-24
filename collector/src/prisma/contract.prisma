@@ -17,17 +17,24 @@ model Channel {
 }
 
 model Stream {
-  id         String   @id @default(sql`gen_random_uuid()`)
-  name       String
-  resolution String?
-  slug       String   @unique
-  url        String
-  language   String
-  youtubeId  String?
-  channel    Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  channelId  String
-  createdat  DateTime @default(now())
-  updatedat  DateTime @default(now())
+  id                String   @id @default(sql`gen_random_uuid()`)
+  name              String
+  resolution        String?
+  slug              String   @unique
+  url               String
+  language          String
+  youtubeId         String?
+  /// Consecutive failed health passes. Reset to 0 on a successful check.
+  failureCount      Int      @default(0)
+  /// First failure of the current streak; null while healthy. Operational
+  /// marker for how long the stream has been unreachable.
+  unreachableAt     DateTime?
+  /// Most recent verification error, for ops/debugging.
+  lastFailureReason String?
+  channel           Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channelId         String
+  createdat         DateTime @default(now())
+  updatedat         DateTime @default(now())
 
   @@map("stream")
 }
@@ -45,6 +52,7 @@ model Schedule {
   createdat   DateTime @default(now())
   updatedat   DateTime @default(now())
 
+  @@unique([channelId, date, startTime])
   @@map("schedule")
 }
 

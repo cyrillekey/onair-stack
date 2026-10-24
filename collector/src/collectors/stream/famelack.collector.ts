@@ -8,6 +8,7 @@ import {
 import { fetchJson } from "@/utils/http.js";
 import { z } from "zod";
 import { verifyM3U8 } from "@/utils/url.js";
+import { isProfane } from "@/utils/media.filter.js";
 
 export const SourcesSchema = z.object({
   streams: z.array(z.string()).optional(),
@@ -53,7 +54,10 @@ class FamelackCollecter extends BaseCollector {
   private async initMedia() {
     try {
       const media = await fetchJson<FamelackMedia[]>(this.buildLink());
-      return media.filter((a) => !a.isGeoBlocked).filter((a)=>a.languages.includes("eng"));
+      return media
+        .filter((a) => !a.isGeoBlocked)
+        .filter((a) => a.languages.includes("eng"))
+        .filter((a) => !isProfane(a.name));
     } catch (error) {
       logger.error({ error }, "failed to fetch streams");
       reportError(error, {

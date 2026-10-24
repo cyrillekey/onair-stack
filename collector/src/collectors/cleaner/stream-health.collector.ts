@@ -1,11 +1,15 @@
 import { config } from "@/config/index.js";
-import { isVerifiableM3U8Url, verifyM3U8, type VerifyResult } from "@/utils/url.js";
-import { reportError, reportMessage } from "@/utils/sentry.js";
+import {
+  isVerifiableM3U8Url,
+  verifyM3U8,
+  type VerifyResult,
+} from "@/utils/url.js";
 import {
   BaseCollector,
   type CollectorContext,
   type CollectResult,
 } from "../base.collector.js";
+import { ensureConfirmationJob } from "@/queues/stream-health.queue.js";
 
 interface SavedStream {
   id: string;
@@ -131,7 +135,9 @@ class StreamHealthCollector extends BaseCollector<string> {
   async collect(
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<string>, "job" | "durationMs">> {
-    const saved = (await ctx.db.orm.public.Stream.all()) as SavedStream[];
+    const saved = (await ctx.db.orm.public.Stream.where((a) =>
+      a.failureCount.eq(0),
+    ).all()) as SavedStream[];
     if (saved.length === 0) {
       ctx.log.info("no saved streams to check");
       return { fetched: 0, stored: 0, skipped: 0, streams: [] };
@@ -196,7 +202,7 @@ class StreamHealthCollector extends BaseCollector<string> {
               deepCheck: deepCheckContext(result.verification),
               verification: verificationContext(result.verification),
             },
-            "discarded stream",
+            "mark stream as broken",
           );
           broken.push({
             id: result.row.id,
@@ -221,95 +227,23 @@ class StreamHealthCollector extends BaseCollector<string> {
       }
     }
 
-    const checked = healthy + broken.length + transient.length;
-    const deleteRatio = checked > 0 ? broken.length / checked : 0;
-    if (checked >= 10 && deleteRatio > config.STREAM_HEALTH_MAX_DELETE_RATIO) {
-      ctx.log.error(
-        {
-          checked,
-          broken: broken.length,
-          deleteRatio,
-          maxRatio: config.STREAM_HEALTH_MAX_DELETE_RATIO,
-        },
-        "safety trip: too many streams look broken, deleting nothing",
-      );
-      reportMessage(
-        `safety trip: ${broken.length}/${checked} streams failed verification, deleting nothing`,
-        "error",
-        {
-          job: this.name,
-          checked,
-          broken: broken.length,
-          deleteRatio,
-          maxRatio: config.STREAM_HEALTH_MAX_DELETE_RATIO,
-        },
-      );
-      return {
-        fetched: saved.length,
-        stored: 0,
-        skipped: skippedYoutube + transient.length,
-        error: `safety trip: ${broken.length}/${checked} streams failed verification, deleting nothing`,
-        streams: [],
-      };
-    }
-
     let deleted = 0;
     if (broken.length > 0) {
-      const deleteChunks = this.chunk(broken, batchSize);
-      for (const deleteChunk of deleteChunks) {
-        const outcomes = await Promise.all(
-          deleteChunk.map(async (item) => {
-            try {
-              const removed = await ctx.db.orm.public.Stream.where({
-                id: item.id,
-              }).delete();
-              return removed !== null;
-            } catch (err) {
-              ctx.log.error(
-                { err, id: item.id, url: item.url },
-                "failed to delete broken stream",
-              );
-              reportError(err, {
-                job: this.name,
-                message: "failed to delete broken stream",
-                id: item.id,
-                url: item.url,
-              });
-              return false;
-            }
-          }),
-        );
-        deleted += outcomes.filter(Boolean).length;
-      }
-    }
-
-    let refreshed = 0;
-    if (resolutionUpdates.length > 0) {
-      const updateChunks = this.chunk(resolutionUpdates, batchSize);
-      for (const updateChunk of updateChunks) {
-        const outcomes = await Promise.all(
-          updateChunk.map(async (item) => {
-            try {
-              const updated = await ctx.db.orm.public.Stream.where({
-                id: item.id,
-              }).update({ resolution: item.resolution });
-              return updated !== null;
-            } catch (err) {
-              ctx.log.error(
-                { err, id: item.id },
-                "failed to refresh stream resolution",
-              );
-              reportError(err, {
-                job: this.name,
-                message: "failed to refresh stream resolution",
-                id: item.id,
-              });
-              return false;
-            }
-          }),
-        );
-        refreshed += outcomes.filter(Boolean).length;
-      }
+      // MARK FIRST PASS THEN SEND TO WORKER
+      await Promise.all(
+        broken.map((b) =>
+          ctx.db.orm.public.Stream.where((a) => a.id.eq(b.id))
+            .update({
+              unreachableAt: this.buildTemporalDate(new Date()),
+              failureCount: 1,
+              lastFailureReason: b.reason,
+            })
+            .then(async () => {
+              await ensureConfirmationJob(b.id, 1);
+              deleted += 1;
+            }),
+        ),
+      );
     }
 
     ctx.log.info(
@@ -319,7 +253,7 @@ class StreamHealthCollector extends BaseCollector<string> {
         deleted,
         keptTransient: transient.length,
         skippedYoutube,
-        refreshedResolution: refreshed,
+        refreshedResolution: 0,
         deepCheckRequested: config.STREAM_HEALTH_DEEP_CHECK,
       },
       "stream health check finished",

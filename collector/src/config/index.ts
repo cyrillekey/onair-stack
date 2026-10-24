@@ -22,7 +22,26 @@ const envSchema = z.object({
     .string()
     .default("false")
     .transform((v) => v.toLowerCase() === "true"),
-  STREAM_HEALTH_MAX_DELETE_RATIO: z.coerce.number().min(0).max(1).default(0.5),
+  STREAM_HEALTH_DELETE_AFTER_FAILURES: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .default(3),
+  /** Delay before a BullMQ worker re-checks a stream that just failed. */
+  STREAM_HEALTH_RETRY_DELAY_MS: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10 * 60 * 1000),
+  /** How many confirmation jobs the BullMQ worker processes concurrently. */
+  STREAM_HEALTH_WORKER_CONCURRENCY: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(10),
+  /** Redis connection used by BullMQ for delayed stream-health checks. */
+  REDIS_URL: z.string().min(1).default("redis://127.0.0.1:6379"),
   SENTRY_DSN: z.string().optional().default(""),
   SENTRY_ENVIRONMENT: z.string().optional().default(""),
   SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).default(0.1),

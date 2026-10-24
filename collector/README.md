@@ -23,8 +23,7 @@ src/
     schedule/
       usa.schedule.ts      # online-television.com daily programme list
       uk.schedule.ts       # freely.co.uk TV guide API
-      uk.sports.scheduler.ts# XMLTV EPG (zappscore)
-      bein.schedule.ts     # beIN Opta channel/event API
+      uk.sports.scheduler.ts# XMLTV EPG (zappscore)      
       source/uk.sports.channels.json
   matchers/
     bein.matcher.ts        # stricter (0.99) matcher for beIN channels

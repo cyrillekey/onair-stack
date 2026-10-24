@@ -55,7 +55,7 @@ export function reportError(err: unknown, ctx: ErrorContext = {}): string {
   });
 }
 
-/** Capture a non-Error signal (safety trips, invalid cron, failed results). */
+/** Capture a non-Error signal (invalid cron, failed job result). */
 export function reportMessage(
   message: string,
   level: Sentry.SeverityLevel = "error",

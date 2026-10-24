@@ -9,6 +9,7 @@ import {
 } from "@/matching/stream.matcher.js";
 import { createHash } from "node:crypto";
 import similarity from "similarity";
+import { classifyTvChannel } from "@/utils/channel.classifier.js";
 
 export interface CollectResult<T = unknown> {
   job: string;
@@ -164,5 +165,8 @@ export abstract class BaseCollector<T = unknown> {
     if (numa.toLocaleString() != numb.toLocaleString()) return 0;
 
     return similarity(a.toLowerCase(), b.toLowerCase());
+  }
+  protected classifyChannel(name: string) {
+    return classifyTvChannel(name);
   }
 }

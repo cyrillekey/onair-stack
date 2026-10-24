@@ -1,235 +1,182 @@
-import { XMLParser, XMLValidator } from "fast-xml-parser";
+import { gunzipSync } from "node:zlib";
+import { XMLParser } from "fast-xml-parser";
+import { cleanDescription, isProfane } from "./media.filter.js";
+import { stripQualityTags } from "./urlparser.js";
 
-export interface EpgProgramme {
+export interface ScheduleItem {
+  startTime: Date;
+  endTime: Date;
+  title: string;
+  /** Omitted when the source description is empty or contains profanity. */
+  description?: string;
+}
+
+export interface Channel {
   name: string;
-  start: Date;
-  stop: Date;
-  date?: string;
-  desc?: string;
-  channel?: string;
+  id: string;
+  logo: string | null;
+  schedule: ScheduleItem[];
 }
 
-export interface EpgParserOptions {
-  /** Maximum XML response size in characters. Default: 20 MB. */
-  maxSize?: number;
+/* ------------------------------------------------------------------ */
+/* Raw XMLTV shape (what fast-xml-parser produces with our options)    */
+/* ------------------------------------------------------------------ */
 
-  /** Reject programmes without a valid XMLTV start/stop timestamp. */
-  validateTimestamps?: boolean;
+/** Element text: a plain string, or an object when the tag has attributes (e.g. lang="en"). */
+type RawText = string | { "#text"?: string; "@_lang"?: string };
+
+interface RawIcon {
+  "@_src"?: string;
 }
 
-const parser = new XMLParser({
+interface RawChannel {
+  "@_id"?: string;
+  "display-name"?: RawText[];
+  icon?: RawIcon[];
+}
+
+interface RawProgramme {
+  "@_start"?: string;
+  "@_stop"?: string;
+  "@_channel"?: string;
+  title?: RawText[];
+  desc?: RawText[];
+}
+
+interface RawTv {
+  channel?: RawChannel[];
+  programme?: RawProgramme[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Helpers                                                             */
+/* ------------------------------------------------------------------ */
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+/** Text content of a node, whether it is a plain string or { "#text", "@_lang" }. */
+function textOf(node: RawText | undefined): string {
+  if (node === undefined) return "";
+  if (typeof node === "string") return node.trim();
+  return (node["#text"] ?? "").trim();
+}
+
+/** Strips a trailing two-letter country suffix: "5.uk" -> "5", "4Seven.uk" -> "4Seven". */
+export function stripCountrySuffix(name: string): string {
+  const stripped = name.replace(/\.[a-z]{2}$/i, "").trim();
+  return stripped || name; // never return an empty name
+}
+
+/**
+ * Parses an XMLTV timestamp: "YYYYMMDDHHMMSS [+-]HHMM".
+ * Seconds / time zone are optional; missing zone is treated as UTC.
+ */
+export function parseXmltvDate(value: string | undefined): Date | null {
+  if (value === undefined) return null;
+  const m = /^(\d{4})(\d{2})(\d{2})(\d{2})?(\d{2})?(\d{2})?\s*(Z|[+-]\d{4})?$/.exec(value.trim());
+  if (!m) return null;
+
+  const [, y, mo, d, h = "00", mi = "00", s = "00", tz = "+0000"] = m;
+  const offset = tz === "Z" ? "+00:00" : `${tz.slice(0, 3)}:${tz.slice(3)}`;
+  const date = new Date(`${y}-${mo}-${d}T${h}:${mi}:${s}${offset}`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/* ------------------------------------------------------------------ */
+/* Parser                                                              */
+/* ------------------------------------------------------------------ */
+
+const ARRAY_TAGS = new Set(["channel", "programme", "display-name", "icon", "title", "desc"]);
+
+const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: "@_",
   textNodeName: "#text",
-  cdataPropName: "#cdata",
+  parseTagValue: false, // keep ids like "123" as strings
   parseAttributeValue: false,
-  parseTagValue: false,
   trimValues: true,
-  processEntities: true,
-
-  // Always return an array for programme elements.
-  isArray: (name) => name === "programme",
+  isArray: (tagName) => ARRAY_TAGS.has(tagName),
 });
 
-const TIMESTAMP_REGEX = /^\d{14}(?:\s*[+-]\d{4})?$/;
-
-function getText(value: unknown): string | undefined {
-  if (value == null) return undefined;
-
-  if (typeof value === "string" || typeof value === "number") {
-    const text = String(value).trim();
-    return text || undefined;
+/**
+ * Runs the XML parser and narrows its `any` result to the <tv> root.
+ * `unknown` forces us to validate before use instead of trusting the input.
+ */
+function parseTv(xml: string): RawTv {
+  const doc: unknown = xmlParser.parse(xml);
+  if (!isRecord(doc) || !isRecord(doc.tv)) {
+    throw new Error("Invalid XMLTV: missing <tv> root element");
   }
-
-  if (Array.isArray(value)) {
-    for (const item of value) {
-      const text = getText(item);
-      if (text) return text;
-    }
-    return undefined;
-  }
-
-  if (typeof value === "object") {
-    const obj = value as Record<string, unknown>;
-
-    // Prefer normal text, falling back to CDATA.
-    return getText(obj["#text"]) ?? getText(obj["#cdata"]);
-  }
-
-  return undefined;
+  return doc.tv;
 }
 
-function getFirst(value: unknown): unknown {
-  return Array.isArray(value) ? value[0] : value;
-}
+/** Parse an XMLTV document (string) into channels with their schedules. */
+export function parseEpg(xml: string): Channel[] {
+  const tv = parseTv(xml);
+  const channels = new Map<string, Channel>();
 
-function getField(
-  programme: Record<string, unknown>,
-  field: string,
-): string | undefined {
-  return getText(getFirst(programme[field]));
-}
-
-function getAttribute(
-  programme: Record<string, unknown>,
-  name: string,
-): string | undefined {
-  const value = programme[`@_${name}`];
-  return typeof value === "string" && value.trim() ? value.trim() : undefined;
-}
-
-export function parseEpg(
-  xml: string,
-  options: EpgParserOptions = {},
-): EpgProgramme[] {
-  const { maxSize = 20 * 1024 * 1024, validateTimestamps = true } = options;
-
-  if (!xml.trim()) {
-    throw new Error("EPG XML response is empty");
-  }
-
-  if (xml.length > maxSize) {
-    throw new Error(`EPG XML exceeds maximum size of ${maxSize} characters`);
-  }
-
-  // This parser does not need DTDs or custom entity declarations.
-  // Reject them rather than accepting unnecessary XML features.
-  if (/<!DOCTYPE\b|<!ENTITY\b/i.test(xml)) {
-    throw new Error("EPG XML must not contain DTD/entity declarations");
-  }
-
-  const validation = XMLValidator.validate(xml);
-
-  if (validation !== true) {
-    throw new Error(
-      `Invalid EPG XML: ${validation.err.msg} ` +
-        `(line ${validation.err.line}, column ${validation.err.col})`,
-    );
-  }
-
-  let document: Record<string, unknown>;
-
-  try {
-    document = parser.parse(xml) as Record<string, unknown>;
-  } catch (error) {
-    throw new Error("Failed to parse EPG XML", { cause: error });
-  }
-
-  const tv = document.tv;
-
-  if (!tv || typeof tv !== "object" || Array.isArray(tv)) {
-    throw new Error("Invalid EPG document: expected <tv> root element");
-  }
-
-  const programmes = (tv as Record<string, unknown>).programme;
-
-  if (programmes == null) return [];
-
-  if (!Array.isArray(programmes)) {
-    throw new Error("Invalid EPG document: programme collection is invalid");
-  }
-
-  const result: EpgProgramme[] = [];
-
-  for (const entry of programmes) {
-    if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
-      continue;
-    }
-
-    const programme = entry as Record<string, unknown>;
-
-    const name = getField(programme, "title");
-    const start = getAttribute(programme, "start");
-    const stop = getAttribute(programme, "stop");
-
-    // Ignore incomplete programme records.
-    if (!name || !start || !stop) continue;
-
-    if (
-      validateTimestamps &&
-      (!TIMESTAMP_REGEX.test(start) || !TIMESTAMP_REGEX.test(stop))
-    ) {
-      continue;
-    }
-
-    const item: EpgProgramme = {
+  for (const ch of tv.channel ?? []) {
+    const id = ch["@_id"];
+    if (!id) continue;
+    const name = stripQualityTags(stripCountrySuffix(textOf(ch["display-name"]?.[0]) || id));
+    if (isProfane(name)) continue;
+    channels.set(id, {
+      id,
       name,
-      start: parseXmltvDate(start),
-      stop: parseXmltvDate(stop),
-    };
-
-    const channel = getAttribute(programme, "channel");
-    const date = getField(programme, "date");
-    const desc = getField(programme, "desc");
-
-    if (channel) item.channel = channel;
-    if (date) item.date = date;
-    if (desc) item.desc = desc;
-
-    result.push(item);
+      logo: ch.icon?.[0]?.["@_src"] ?? null,
+      schedule: [],
+    });
   }
 
+  for (const p of tv.programme ?? []) {
+    const channelId = p["@_channel"];
+    const channel = channelId === undefined ? undefined : channels.get(channelId);
+    if (!channel) continue;
+
+    const startTime = parseXmltvDate(p["@_start"]);
+    const endTime = parseXmltvDate(p["@_stop"]);
+    if (!startTime || !endTime) continue;
+
+    const title = textOf(p.title?.[0]);
+    if (isProfane(title)) continue;
+
+    channel.schedule.push({
+      startTime,
+      endTime,
+      title,
+      description: cleanDescription(textOf(p.desc?.[0])),
+    });
+  }
+
+  const result = [...channels.values()];
+  for (const ch of result) {
+    ch.schedule.sort((a, b) => a.startTime.getTime() - b.startTime.getTime());
+  }
   return result;
 }
 
-export function parseXmltvDate(value: string): Date {
-  const match = value.match(
-    /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})(?:\s*([+-])(\d{2})(\d{2}))?$/,
-  );
+/** True when the buffer starts with the gzip magic bytes (1f 8b). */
+export function isGzip(buf: Uint8Array): boolean {
+  return buf[0] === 0x1f && buf[1] === 0x8b;
+}
 
-  if (!match) {
-    throw new Error(`Invalid XMLTV timestamp: ${value}`);
+/** Parse raw feed bytes: plain XMLTV or gzip-compressed XMLTV (detected automatically). */
+export function parseEpgBuffer(buf: Buffer): Channel[] {
+  const xml = (isGzip(buf) ? gunzipSync(buf) : buf).toString("utf8");
+  return parseEpg(xml);
+}
+
+/**
+ * Download and parse an EPG feed. Works with both `.xml` and `.xml.gz` URLs;
+ * gzip is detected from the content, not the URL, so servers that compress
+ * on the fly (Content-Encoding: gzip, already decoded by fetch) work too.
+ */
+export async function fetchEpg(url: string): Promise<Channel[]> {
+  const res = await fetch(url, { headers: { "User-Agent": "epg-parser/1.0" } });
+  if (!res.ok) {
+    throw new Error(`Failed to fetch EPG (${String(res.status)} ${res.statusText})`);
   }
-
-  const [
-    ,
-    year,
-    month,
-    day,
-    hour,
-    minute,
-    second,
-    sign,
-    offsetHour,
-    offsetMinute,
-  ] = match;
-
-  const timestamp = Date.UTC(
-    Number(year),
-    Number(month) - 1,
-    Number(day),
-    Number(hour),
-    Number(minute),
-    Number(second),
-  );
-
-  // Validate the calendar date and time.
-  const date = new Date(timestamp);
-
-  if (
-    date.getUTCFullYear() !== Number(year) ||
-    date.getUTCMonth() !== Number(month) - 1 ||
-    date.getUTCDate() !== Number(day) ||
-    date.getUTCHours() !== Number(hour) ||
-    date.getUTCMinutes() !== Number(minute) ||
-    date.getUTCSeconds() !== Number(second)
-  ) {
-    throw new Error(`Invalid XMLTV date/time: ${value}`);
-  }
-
-  if (sign) {
-    const hours = Number(offsetHour);
-    const minutes = Number(offsetMinute);
-
-    if (hours > 14 || minutes > 59 || (hours === 14 && minutes !== 0)) {
-      throw new Error(`Invalid XMLTV timezone offset: ${value}`);
-    }
-
-    const offsetMs = (hours * 60 + minutes) * 60_000 * (sign === "+" ? 1 : -1);
-
-    return new Date(timestamp - offsetMs);
-  }
-
-  // XMLTV timestamps without an offset are interpreted as UTC here.
-  return date;
+  return parseEpgBuffer(Buffer.from(await res.arrayBuffer()));
 }

@@ -8,6 +8,11 @@ import { config } from "@/config/index.js";
 import { getDb } from "@/db/client.js";
 import { buildRegistry } from "@/jobs/registry.js";
 import { filterCollectors, runOnce, startScheduler } from "@/jobs/scheduler.js";
+import { closeStreamHealthQueue } from "@/queues/stream-health.queue.js";
+import {
+  startStreamHealthWorker,
+  stopStreamHealthWorker,
+} from "@/queues/stream-health.worker.js";
 import { logger } from "@/utils/logger.js";
 import { flushSentry, reportError } from "@/utils/sentry.js";
 import { v2 as cloudinary } from "cloudinary";
@@ -22,8 +27,9 @@ if (config.CLOUDINARY_CLOUD_NAME) {
   });
 }
 // Worker entrypoint. Intentionally exposes NO HTTP port:
-// collection is triggered by in-process cron (or a single
-// RUN_ONCE pass when deployed as a Kubernetes CronJob).x
+// collection is triggered by in-process cron (or a single RUN_ONCE pass when
+// deployed as a Kubernetes CronJob). Stream-health confirmations run on an
+// in-process BullMQ worker backed by Redis.
 async function main(): Promise<void> {
   const all = buildRegistry();
   const collectors = filterCollectors(all);
@@ -41,17 +47,24 @@ async function main(): Promise<void> {
       { jobs: collectors.map((c) => c.name) },
       "RUN_ONCE=true, running jobs once",
     );
-    const outcomes = await runOnce(collectors, buildCtx);
-    const failed = outcomes.filter((o) => o.error);
-    if (failed.length > 0) {
-      logger.error({ failed }, "RUN_ONCE finished with job failures");
-      // Non-zero exit so Kubernetes CronJobs / alerting notice the failure.
-      process.exitCode = 1;
+    try {
+      const outcomes = await runOnce(collectors, buildCtx);
+      const failed = outcomes.filter((o) => o.error);
+      if (failed.length > 0) {
+        logger.error({ failed }, "RUN_ONCE finished with job failures");
+        // Non-zero exit so Kubernetes CronJobs / alerting notice the failure.
+        process.exitCode = 1;
+      }
+    } finally {
+      // A RUN_ONCE pass may have enqueued delayed confirmations for a
+      // long-running worker to pick up. Close the producer connection cleanly.
+      await closeStreamHealthQueue();
     }
     return;
   }
 
   startScheduler(collectors, buildCtx, logger);
+  startStreamHealthWorker();
   logger.info(
     { jobs: collectors.map((c) => `${c.name} (${c.schedule})`) },
     "collector running",
@@ -59,7 +72,20 @@ async function main(): Promise<void> {
 
   const shutdown = (signal: string) => {
     logger.info({ signal }, "shutting down");
-    void flushSentry().finally(() => process.exit(0));
+    void (async () => {
+      try {
+        await stopStreamHealthWorker();
+      } catch (err) {
+        logger.error({ err }, "failed to stop stream health worker");
+      }
+      try {
+        await closeStreamHealthQueue();
+      } catch (err) {
+        logger.error({ err }, "failed to close stream health queue");
+      }
+      await flushSentry();
+      process.exit(0);
+    })();
   };
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));

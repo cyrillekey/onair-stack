@@ -34,7 +34,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'87778bd7b49c76bfea0cc34dde13d7b65ae3579e421fcb28f36fc99f90314775'>;
+  StorageHashBase<'ff3b5521f01f9c98f020cf8cc848953996317a6f4043134edfdccaea75a17c0c'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -293,11 +293,14 @@ export type FieldOutputTypes = {
     readonly Stream: {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly failureCount: CodecTypes['pg/int4@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly language: CodecTypes['pg/text@1']['output'];
+      readonly lastFailureReason: CodecTypes['pg/text@1']['output'] | null;
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly resolution: CodecTypes['pg/text@1']['output'] | null;
       readonly slug: CodecTypes['pg/text@1']['output'];
+      readonly unreachableAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
       readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
@@ -350,11 +353,14 @@ export type FieldInputTypes = {
     readonly Stream: {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly failureCount: CodecTypes['pg/int4@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly language: CodecTypes['pg/text@1']['input'];
+      readonly lastFailureReason: CodecTypes['pg/text@1']['input'] | null;
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly resolution: CodecTypes['pg/text@1']['input'] | null;
       readonly slug: CodecTypes['pg/text@1']['input'];
+      readonly unreachableAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
       readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
@@ -407,11 +413,14 @@ export type StorageColumnTypes = {
     readonly stream: {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly failureCount: CodecTypes['pg/int4@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly language: CodecTypes['pg/text@1']['output'];
+      readonly lastFailureReason: CodecTypes['pg/text@1']['output'] | null;
       readonly name: CodecTypes['pg/text@1']['output'];
       readonly resolution: CodecTypes['pg/text@1']['output'] | null;
       readonly slug: CodecTypes['pg/text@1']['output'];
+      readonly unreachableAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
       readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
@@ -464,11 +473,14 @@ export type StorageColumnInputTypes = {
     readonly stream: {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly failureCount: CodecTypes['pg/int4@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly language: CodecTypes['pg/text@1']['input'];
+      readonly lastFailureReason: CodecTypes['pg/text@1']['input'] | null;
       readonly name: CodecTypes['pg/text@1']['input'];
       readonly resolution: CodecTypes['pg/text@1']['input'] | null;
       readonly slug: CodecTypes['pg/text@1']['input'];
+      readonly unreachableAt: CodecTypes['pg/timestamptz-temporal@1']['input'] | null;
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
       readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
@@ -526,11 +538,14 @@ export namespace Models {
   export type public_Stream = {
     channelId: CodecTypes['pg/text@1']['output'];
     createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    failureCount: CodecTypes['pg/int4@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     language: CodecTypes['pg/text@1']['output'];
+    lastFailureReason: CodecTypes['pg/text@1']['output'] | null;
     name: CodecTypes['pg/text@1']['output'];
     resolution: CodecTypes['pg/text@1']['output'] | null;
     slug: CodecTypes['pg/text@1']['output'];
+    unreachableAt: CodecTypes['pg/timestamptz-temporal@1']['output'] | null;
     updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     url: CodecTypes['pg/text@1']['output'];
     youtubeId: CodecTypes['pg/text@1']['output'] | null;
@@ -730,6 +745,15 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
                 };
+                readonly failureCount: {
+                  readonly nativeType: 'int4';
+                  readonly codecId: 'pg/int4@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/int4@1', 0>;
+                  };
+                };
                 readonly id: {
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
@@ -743,6 +767,11 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                };
+                readonly lastFailureReason: {
+                  readonly nativeType: 'text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
                 };
                 readonly name: {
                   readonly nativeType: 'text';
@@ -758,6 +787,11 @@ type ContractBase = Omit<
                   readonly nativeType: 'text';
                   readonly codecId: 'pg/text@1';
                   readonly nullable: false;
+                };
+                readonly unreachableAt: {
+                  readonly nativeType: 'timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: true;
                 };
                 readonly updatedat: {
                   readonly nativeType: 'timestamptz';
@@ -1036,12 +1070,20 @@ type ContractBase = Omit<
                   readonly codecId: 'pg/timestamptz-temporal@1';
                 };
               };
+              readonly failureCount: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
+              };
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly language: {
                 readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly lastFailureReason: {
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly name: {
@@ -1055,6 +1097,13 @@ type ContractBase = Omit<
               readonly slug: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly unreachableAt: {
+                readonly nullable: true;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
               };
               readonly updatedat: {
                 readonly nullable: false;
@@ -1092,11 +1141,14 @@ type ContractBase = Omit<
               readonly fields: {
                 readonly channelId: { readonly column: 'channelId' };
                 readonly createdat: { readonly column: 'createdat' };
+                readonly failureCount: { readonly column: 'failureCount' };
                 readonly id: { readonly column: 'id' };
                 readonly language: { readonly column: 'language' };
+                readonly lastFailureReason: { readonly column: 'lastFailureReason' };
                 readonly name: { readonly column: 'name' };
                 readonly resolution: { readonly column: 'resolution' };
                 readonly slug: { readonly column: 'slug' };
+                readonly unreachableAt: { readonly column: 'unreachableAt' };
                 readonly updatedat: { readonly column: 'updatedat' };
                 readonly url: { readonly column: 'url' };
                 readonly youtubeId: { readonly column: 'youtubeId' };
