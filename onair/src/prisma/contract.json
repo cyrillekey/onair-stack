@@ -388,6 +388,13 @@
                   "kind": "scalar"
                 }
               },
+              "failureCount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/int4@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -397,6 +404,13 @@
               },
               "language": {
                 "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "lastFailureReason": {
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -420,6 +434,13 @@
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "unreachableAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
                   "kind": "scalar"
                 }
               },
@@ -471,11 +492,17 @@
                 "createdat": {
                   "column": "createdat"
                 },
+                "failureCount": {
+                  "column": "failureCount"
+                },
                 "id": {
                   "column": "id"
                 },
                 "language": {
                   "column": "language"
+                },
+                "lastFailureReason": {
+                  "column": "lastFailureReason"
                 },
                 "name": {
                   "column": "name"
@@ -485,6 +512,9 @@
                 },
                 "slug": {
                   "column": "slug"
+                },
+                "unreachableAt": {
+                  "column": "unreachableAt"
                 },
                 "updatedat": {
                   "column": "updatedat"
@@ -723,6 +753,15 @@
                   "nativeType": "timestamptz",
                   "nullable": false
                 },
+                "failureCount": {
+                  "codecId": "pg/int4@1",
+                  "default": {
+                    "kind": "literal",
+                    "value": 0
+                  },
+                  "nativeType": "int4",
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/text@1",
                   "default": {
@@ -736,6 +775,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "lastFailureReason": {
+                  "codecId": "pg/text@1",
+                  "nativeType": "text",
+                  "nullable": true
                 },
                 "name": {
                   "codecId": "pg/text@1",
@@ -751,6 +795,11 @@
                   "codecId": "pg/text@1",
                   "nativeType": "text",
                   "nullable": false
+                },
+                "unreachableAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "nativeType": "timestamptz",
+                  "nullable": true
                 },
                 "updatedat": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -844,7 +893,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "87778bd7b49c76bfea0cc34dde13d7b65ae3579e421fcb28f36fc99f90314775"
+    "storageHash": "ff3b5521f01f9c98f020cf8cc848953996317a6f4043134edfdccaea75a17c0c"
   },
   "capabilities": {
     "postgres": {

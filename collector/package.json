@@ -25,6 +25,7 @@
     "@prisma/orm-postgres": "^8.0.0-rc.18",
     "@sentry/node": "^11.6.0",
     "@sentry/profiling-node": "^11.6.0",
+    "bullmq": "^6.4.1",
     "cheerio": "^1.0.0",
     "cloudinary": "^2.11.0",
     "cronitor": "^2.6.1",
