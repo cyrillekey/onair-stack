@@ -180,9 +180,14 @@ class BroadcastCollector extends BaseCollector {
         const valid = await this.verifyStreams(streams);
         skipped += streams.length - valid.length;
         for (const channel of channels) {
-          const matching = valid.filter((a) =>
-            this.fuzzyMatch(a.name, channel.name),
-          );
+          const matching = valid.filter((a) => {
+            if (a?.countryName && channel.country) {
+              if (a.countryName.toLowerCase() != channel.country.toLowerCase()) {
+                return false;
+              }
+            }
+            return this.fuzzyMatch(a.name, channel.name);
+          });
           if (matching.length > 0) {
             await ctx.db.orm.public.Stream.createAll(
               matching

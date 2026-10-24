@@ -56,9 +56,16 @@ class StreamsCollector extends BaseCollector {
             logger.info({ streams: streams.length }, "streams collected");
 
             for (const channel of allChannels) {
-              const matching = streams.filter((a) =>
-                this.fuzzyMatch(a.name, channel.name),
-              );
+              const matching = streams.filter((a) => {
+                if (a?.countryName && channel.country) {
+                  if (
+                    a.countryName.toLowerCase() != channel.country.toLowerCase()
+                  ) {
+                    return false;
+                  }
+                }
+                return this.fuzzyMatch(a.name, channel.name);
+              });
               // for all matching upsert streams
               await Promise.all(
                 matching.map((a) =>
@@ -90,9 +97,14 @@ class StreamsCollector extends BaseCollector {
           logger.info({ streams: streams.length }, "streams collected");
           // for all matching upsert streams
           for (const channel of allChannels) {
-            const channelStreams = (famelack.streams ?? []).filter((a) =>
-              this.fuzzyMatch(a.name, channel.name),
-            );
+            const channelStreams = (famelack.streams ?? []).filter((a) => {
+              if (a?.country && channel.country) {
+                if (a.country.toLowerCase() != channel.country.toLowerCase()) {
+                  return false;
+                }
+              }
+              return this.fuzzyMatch(a.name, channel.name);
+            });
             const promises = [];
             for (const stream of channelStreams) {
               // pass
