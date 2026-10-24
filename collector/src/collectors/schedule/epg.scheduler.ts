@@ -16,7 +16,51 @@ class EpgScheduler extends BaseCollector<Channel> {
       name: "Canada",
     },
     {
+      id: "australia.xml",
+      name: "Australia",
+    },
+    {
       id: "unitedstates11.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates10.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates9.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates8.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates7.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates6.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates5.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates4.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates3.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates2.xml",
+      name: "United States",
+    },
+    {
+      id: "unitedstates1.xml",
       name: "United States",
     },
   ];

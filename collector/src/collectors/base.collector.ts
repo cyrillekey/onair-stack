@@ -38,7 +38,7 @@ export abstract class BaseCollector<T = unknown> {
 
   /** Configuration for stream-to-channel matching. Override in subclasses for custom behavior. */
   protected streamMatcherConfig: Partial<StreamMatcherConfig> = {
-    minConfidence: 0.75,
+    minConfidence: 0.85,
     requireVariantMatch: true,
     allowVariantSubset: true,
   };
@@ -90,7 +90,7 @@ export abstract class BaseCollector<T = unknown> {
     // return this.streamMatcher.match(a, b).matched;
     return (
       this.rudimentaryCompare(a, b) >=
-      (this.streamMatcherConfig.minConfidence ?? 0.75)
+      (this.streamMatcherConfig.minConfidence ?? 0.85)
     );
   }
 
