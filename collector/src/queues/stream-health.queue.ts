@@ -64,7 +64,7 @@ export async function ensureConfirmationJob(
       removeOnComplete: true,
       // Keep recent failures for debugging; the cron sweep removes and
       // re-adds a failed job when the row is still in the same state.
-      removeOnFail: { age: 24 * 60 * 60, count: 1_000 },
+      removeOnFail: { age: 24 * 60 * 60, count: 10 },
     },
   );
   return true;
