@@ -55,7 +55,7 @@ class EpgScheduler extends BaseCollector<Channel> {
                 country: country.name,
                 name: schedule.name,
                 slug: this.slugify(schedule.name),
-                category: "GENERAL",
+                category: this.classifyChannel(schedule.name),
                 poster: schedule.logo,
               },
               update: {
