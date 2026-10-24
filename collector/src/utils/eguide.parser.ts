@@ -1,6 +1,7 @@
 import { gunzipSync } from "node:zlib";
 import { XMLParser } from "fast-xml-parser";
 import { cleanDescription, isProfane } from "./media.filter.js";
+import { stripQualityTags } from "./urlparser.js";
 
 export interface ScheduleItem {
   startTime: Date;
@@ -119,7 +120,7 @@ export function parseEpg(xml: string): Channel[] {
   for (const ch of tv.channel ?? []) {
     const id = ch["@_id"];
     if (!id) continue;
-    const name = stripCountrySuffix(textOf(ch["display-name"]?.[0]) || id);
+    const name = stripQualityTags(stripCountrySuffix(textOf(ch["display-name"]?.[0]) || id));
     if (isProfane(name)) continue;
     channels.set(id, {
       id,

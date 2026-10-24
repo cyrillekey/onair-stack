@@ -20,7 +20,7 @@ class EpgScheduler extends BaseCollector<Channel> {
       name: "United States",
     },
   ];
-  schedule = "30 01 * * *";
+  schedule = "50 00 * * *";
   name = "EPG Scheduler";
   private buildUrl(country: string) {
     return `${this.epgUrl}${country}.gz`;
@@ -42,10 +42,13 @@ class EpgScheduler extends BaseCollector<Channel> {
       let stored = 0;
       let fetched = 0;
       let skipped = 0;
+
       for (const country of this.countries) {
+        ctx.log.info({ country: country.name }, "collect started");
         try {
           const url = this.buildUrl(country.id);
           const schedules = await this.fetchScheduleEpg(url);
+          ctx.log.info({ schedules: schedules.length }, "channels fetched");
           for (const schedule of schedules) {
             const channel = await ctx.db.orm.public.Channel.upsert({
               create: {
@@ -88,6 +91,7 @@ class EpgScheduler extends BaseCollector<Channel> {
           Sentry.captureException(error);
           skipped += 1;
         }
+        ctx.log.info({ country: country.name }, "collect finished");
       }
       return {
         fetched: fetched,
