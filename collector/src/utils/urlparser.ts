@@ -5,6 +5,8 @@
  * lines, and a stream URL) into a list of structured Stream objects.
  */
 
+import { isProfane } from "./media.filter.js";
+
 export interface Stream {
   /**
    * Display name of the channel, with any "[Geo-blocked]" marker and quality
@@ -159,16 +161,19 @@ export function parseM3UContent(content: string): Stream[] {
         pendingName.replace(GEO_BLOCKED_PATTERN, "").trim(),
       );
 
-      streams.push({
-        name,
-        isGeoBlocked,
-        streamLink: line,
-        tvgId: pendingTvgId,
-        httpReferrer: pendingReferrer,
-        logo: pendingLogo,
-        tvgLogo: pendingLogo,
-        tvgGroupTitle: pendingGroupTitle,
-      });
+      // Drop entries whose display name or group title contains profanity.
+      if (!isProfane(name) && !isProfane(pendingGroupTitle)) {
+        streams.push({
+          name,
+          isGeoBlocked,
+          streamLink: line,
+          tvgId: pendingTvgId,
+          httpReferrer: pendingReferrer,
+          logo: pendingLogo,
+          tvgLogo: pendingLogo,
+          tvgGroupTitle: pendingGroupTitle,
+        });
+      }
 
       // Reset so a stray URL line can't be reused for a later entry.
       pendingName = undefined;

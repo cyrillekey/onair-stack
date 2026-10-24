@@ -5,6 +5,7 @@ import {
   type CollectResult,
 } from "../base.collector.js";
 import { verifyM3U8 } from "@/utils/url.js";
+import { isProfane } from "@/utils/media.filter.js";
 import Sentry from "@/utils/instrument.js";
 
 export interface BroadcastMedia {
@@ -82,7 +83,15 @@ class BroadcastCollector extends BaseCollector {
         hasMore = data.hasMore;
         offset = data.nextOffset;
       }
-      return streams.map((a) => ({ ...a, name: this.formatName(a.name) }));
+      return streams
+        .filter((a) => !isProfane(a.name))
+        .map((a) => ({
+          ...a,
+          name: this.formatName(a.name),
+          playbackOptions: (a.playbackOptions ?? []).filter(
+            (b) => !isProfane(b.title),
+          ),
+        }));
     } catch (error) {
       Sentry.captureException(error);
       logger.error({ error }, "Failed to fetch streams");

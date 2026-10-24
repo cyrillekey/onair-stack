@@ -1,5 +1,5 @@
 /**
- * Returns true if the given name contains profanity, false otherwise.
+ * Returns true if the given text contains profanity, false otherwise.
  *
  * Two lists are used to limit false positives on real names:
  *  - SUBSTRING_WORDS: unambiguous terms, flagged even when embedded
@@ -77,8 +77,9 @@ function normalize(input: string): string {
     .replace(/[0134577@$!]/g, (c) => LEET[c] ?? c);
 }
 
-export function isProfane(name: string): boolean {
-  const normalized = normalize(name);
+export function isProfane(text: string | null | undefined): boolean {
+  if (!text) return false;
+  const normalized = normalize(text);
 
   // 1. Standalone words (split on anything that isn't a letter).
   const tokens = normalized.split(/[^a-z]+/).filter(Boolean);
@@ -93,6 +94,19 @@ export function isProfane(name: string): boolean {
   return SUBSTRING_WORDS.some((w) => collapsed.includes(w));
 }
 
+/**
+ * Trims a description and returns it only when it is non-empty and free of
+ * profanity. Profane descriptions are dropped (undefined) without discarding
+ * the resource they describe.
+ */
+export function cleanDescription(
+  description: string | null | undefined,
+): string | undefined {
+  const trimmed = description?.trim();
+  if (!trimmed || isProfane(trimmed)) return undefined;
+  return trimmed;
+}
+
 // Examples
 // isProfane("John Smith");   // false
 // isProfane("Dick Van Dyke"); // true  (standalone word; see note below)
@@ -103,3 +117,5 @@ export function isProfane(name: string): boolean {
 // isProfane("Nigeria");      // false (not confused with a slur)
 // isProfane("Spicer");       // false (slur only flagged as a standalone word)
 // isProfane("n1gg3r");       // true
+// cleanDescription("  A family drama.  "); // "A family drama."
+// cleanDescription("Fuck this");           // undefined

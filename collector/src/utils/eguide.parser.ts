@@ -1,12 +1,13 @@
 import { gunzipSync } from "node:zlib";
 import { XMLParser } from "fast-xml-parser";
-
+import { cleanDescription, isProfane } from "./media.filter.js";
 
 export interface ScheduleItem {
   startTime: Date;
   endTime: Date;
   title: string;
-  description: string;
+  /** Omitted when the source description is empty or contains profanity. */
+  description?: string;
 }
 
 export interface Channel {
@@ -118,9 +119,11 @@ export function parseEpg(xml: string): Channel[] {
   for (const ch of tv.channel ?? []) {
     const id = ch["@_id"];
     if (!id) continue;
+    const name = stripCountrySuffix(textOf(ch["display-name"]?.[0]) || id);
+    if (isProfane(name)) continue;
     channels.set(id, {
       id,
-      name: stripCountrySuffix(textOf(ch["display-name"]?.[0]) || id),
+      name,
       logo: ch.icon?.[0]?.["@_src"] ?? null,
       schedule: [],
     });
@@ -135,11 +138,14 @@ export function parseEpg(xml: string): Channel[] {
     const endTime = parseXmltvDate(p["@_stop"]);
     if (!startTime || !endTime) continue;
 
+    const title = textOf(p.title?.[0]);
+    if (isProfane(title)) continue;
+
     channel.schedule.push({
       startTime,
       endTime,
-      title: textOf(p.title?.[0]),
-      description: textOf(p.desc?.[0]),
+      title,
+      description: cleanDescription(textOf(p.desc?.[0])),
     });
   }
 
