@@ -8,7 +8,6 @@ import {
   type StreamMatcherConfig,
 } from "@/matching/stream.matcher.js";
 import { createHash } from "node:crypto";
-import similarity from "similarity";
 import { classifyTvChannel } from "@/utils/channel.classifier.js";
 
 export interface CollectResult<T = unknown> {
@@ -39,8 +38,6 @@ export abstract class BaseCollector<T = unknown> {
   /** Configuration for stream-to-channel matching. Override in subclasses for custom behavior. */
   protected streamMatcherConfig: Partial<StreamMatcherConfig> = {
     minConfidence: 0.85,
-    requireVariantMatch: true,
-    allowVariantSubset: true,
   };
 
   private _matcher: StreamMatcher | null = null;
@@ -89,8 +86,7 @@ export abstract class BaseCollector<T = unknown> {
   protected fuzzyMatch(a: string, b: string): boolean {
     // return this.streamMatcher.match(a, b).matched;
     return (
-      this.rudimentaryCompare(a, b) >=
-      (this.streamMatcherConfig.minConfidence ?? 0.85)
+      this.streamMatcher.match(a, b).matched
     );
   }
 
@@ -154,21 +150,7 @@ export abstract class BaseCollector<T = unknown> {
   protected formatName(name: string) {
     return name?.split("(")?.at(0)?.trim() ?? name;
   }
-  private rudimentaryCompare(a: string, b: string): number {
-    const tokensa = a.split(" ");
-    const tokensb = b.split(" ");
-    const numa = tokensa?.filter((a) => !Number.isNaN(Number.parseInt(a)));
-    const numb = tokensb?.filter((a) => !Number.isNaN(Number.parseInt(a)));
-
-    if (numa.length != numb.length) return 0;
-
-    if (numa.toLocaleString() != numb.toLocaleString()) return 0;
-    // TODO: handle channels ending in TV even when mistaken spelling in name i.e AMCTV and AMC TV should be the same
-    return similarity(
-      a.replace(/ TV/i, "").replace(/ network/i,"").toLowerCase(),
-      b.replace(/ TV/i, "").replace(/ network/i,"").toLowerCase(),
-    );
-  }
+  
   protected classifyChannel(name: string) {
     return classifyTvChannel(name);
   }
