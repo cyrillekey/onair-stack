@@ -1,24 +1,27 @@
 // use prisma-8
 model User {
-  id          String     @id @default(sql`gen_random_uuid()`)
-  name String?
-  configuration Configuration
-  createdat   DateTime   @default(now())
-  updatedat   DateTime   @default(now())
+  id            String         @id @default(sql`gen_random_uuid()`)
+  name          String?
+  country       String?
+  configuration Configuration?
+  createdat     DateTime       @default(now())
+  updatedat     DateTime       @default(now())
+
   @@map("users")
 }
 
 model Configuration {
-  id          String     @id @default(sql`gen_random_uuid()`)
-  countries   String []
-  categories  Category []
-  user User @relation(fields: [userId],references: [id],onDelete:Cascade)
-  userId String
-  createdat   DateTime   @default(now())
-  updatedat   DateTime   @default(now())
+  id         String     @id @default(sql`gen_random_uuid()`)
+  countries  String[]
+  categories Category[]
+  timezone   String
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String     @unique
+  createdat  DateTime   @default(now())
+  updatedat  DateTime   @default(now())
+
   @@map("configuration")
 }
-
 
 model Channel {
   id          String     @id @default(sql`gen_random_uuid()`)
@@ -38,7 +41,7 @@ model Channel {
 }
 
 model Stream {
-  id                String   @id @default(sql`gen_random_uuid()`)
+  id                String    @id @default(sql`gen_random_uuid()`)
   name              String
   resolution        String?
   slug              String    @unique

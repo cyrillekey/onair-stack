@@ -1,24 +1,30 @@
-import { FastifyPluginAsync } from "fastify";
+import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
-const configurationRoutes: FastifyPluginAsync = async (
-  fastify,
-  opts,
-): Promise<void> => {
-  fastify.get("", async function (request, reply) {
-    return { root: true };
-  });
+const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+  SerializerSchemaOptions: {
+    deserialize: [
+      {
+        pattern: { type: "string"; format: "date-time" };
+        output: Date | undefined | null;
+      },
+    ];
+  };
+}> = async (fastify, opts): Promise<void> => {
   fastify.post(
-    "",
+    "/",
     {
       schema: {
+        consumes: ['application/json'],
         response: {
-          type: "object",
-          properties: {
-            success: {
-              type: "bool",
-            },
-            manifest: {
-              type: "string",
+          200: {
+            type: "object",
+            properties: {
+              success: {
+                type: "boolean",
+              },
+              manifest: {
+                type: "string",
+              },
             },
           },
         },
@@ -50,7 +56,6 @@ const configurationRoutes: FastifyPluginAsync = async (
     },
     async function (request, reply) {},
   );
-  fastify.put(":id", {}, async (req, res) => {});
+  fastify.put("/:id", {}, async (req, res) => {});
 };
-
 export default configurationRoutes;

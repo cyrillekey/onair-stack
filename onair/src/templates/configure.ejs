@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title><%= title %> - Stremio addon configuration</title>
+    <link rel="shortcut icon" href="<%= logo %>" type="image/png">
+    <style>
+      :root {
+        color-scheme: dark;
+        --purple: #8a5aab;
+        --purple-bright: #b183d6;
+        --card: rgba(13, 13, 18, 0.9);
+        --border: rgba(255, 255, 255, 0.13);
+        --muted: rgba(255, 255, 255, 0.68);
+        --text: #f7f5fb;
+        --danger: #ffa3a3;
+        --ok: #8fe3b0;
+      }
+
+      * { box-sizing: border-box; }
+
+      html, body { margin: 0; min-height: 100%; }
+
+      body {
+        display: grid;
+        place-items: start center;
+        padding: 40px 16px;
+        color: var(--text);
+        font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+        line-height: 1.45;
+        background-color: #0b0b10;
+        background-image:
+          linear-gradient(180deg, rgba(8, 8, 12, 0.55), rgba(8, 8, 12, 0.92)),
+          url(<%- background %>);
+        background-position: center;
+        background-size: cover;
+        background-attachment: fixed;
+      }
+
+      .card {
+        width: min(780px, 100%);
+        padding: clamp(22px, 5vw, 44px);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        background: var(--card);
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(14px);
+      }
+
+      /* Header */
+      .hero { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+      .logo {
+        width: 72px; height: 72px; flex: 0 0 auto; object-fit: contain;
+        border-radius: 18px; background: rgba(255, 255, 255, 0.06);
+      }
+      h1 { margin: 0; font-size: clamp(1.9rem, 5vw, 2.5rem); line-height: 1.08; }
+      .tagline { margin: 8px 0 0; max-width: 52ch; color: var(--muted); font-size: 0.97rem; }
+
+      /* Sections */
+      .section { margin: 0 0 30px; padding: 0; border: 0; min-width: 0; }
+      .section > legend, .section-title {
+        display: block; width: 100%; margin: 0 0 4px; padding: 0;
+        font-size: 1.05rem; font-weight: 700;
+      }
+      .hint { margin: 0 0 12px; color: var(--muted); font-size: 0.86rem; max-width: 62ch; }
+
+      .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      .field label { display: block; margin-bottom: 6px; font-size: 0.9rem; font-weight: 600; }
+
+      input[type="text"], input[type="search"] {
+        width: 100%; padding: 12px 14px;
+        color: var(--text); font: inherit; font-size: 0.95rem;
+        border: 1px solid var(--border); border-radius: 11px; outline: none;
+        background: rgba(255, 255, 255, 0.06);
+        transition: border-color 120ms ease, background 120ms ease;
+      }
+      input[type="text"]:focus, input[type="search"]:focus {
+        border-color: var(--purple-bright); background: rgba(255, 255, 255, 0.09);
+      }
+      input[aria-invalid="true"] { border-color: var(--danger); }
+      ::placeholder { color: rgba(255, 255, 255, 0.4); }
+
+      .error { margin: 8px 0 0; color: var(--danger); font-size: 0.82rem; }
+      .error[hidden], .empty[hidden] { display: none; }
+
+      /* Group toolbar */
+      .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 10px; }
+      .toolbar .filter { flex: 1 1 200px; max-width: 280px; padding: 9px 12px; font-size: 0.88rem; }
+      .count { margin-right: auto; color: var(--muted); font-size: 0.84rem; font-variant-numeric: tabular-nums; }
+      .link {
+        padding: 4px 2px; color: var(--purple-bright); font: inherit; font-size: 0.86rem; font-weight: 600;
+        background: none; border: 0; border-radius: 6px; cursor: pointer;
+      }
+      .link:hover { text-decoration: underline; }
+
+      /* Checkbox chips */
+      .choices {
+        display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 8px;
+        max-height: 320px; overflow-y: auto; padding: 2px 4px 2px 2px;
+        scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+      }
+      .choice {
+        display: flex; align-items: center; gap: 9px; padding: 10px 12px;
+        font-size: 0.9rem; border: 1px solid var(--border); border-radius: 10px;
+        background: rgba(255, 255, 255, 0.04); cursor: pointer; user-select: none;
+        transition: border-color 120ms ease, background 120ms ease;
+      }
+      .choice[hidden] { display: none; }
+      .choice:hover { border-color: rgba(177, 131, 214, 0.55); background: rgba(138, 90, 171, 0.12); }
+      .choice:has(input:checked) { border-color: rgba(177, 131, 214, 0.75); background: rgba(138, 90, 171, 0.22); }
+      .choice:has(input:focus-visible) { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
+      .choice input { width: 16px; height: 16px; margin: 0; flex: 0 0 auto; accent-color: var(--purple-bright); }
+      .empty { margin: 6px 0 0; color: var(--muted); font-size: 0.86rem; }
+
+      /* Install panel */
+      .install {
+        padding: 20px; border: 1px solid var(--border); border-radius: 16px;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .url-row { display: flex; gap: 8px; margin: 12px 0 16px; }
+      .url-row input { font-size: 0.8rem; color: var(--muted); }
+      .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; }
+
+      .btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        padding: 12px 20px; color: #fff; font: inherit; font-weight: 700; font-size: 0.93rem;
+        text-decoration: none; white-space: nowrap;
+        border: 1px solid transparent; border-radius: 11px; cursor: pointer;
+        transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
+      }
+      .btn:active { transform: translateY(1px); }
+      .btn-primary { background: var(--purple); box-shadow: 0 10px 28px rgba(138, 90, 171, 0.35); }
+      .btn-primary:hover { background: var(--purple-bright); }
+      .btn-ghost { background: rgba(255, 255, 255, 0.06); border-color: var(--border); }
+      .btn-ghost:hover { background: rgba(255, 255, 255, 0.12); }
+      .btn[aria-disabled="true"] { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+      .btn:focus-visible, .link:focus-visible { outline: 2px solid var(--purple-bright); outline-offset: 2px; }
+
+      .status { min-height: 1.3em; margin: 14px 0 0; font-size: 0.86rem; color: var(--muted); }
+      .status.ok { color: var(--ok); }
+      .status.bad { color: var(--danger); }
+
+      .note { margin: 18px 0 0; color: var(--muted); font-size: 0.8rem; max-width: 66ch; }
+      .note code { color: var(--text); }
+
+      @media (max-width: 540px) {
+        body { padding: 20px 12px; }
+        .hero { align-items: flex-start; }
+        .logo { width: 56px; height: 56px; border-radius: 14px; }
+        .actions .btn { flex: 1 1 100%; }
+        .url-row { flex-direction: column; }
+        .url-row .btn { width: 100%; }
+        .toolbar .filter { max-width: none; flex-basis: 100%; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <header class="hero">
+        <img class="logo" src="<%= logo %>" alt="<%= title %> logo">
+        <div>
+          <h1><%= title %></h1>
+          <p class="tagline">
+            Build your live-TV lineup. Choose the countries and categories you
+            want to browse, then install the addon in Stremio.
+          </p>
+        </div>
+      </header>
+
+      <form id="config-form" novalidate>
+        <fieldset class="section">
+          <legend>About you</legend>
+          <p class="hint">Your timezone lines the TV guide up with your local time.</p>
+          <div class="fields">
+            <div class="field">
+              <label for="username">Username</label>
+              <input
+                type="text" id="username" name="username" maxlength="80"
+                autocomplete="nickname" placeholder="How should we call you?"
+                aria-describedby="username-error" required
+              >
+              <p class="error" id="username-error" hidden>Enter a username.</p>
+            </div>
+
+            <div class="field">
+              <label for="timezone">Timezone</label>
+              <input
+                type="text" id="timezone" name="timezone" list="timezone-options"
+                autocomplete="off" spellcheck="false" placeholder="Europe/London"
+                aria-describedby="timezone-error" required
+              >
+              <datalist id="timezone-options">
+                <% for (const timezone of timezones) { %>
+                <option value="<%= timezone %>"></option>
+                <% } %>
+              </datalist>
+              <p class="error" id="timezone-error" hidden>Pick a timezone from the list, for example Europe/London.</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <% for (const group of groups) { %>
+        <fieldset class="section group" data-group="<%= group.name %>">
+          <legend><%= group.legend %></legend>
+          <p class="hint"><%= group.hint %></p>
+
+          <div class="toolbar">
+            <input
+              type="search" class="filter" placeholder="Filter list"
+              aria-label="Filter <%= group.legend %>" autocomplete="off"
+              <% if (group.options.length <= 8) { %>hidden<% } %>
+            >
+            <span class="count" aria-live="polite"></span>
+            <button type="button" class="link" data-action="all">Select all</button>
+            <button type="button" class="link" data-action="none">Clear</button>
+          </div>
+
+          <div class="choices">
+            <% for (const option of group.options) { %>
+            <label class="choice">
+              <input type="checkbox" name="<%= group.name %>" value="<%= option.value %>" checked>
+              <span><%= option.label %></span>
+            </label>
+            <% } %>
+          </div>
+          <p class="empty" hidden>Nothing matches that filter.</p>
+          <p class="error" hidden>Select at least one option.</p>
+        </fieldset>
+        <% } %>
+
+        <section class="install" aria-labelledby="install-title">
+          <h2 class="section-title" id="install-title">Install</h2>
+          <p class="hint" style="margin:0">Your choices are saved in the addon link below.</p>
+
+          <div class="url-row">
+            <input
+              type="text" id="manifest-url" readonly spellcheck="false"
+              placeholder="Complete the form to create your addon link"
+              aria-label="Generated addon manifest URL"
+            >
+            <button type="button" class="btn btn-ghost" id="copy-btn">Copy link</button>
+          </div>
+
+          <div class="actions">
+            <button type="submit" class="btn btn-primary" id="install-btn">Install in Stremio</button>
+            <a class="btn btn-ghost" id="web-btn" href="#" target="_blank" rel="noopener" aria-disabled="true">Install in Stremio Web</a>
+          </div>
+
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </section>
+
+        <p class="note">
+          Keep the link if you want to reinstall later, and install again after
+          changing your selection. The desktop button uses <code>stremio://</code>
+          to open the app; if nothing happens, copy the link and paste it into
+          Stremio's addon search box. Your last choices are remembered in this browser.
+        </p>
+      </form>
+    </main>
+
+    <script>
+      (function () {
+        var STORAGE_KEY = "stremio-addon-config-v1";
+        var form = document.getElementById("config-form");
+        var usernameInput = document.getElementById("username");
+        var timezoneInput = document.getElementById("timezone");
+        var manifestInput = document.getElementById("manifest-url");
+        var copyBtn = document.getElementById("copy-btn");
+        var installBtn = document.getElementById("install-btn");
+        var webBtn = document.getElementById("web-btn");
+        var statusEl = document.getElementById("status");
+        var groups = Array.prototype.slice.call(form.querySelectorAll("[data-group]"));
+
+        var validTimezones = {};
+        var tzOptions = document.querySelectorAll("#timezone-options option");
+        Array.prototype.forEach.call(tzOptions, function (o) { validTimezones[o.value] = true; });
+        var hasTimezoneList = tzOptions.length > 0;
+
+        var showFieldErrors = false;
+        var statusTimer;
+
+        function boxes(group) {
+          return Array.prototype.slice.call(group.querySelectorAll('input[type="checkbox"]'));
+        }
+
+        function selectedValues(group) {
+          return boxes(group).filter(function (b) { return b.checked; }).map(function (b) { return b.value; });
+        }
+
+        function setStatus(message, kind) {
+          clearTimeout(statusTimer);
+          statusEl.textContent = message || "";
+          statusEl.className = "status" + (kind ? " " + kind : "");
+          if (message && kind === "ok") {
+            statusTimer = setTimeout(function () { setStatus(""); }, 3500);
+          }
+        }
+
+        /* ---------- Persistence (best effort) ---------- */
+        function save() {
+          try {
+            var off = {};
+            groups.forEach(function (g) {
+              off[g.dataset.group] = boxes(g).filter(function (b) { return !b.checked; })
+                .map(function (b) { return b.value; });
+            });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+              username: usernameInput.value, timezone: timezoneInput.value, off: off
+            }));
+          } catch (_e) { /* storage unavailable */ }
+        }
+
+        function restore() {
+          try {
+            var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+            if (!saved) return;
+            if (saved.username) usernameInput.value = saved.username;
+            if (saved.timezone) timezoneInput.value = saved.timezone;
+            groups.forEach(function (g) {
+              var off = (saved.off && saved.off[g.dataset.group]) || [];
+              boxes(g).forEach(function (b) { b.checked = off.indexOf(b.value) === -1; });
+            });
+          } catch (_e) { /* ignore corrupt or missing data */ }
+        }
+
+        /* ---------- Validation ---------- */
+        function fieldError(input, message, isValid) {
+          var el = document.getElementById(input.id + "-error");
+          var show = showFieldErrors && !isValid;
+          el.hidden = !show;
+          if (show) el.textContent = message;
+          input.setAttribute("aria-invalid", show ? "true" : "false");
+        }
+
+        function validate() {
+          var name = usernameInput.value.trim();
+          var tz = timezoneInput.value.trim();
+          var nameOk = name.length > 0;
+          var tzOk = tz.length > 0 && (!hasTimezoneList || validTimezones[tz] === true);
+
+          fieldError(usernameInput, "Enter a username.", nameOk);
+          fieldError(timezoneInput, tz ? "Pick a timezone from the list, for example Europe/London." : "Enter your timezone.", tzOk);
+
+          var groupsOk = true;
+          groups.forEach(function (g) {
+            var ok = selectedValues(g).length > 0;
+            g.querySelector(".error").hidden = ok;
+            if (!ok) groupsOk = false;
+          });
+
+          return nameOk && tzOk && groupsOk;
+        }
+
+        /* ---------- Counts ---------- */
+        function updateCount(group) {
+          var all = boxes(group);
+          var on = all.filter(function (b) { return b.checked; }).length;
+          group.querySelector(".count").textContent = on + " of " + all.length + " selected";
+        }
+
+        /* ---------- Manifest URL ---------- */
+        function currentConfig() {
+          var config = {};
+          groups.forEach(function (g) { config[g.dataset.group] = selectedValues(g); });
+          config.timezone = timezoneInput.value.trim();
+          config.username = usernameInput.value.trim();
+          return config;
+        }
+
+        function refresh() {
+          groups.forEach(updateCount);
+          var ok = validate();
+          var url = "";
+
+          if (ok) {
+            url = window.location.protocol + "//" + window.location.host + "/" +
+              encodeURIComponent(JSON.stringify(currentConfig())) + "/manifest.json";
+          }
+
+          manifestInput.value = url;
+          webBtn.setAttribute("aria-disabled", ok ? "false" : "true");
+          webBtn.href = ok ? "https://web.stremio.com/#/addons?addon=" + encodeURIComponent(url) : "#";
+          save();
+          return url;
+        }
+
+        function focusFirstInvalid() {
+          var target =
+            (usernameInput.getAttribute("aria-invalid") === "true" && usernameInput) ||
+            (timezoneInput.getAttribute("aria-invalid") === "true" && timezoneInput);
+          if (!target) {
+            var bad = groups.filter(function (g) { return selectedValues(g).length === 0; })[0];
+            target = bad && bad.querySelector("input, button");
+          }
+          if (target) target.focus();
+        }
+
+        function requireValid() {
+          showFieldErrors = true;
+          var url = refresh();
+          if (!url) {
+            setStatus("Fix the highlighted fields to create your link.", "bad");
+            focusFirstInvalid();
+          }
+          return url;
+        }
+
+        /* ---------- Actions ---------- */
+        function install() {
+          var url = requireValid();
+          if (!url) return;
+          setStatus("Opening Stremio…", "ok");
+          window.location.href = url.replace(/^https?:[/][/]/, "stremio://");
+        }
+
+        function copy() {
+          var url = requireValid();
+          if (!url) return;
+          function done() { setStatus("Link copied.", "ok"); }
+          function fallback() {
+            manifestInput.focus();
+            manifestInput.select();
+            try {
+              if (document.execCommand("copy")) return done();
+            } catch (_e) { /* fall through */ }
+            setStatus("Press Ctrl+C (or Cmd+C) to copy the selected link.");
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(done, fallback);
+          } else {
+            fallback();
+          }
+        }
+
+        /* ---------- Wiring ---------- */
+        groups.forEach(function (group) {
+          var filter = group.querySelector(".filter");
+          var empty = group.querySelector(".empty");
+          var choices = Array.prototype.slice.call(group.querySelectorAll(".choice"));
+
+          function applyFilter() {
+            var q = filter.value.trim().toLowerCase();
+            var visible = 0;
+            choices.forEach(function (c) {
+              var match = !q || c.textContent.toLowerCase().indexOf(q) !== -1;
+              c.hidden = !match;
+              if (match) visible++;
+            });
+            empty.hidden = visible > 0;
+          }
+
+          filter.addEventListener("input", applyFilter);
+
+          group.addEventListener("click", function (event) {
+            var action = event.target && event.target.getAttribute("data-action");
+            if (!action) return;
+            // Only touch options that are currently visible under the filter.
+            choices.forEach(function (c) {
+              if (!c.hidden) c.querySelector("input").checked = action === "all";
+            });
+            refresh();
+          });
+        });
+
+        try {
+          restore();
+          if (!timezoneInput.value) {
+            timezoneInput.value = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
+          }
+        } catch (_error) {
+          // Older browsers: leave the field empty so the user can fill it in.
+        }
+
+        form.addEventListener("input", function () { refresh(); });
+        form.addEventListener("change", function () { refresh(); });
+        usernameInput.addEventListener("blur", function () { showFieldErrors = true; refresh(); });
+        timezoneInput.addEventListener("blur", function () { showFieldErrors = true; refresh(); });
+        form.addEventListener("submit", function (event) { event.preventDefault(); install(); });
+        copyBtn.addEventListener("click", copy);
+        webBtn.addEventListener("click", function (event) {
+          if (!requireValid()) event.preventDefault();
+        });
+
+        refresh();
+      })();
+    </script>
+  </body>
+</html>

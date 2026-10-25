@@ -29,6 +29,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+# tsc does not emit .ejs files; ship the templates alongside the compiled app.
+COPY --from=builder /app/src/templates ./dist/src/templates
 RUN npm prune --omit=dev && npm cache clean --force && touch /app/.env && chown -R node:node /app
 
 USER node

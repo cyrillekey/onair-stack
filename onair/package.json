@@ -8,28 +8,42 @@
   },
   "scripts": {
     "test": "npm run build:ts && tsc -p test/tsconfig.json && c8 node --test -r ts-node/register \"test/**/*.ts\"",
-    "start": "npm run build:ts && fastify start -l info dist/app.js",
+    "start": "npm run build && fastify start -l info dist/src/app.js",
+    "build": "npm run build:ts",
     "build:ts": "tsc",
     "watch:ts": "tsc -w",
     "dev": "npm run build:ts && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/src/app.js",
+    "emit": "prisma contract emit"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "fastify": "^5.0.0",
-    "fastify-plugin": "^5.0.0",
     "@fastify/autoload": "^6.0.0",
+    "@fastify/cors": "^11.3.1",
     "@fastify/sensible": "^6.0.0",
-    "fastify-cli": "^7.4.1"
+    "@fastify/swagger": "^9.9.2",
+    "@fastify/type-provider-json-schema-to-ts": "^5.0.1",
+    "@prisma/orm-postgres": "^8.0.0-rc.20",
+    "@scalar/fastify-api-reference": "^1.76.0",
+    "dayjs": "^1.11.23",
+    "dotenv": "^18.0.9",
+    "ejs": "^7.0.2",
+    "fastify": "^5.0.0",
+    "fastify-cli": "^7.4.1",
+    "fastify-plugin": "^5.0.0",
+    "stremio-addon-sdk": "https://github.com/Stremio/stremio-addon-sdk.git",
+    "temporal-polyfill": "^1.0.6"
   },
   "devDependencies": {
+    "@types/ejs": "^3.1.5",
     "@types/node": "^24.0.8",
     "c8": "^10.1.2",
-    "ts-node": "^10.4.0",
     "concurrently": "^9.0.0",
     "fastify-tsconfig": "^3.0.0",
+    "prisma": "^8.0.0-rc.27",
+    "ts-node": "^10.4.0",
     "typescript": "~5.9.2"
   }
 }
