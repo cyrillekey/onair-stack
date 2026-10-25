@@ -76,6 +76,7 @@ class StreamsCollector extends BaseCollector {
                     url: a.streamLink,
                     resolution: a.resolution,
                     language: a.countryName,
+                    logo: a.logo ?? a.tvgLogo,
                   }),
                 ),
               );
@@ -144,7 +145,9 @@ class StreamsCollector extends BaseCollector {
   }
   private async upsertRecord(
     ctx: CollectorContext,
-    record: Partial<DefaultModelRow<Contract, "Stream", never>>,
+    record: Partial<
+      DefaultModelRow<Contract, "Stream", never> & { logo?: string }
+    >,
   ) {
     try {
       const streamSlug = this.slugifyUrl(record.url!, record.channelId!);
@@ -163,6 +166,14 @@ class StreamsCollector extends BaseCollector {
         },
         conflictOn: { slug: streamSlug },
       });
+      if (record?.logo) {
+        await ctx.db.orm.public.Channel.where({
+          id: record.channelId,
+          poster: null,
+        }).update({
+          poster: record.logo,
+        });
+      }
     } catch (error) {
       logger.error({
         error,
