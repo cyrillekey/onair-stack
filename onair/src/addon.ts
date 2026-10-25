@@ -18,7 +18,7 @@ import Sentry from "./utils/instrument.js";
 // Docs: https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/api/responses/manifest.md
 const manifest: Manifest = {
   id: "community.onair",
-  version: "1.0.1-beta",
+  version: "1.0.2",
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleotieno7@gmail.com",

@@ -8,23 +8,19 @@
 import { isProfane } from "./media.filter.js";
 
 export interface Stream {
-  /**
-   * Display name of the channel, with any "[Geo-blocked]" marker and quality
-   * tags (HD, SD, 4K, ...) stripped out.
-   */
   name: string;
-  /** Whether the channel name indicated it is geo-blocked */
   isGeoBlocked: boolean;
-  /** The playable stream URL */
   streamLink: string;
-  /** tvg-id attribute from #EXTINF, if present */
   tvgId?: string;
   tvgLogo?: string;
   tvgGroupTitle?: string;
-  /** Any #EXTVLCOPT:http-referrer=... value associated with this entry, if present */
   httpReferrer?: string;
   logo?: string;
   resolution?: string;
+  /** Two-letter country code parsed from the tvg-id (e.g. "US" from "WillowSports.us@SD"), if present */
+  country?: string;
+  /** Full country name for `country` (e.g. "United States"), if it could be resolved */
+  countryName?: string;
 }
 
 const GEO_BLOCKED_PATTERN = /\s*\[geo-blocked\]\s*/i;
@@ -119,6 +115,11 @@ export async function parseM3U(url: string): Promise<Stream[]> {
  * Use this directly if you've already fetched/read the playlist content yourself;
  * otherwise use `parseM3U(url)` to fetch and parse in one step.
  */
+/**
+ * Parse raw M3U playlist text (already in memory) into a list of Stream entries.
+ * Use this directly if you've already fetched/read the playlist content yourself;
+ * otherwise use `parseM3U(url)` to fetch and parse in one step.
+ */
 export function parseM3UContent(content: string): Stream[] {
   const streams: Stream[] = [];
 
@@ -132,6 +133,7 @@ export function parseM3UContent(content: string): Stream[] {
   let pendingReferrer: string | undefined;
   let pendingLogo: string | undefined;
   let pendingGroupTitle: string | undefined;
+
   for (const line of lines) {
     if (line.startsWith("#EXTINF")) {
       // A new entry begins; reset pending state.
@@ -163,11 +165,15 @@ export function parseM3UContent(content: string): Stream[] {
 
       // Drop entries whose display name or group title contains profanity.
       if (!isProfane(name) && !isProfane(pendingGroupTitle)) {
+        const country = extractCountry(pendingTvgId);
+
         streams.push({
           name,
           isGeoBlocked,
           streamLink: line,
           tvgId: pendingTvgId,
+          country,
+          countryName: countryNameFromCode(country),
           httpReferrer: pendingReferrer,
           logo: pendingLogo,
           tvgLogo: pendingLogo,
@@ -185,4 +191,40 @@ export function parseM3UContent(content: string): Stream[] {
   }
 
   return streams;
+}
+
+/**
+ * Extract the country code from a tvg-id like "WillowSports.us@SD".
+ * The country is the 2-letter suffix after the last dot, before an optional
+ * "@Variant" part.
+ */
+const COUNTRY_FROM_TVG_ID_PATTERN = /\.([a-z]{2})(?:@[^@]*)?$/i;
+
+export function extractCountry(tvgId: string | undefined): string | undefined {
+  if (!tvgId) return undefined;
+  const match = tvgId.trim().match(COUNTRY_FROM_TVG_ID_PATTERN);
+  return match ? match[1].toUpperCase() : undefined;
+}
+
+const regionNames = new Intl.DisplayNames(["en"], {
+  type: "region",
+  fallback: "none", // undefined for unknown codes instead of echoing them back
+});
+
+/** Non-standard codes seen in playlists, mapped to their ISO 3166-1 alpha-2 equivalent. */
+const COUNTRY_CODE_ALIASES: Record<string, string> = {
+  UK: "GB",
+};
+
+export function countryNameFromCode(
+  code: string | undefined,
+): string | undefined {
+  if (!code) return undefined;
+  const upper = code.toUpperCase();
+  const normalized = COUNTRY_CODE_ALIASES[upper] ?? upper;
+  try {
+    return regionNames.of(normalized);
+  } catch {
+    return undefined; // malformed code
+  }
 }
