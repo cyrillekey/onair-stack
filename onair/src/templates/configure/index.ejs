@@ -52,7 +52,8 @@
               <div class="choices">
                 <% for (const option of group.options) { %>
                   <label class="choice">
-                    <input type="checkbox" name="<%= group.name %>" value="<%= option.value %>" checked>
+                    <input type="checkbox" name="<%= group.name %>" value="<%= option.value %>"
+                      <%=group.selected?.includes(option.value) ? "checked" : "" %>>
                     <span>
                       <%= option.label %>
                     </span>

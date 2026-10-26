@@ -182,15 +182,15 @@
     /* ---------- Actions ---------- */
     async function generateLink() {
       var url = requireValid();
-      console.log(url);
+
       if (!url) return;
       //
 
       setStatus("");
       const values = currentConfig();
       setStatus("Generating link...", "ok");
-      const response = await fetch("/configure", {
-        method: "POST",
+      const response = await fetch(id ? `/configure/${id}` : "/configure", {
+        method: id ? "PUT" : "POST",
         body: JSON.stringify(values),
         headers: {
           "Content-Type": "application/json",
@@ -264,10 +264,15 @@
       group.addEventListener("click", function (event) {
         var action = event.target && event.target.getAttribute("data-action");
         if (!action) return;
+
         // Only touch options that are currently visible under the filter.
         choices.forEach(function (c) {
-          if (!c.hidden) c.querySelector("input").checked = action === "all";
+          if (!c.hidden) {
+            c.querySelector('input[type="checkbox"]').checked = action === "all";
+          }
         });
+
+        refresh();
       });
     });
     function install() {

@@ -3,14 +3,15 @@ export type ConfigureOption = Readonly<{
   label: string;
 }>;
 
-export type ConfigureGroup = Readonly<{
+export type ConfigureGroup = {
   name: "countries" | "categories";
   label: string;
   eyebrow: string;
   hint: string;
   placeholder: string;
   options: readonly ConfigureOption[];
-}>;
+  selected?: string[];
+};
 
 /** Countries the collector currently produces channels for. */
 export const COUNTRIES: readonly ConfigureOption[] = [
@@ -40,7 +41,7 @@ export const GENRES: readonly ConfigureOption[] = [
   { value: "GENERAL", label: "General" },
 ];
 
-export const CONFIGURE_GROUPS: readonly ConfigureGroup[] = [
+export const CONFIGURE_GROUPS:  ConfigureGroup[] = [
   {
     name: "countries",
     label: "Countries",

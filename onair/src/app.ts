@@ -10,7 +10,6 @@ export interface AppOptions
 // Pass --options via CLI arguments in command to enable these options.
 const options: AppOptions = {
   routeParams: true,
-  maxDepth: 10,
   dirNameRoutePrefix: true,
 };
 

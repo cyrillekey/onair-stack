@@ -43,9 +43,20 @@ const updateConfigurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           .include("user")
           .first();
         if (!config) return reply.redirect("/configure");
+        const countryConfgureGroup = CONFIGURE_GROUPS.findIndex(
+          (group) => group.name === "countries",
+        );
+        const genreConfigureGroup = CONFIGURE_GROUPS.findIndex(
+          (group) => group.name === "categories",
+        );
+        const userGroupConfig = [...CONFIGURE_GROUPS];
+        userGroupConfig[countryConfgureGroup].selected =
+          config.countries as string[];
+        userGroupConfig[genreConfigureGroup].selected =
+          config.categories as string[];
         const template = fastify.ejs.compile("/configure/index", {
           pageTitle: "Update your line-up — Onair",
-          groups: CONFIGURE_GROUPS,
+          groups: userGroupConfig,
           countries: COUNTRIES,
           genres: GENRES,
           timezones: TIMEZONES,
