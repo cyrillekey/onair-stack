@@ -26,6 +26,7 @@
     var form = document.getElementById("config-form");
     var usernameInput = document.getElementById("username");
     var timezoneInput = document.getElementById("timezone");
+    var showOnHomeInput = document.getElementById("showOnHome");
     var manifestInput = document.getElementById("manifest-url");
     var copyBtn = document.getElementById("copy-btn");
     var installBtn = document.getElementById("install-btn");
@@ -136,6 +137,7 @@
       });
       config.timezone = timezoneInput.value.trim();
       config.username = usernameInput.value.trim();
+      config.showOnHome = showOnHomeInput.checked;
       return config;
     }
 

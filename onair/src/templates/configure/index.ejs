@@ -64,6 +64,19 @@
               <p class="error" hidden>Select at least one option.</p>
             </fieldset>
             <% } %>
+
+            <fieldset class="section">
+              <legend>Home page</legend>
+              <p class="hint" id="showOnHome-hint">
+                Choose whether your catalog rails appear on the Stremio home board. When off, they stay available in
+                Discover.
+              </p>
+              <label class="choice">
+                <input type="checkbox" id="showOnHome" name="showOnHome" aria-describedby="showOnHome-hint"
+                  <%= config?.showInHome === false ? "" : "checked" %>>
+                <span>Show catalogs on the home page</span>
+              </label>
+            </fieldset>
         </div>
         <div class="card">
           <section class="install" aria-labelledby="install-title">

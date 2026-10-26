@@ -49,7 +49,10 @@ const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
         if (!config?.id) {
           return reply.redirect("/configure");
         }
-        const showInHome = req.query.home !== "0";
+        const showInHome =
+          req.query.home === undefined
+            ? config.showInHome
+            : req.query.home !== "0";
         const catalogs = buildCatalog(
           config.categories as CatalogType[],
           showInHome,
