@@ -17,7 +17,7 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
   };
 }> = async (fastify, opts): Promise<void> => {
   fastify.get(
-    "/{resource}/:catalog/:{extraArgs}.json",
+    "/:type/:catalog/:extraArgs.json",
     {
       schema: {
         tags: ["Stremio"],
@@ -75,22 +75,24 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
         params: {
           type: "object",
           properties: {
-            resource: {
-              type: "string",
-              enum: ["movie", "series", "channel", "tv"],
-            },
             id: {
               type: "string",
             },
             catalog: {
               type: "string",
               enum: catalogTypes.map(encodeCatalogType),
+              default: "sports",
+            },
+            type: {
+              type: "string",
+              enum: ["tv", "movie", "series", "channel"],
+              default: "tv",
             },
             extraArgs: {
               type: "string",
             },
           },
-          required: ["id", "catalog", "resource", "extraArgs"],
+          required: ["id", "catalog", "extraArgs"],
         },
       },
     },
