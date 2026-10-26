@@ -15,6 +15,7 @@ model Configuration {
   countries  String[]
   categories Category[]
   timezone   String
+  showInHome Boolean    @default(false)
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId     String     @unique
   createdat  DateTime   @default(now())

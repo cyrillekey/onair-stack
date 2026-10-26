@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'6087857a1e788c60efc9ea1fdab3962c0ce4b496d504b9eb1dcb777501391231'>;
+  StorageHashBase<'4bde41f40052afe0c49244fe1f34ded993690c40f67a36fd828e8403e5f2c479'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -457,6 +457,7 @@ export namespace Models {
     countries: FieldOutputTypes['public']['Configuration']['countries'];
     createdat: FieldOutputTypes['public']['Configuration']['createdat'];
     id: FieldOutputTypes['public']['Configuration']['id'];
+    showInHome: FieldOutputTypes['public']['Configuration']['showInHome'];
     timezone: FieldOutputTypes['public']['Configuration']['timezone'];
     updatedat: FieldOutputTypes['public']['Configuration']['updatedat'];
     userId: FieldOutputTypes['public']['Configuration']['userId'];
@@ -639,6 +640,16 @@ type ContractBase = Omit<
                   readonly default: {
                     readonly kind: 'function';
                     readonly expression: 'gen_random_uuid()';
+                  };
+                  readonly many: false;
+                };
+                readonly showInHome: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
                   };
                   readonly many: false;
                 };
@@ -1095,6 +1106,10 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly showInHome: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
               readonly timezone: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -1130,6 +1145,7 @@ type ContractBase = Omit<
                 readonly countries: { readonly column: 'countries' };
                 readonly createdat: { readonly column: 'createdat' };
                 readonly id: { readonly column: 'id' };
+                readonly showInHome: { readonly column: 'showInHome' };
                 readonly timezone: { readonly column: 'timezone' };
                 readonly updatedat: { readonly column: 'updatedat' };
                 readonly userId: { readonly column: 'userId' };

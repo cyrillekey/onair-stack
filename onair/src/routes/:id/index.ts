@@ -1,0 +1,66 @@
+import { baseManifest, buildCatalog, CatalogType } from "@/utils/helpers";
+import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { Manifest } from "stremio-addon-sdk";
+
+const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+  SerializerSchemaOptions: {
+    deserialize: [
+      {
+        pattern: { type: "string"; format: "date-time" };
+        output: Date | undefined | null;
+      },
+    ];
+  };
+}> = async (fastify, opts): Promise<void> => {
+  fastify.get(
+    "/manifest.json",
+    {
+      schema: {
+        tags: ["Stremio"],
+        consumes: ["application/json"],
+        produces: ["application/json"],
+        summary: "Get user stremio manifest",
+        description: "Ger stremio manifest for user given id",
+        params: {
+          type: "object",
+          properties: {
+            id: {
+              type: "string",
+            },
+          },
+          required: ["id"],
+        },
+        querystring: {
+          type: "object",
+          properties: {
+            home: {
+              type: "string",
+              enum: ["0", "1"],
+            },
+          },
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const config = await fastify.db.orm.public.Configuration.whereUnique({
+          userId: req.params.id,
+        }).first();
+        if (!config?.id) {
+          return reply.redirect("/configure");
+        }
+        const showInHome = req.query.home !== "0";
+        const catalogs = buildCatalog(
+          config.categories as CatalogType[],
+          showInHome,
+        );
+        const manifest: Manifest = { ...baseManifest, catalogs };
+
+        reply.status(200).send(manifest);
+      } catch (error) {
+        reply.redirect("/configure");
+      }
+    },
+  );
+};
+export default stremioRoutes;

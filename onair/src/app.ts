@@ -8,7 +8,11 @@ import scalarDocumentation from "@scalar/fastify-api-reference";
 export interface AppOptions
   extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
-const options: AppOptions = {};
+const options: AppOptions = {
+  routeParams: true,
+  maxDepth: 10,
+  dirNameRoutePrefix: true,
+};
 
 const app: FastifyPluginAsync<AppOptions> = async (
   fastify,

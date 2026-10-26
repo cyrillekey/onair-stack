@@ -1,0 +1,311 @@
+<footer class="site-footer">
+  <div class="wrap">
+    <span>© <%= year %> Onair. Self-hosted live TV for Stremio.</span>
+    <nav>
+      <a href="<%= docsUrl %>">Docs</a>
+      <a href="<%= githubUrl %>" target="_blank" rel="noopener">GitHub</a>
+      <a href="<%= configureUrl %>">Configure</a>
+      <a href="https://github.com/cyrillekey/onair-stack/issues/new/choose" target="_blank" rel="noopener">Report
+        issue</a>
+    </nav>
+  </div>
+</footer>
+<script>
+  (function () {
+    function parseUUID(str) {
+      return str.match(
+        /\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/i
+      )?.[0] ?? null;
+    }
+
+    // null
+    const location = window.location.pathname;
+
+
+
+    var form = document.getElementById("config-form");
+    var usernameInput = document.getElementById("username");
+    var timezoneInput = document.getElementById("timezone");
+    var manifestInput = document.getElementById("manifest-url");
+    var copyBtn = document.getElementById("copy-btn");
+    var installBtn = document.getElementById("install-btn");
+    var webBtn = document.getElementById("web-btn");
+    var statusEl = document.getElementById("status");
+    var groups = Array.prototype.slice.call(
+      form.querySelectorAll("[data-group]"),
+    );
+
+    var validTimezones = {};
+    var tzOptions = document.querySelectorAll("#timezone-options option");
+    Array.prototype.forEach.call(tzOptions, function (o) {
+      validTimezones[o.value] = true;
+    });
+    var hasTimezoneList = tzOptions.length > 0;
+
+    var showFieldErrors = false;
+    var statusTimer;
+    var manifestUrl = "";
+    const id = parseUUID(location)
+
+    if (id) {
+      manifestUrl = `${"<%= baseUrl %>"}/${id}/manifest.json`
+      document.getElementById("manifest-url").setAttribute("value", manifestUrl)
+      setWebInstallationLink()
+      toggleState(true)
+    }
+
+    function boxes(group) {
+      return Array.prototype.slice.call(
+        group.querySelectorAll('input[type="checkbox"]'),
+      );
+    }
+
+    function selectedValues(group) {
+      return boxes(group)
+        .filter(function (b) {
+          return b.checked;
+        })
+        .map(function (b) {
+          return b.value;
+        });
+    }
+
+    function setStatus(message, kind) {
+      clearTimeout(statusTimer);
+      statusEl.textContent = message || "";
+      statusEl.className = "status" + (kind ? " " + kind : "");
+      if (message && kind === "ok") {
+        statusTimer = setTimeout(function () {
+          setStatus("");
+        }, 3500);
+      }
+    }
+
+    /* ---------- Persistence (best effort) ---------- */
+
+    /* ---------- Validation ---------- */
+    function fieldError(input, message, isValid) {
+      var el = document.getElementById(input.id + "-error");
+      var show = showFieldErrors && !isValid;
+      el.hidden = !show;
+      if (show) el.textContent = message;
+      input.setAttribute("aria-invalid", show ? "true" : "false");
+    }
+
+    function validate() {
+      var name = usernameInput.value.trim();
+      var tz = timezoneInput.value.trim();
+      var nameOk = name.length > 0;
+      var tzOk =
+        tz.length > 0 && (!hasTimezoneList || validTimezones[tz] === true);
+
+      fieldError(usernameInput, "Enter a username.", nameOk);
+      fieldError(
+        timezoneInput,
+        tz
+          ? "Pick a timezone from the list, for example Europe/London."
+          : "Enter your timezone.",
+        tzOk,
+      );
+
+      var groupsOk = true;
+      groups.forEach(function (g) {
+        var ok = selectedValues(g).length > 0;
+        g.querySelector(".error").hidden = ok;
+        if (!ok) groupsOk = false;
+      });
+
+      return nameOk && tzOk && groupsOk;
+    }
+
+    /* ---------- Counts ---------- */
+    function updateCount(group) {
+      var all = boxes(group);
+      var on = all.filter(function (b) {
+        return b.checked;
+      }).length;
+      group.querySelector(".count").textContent =
+        on + " of " + all.length + " selected";
+    }
+
+    /* ---------- Manifest URL ---------- */
+    function currentConfig() {
+      var config = {};
+      groups.forEach(function (g) {
+        config[g.dataset.group] = selectedValues(g);
+      });
+      config.timezone = timezoneInput.value.trim();
+      config.username = usernameInput.value.trim();
+      return config;
+    }
+
+    function refresh() {
+      groups.forEach(updateCount);
+      var ok = validate();
+      webBtn.setAttribute("aria-disabled", ok ? "false" : "true");
+      return ok;
+    }
+
+    function setWebInstallationLink() {
+      const link =
+        "https://web.stremio.com/#/addons?addon=" +
+        encodeURIComponent(manifestUrl);
+      document.getElementById("web-btn").setAttribute("href", link);
+
+    }
+
+    function focusFirstInvalid() {
+      var target =
+        (usernameInput.getAttribute("aria-invalid") === "true" &&
+          usernameInput) ||
+        (timezoneInput.getAttribute("aria-invalid") === "true" && timezoneInput);
+      if (!target) {
+        var bad = groups.filter(function (g) {
+          return selectedValues(g).length === 0;
+        })[0];
+        target = bad && bad.querySelector("input, button");
+      }
+      if (target) target.focus();
+    }
+
+    function requireValid() {
+      showFieldErrors = true;
+      var validated = refresh();
+      if (!validated) {
+        setStatus("Fix the highlighted fields to create your link.", "bad");
+        focusFirstInvalid();
+      }
+      return validated;
+      // HANDLE INSTALATION
+    }
+
+    /* ---------- Actions ---------- */
+    async function generateLink() {
+      var url = requireValid();
+      console.log(url);
+      if (!url) return;
+      //
+
+      setStatus("");
+      const values = currentConfig();
+      setStatus("Generating link...", "ok");
+      const response = await fetch("/configure", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const { manifest } = await response.json();
+      manifestUrl = manifest;
+      const manifestId = parseUUID(manifest);
+      if (!id || id !== manifestId) {
+        window.location.replace(`/${manifestId}/configure`);
+      } else {
+
+        document.getElementById("manifest-url").value = manifest;
+        setWebInstallationLink();
+        toggleState(true);
+        setStatus("", "ok");
+        return manifest;
+      }
+    }
+    function toggleState(state) {
+      if (state) {
+        document.getElementById("generate-link").classList.add("hide");
+        document.getElementById("install-actions").classList.remove("hide");
+      } else {
+        document.getElementById("generate-link").classList.remove("hide");
+        document.getElementById("install-actions").classList.add("hide");
+      }
+    }
+
+    function copy() {
+      if (!manifestUrl) return;
+      function done() {
+        setStatus("Link copied.", "ok");
+      }
+      function fallback() {
+        manifestInput.focus();
+        manifestInput.select();
+        try {
+          if (document.execCommand("copy")) return done();
+        } catch (_e) {
+          /* fall through */
+        }
+        setStatus("Press Ctrl+C (or Cmd+C) to copy the selected link.");
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(manifestUrl).then(done, fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    /* ---------- Wiring ---------- */
+    groups.forEach(function (group) {
+      var filter = group.querySelector(".filter");
+      var empty = group.querySelector(".empty");
+      var choices = Array.prototype.slice.call(group.querySelectorAll(".choice"));
+
+      function applyFilter() {
+        var q = filter.value.trim().toLowerCase();
+        var visible = 0;
+        choices.forEach(function (c) {
+          var match = !q || c.textContent.toLowerCase().indexOf(q) !== -1;
+          c.hidden = !match;
+          if (match) visible++;
+        });
+        empty.hidden = visible > 0;
+      }
+
+      filter.addEventListener("input", applyFilter);
+
+      group.addEventListener("click", function (event) {
+        var action = event.target && event.target.getAttribute("data-action");
+        if (!action) return;
+        // Only touch options that are currently visible under the filter.
+        choices.forEach(function (c) {
+          if (!c.hidden) c.querySelector("input").checked = action === "all";
+        });
+      });
+    });
+    function install() {
+      if (manifestUrl) {
+        const stremioClientUrl = manifestUrl.replace("https://", "stremio://").replace("http://", "stremio://");
+        window.open(stremioClientUrl, "_blank", "noopener,noreferrer");
+      }
+    }
+
+    form.addEventListener("input", function () {
+      toggleState(false);
+      refresh();
+    });
+    form.addEventListener("change", function () {
+      refresh();
+    });
+    usernameInput.addEventListener("blur", function () {
+      showFieldErrors = true;
+      refresh();
+    });
+    timezoneInput.addEventListener("blur", function () {
+      showFieldErrors = true;
+      refresh();
+    });
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+      generateLink();
+    });
+    copyBtn.addEventListener("click", copy);
+    installBtn.addEventListener("click", install);
+    webBtn.addEventListener("click", function (event) {
+      if (!requireValid()) event.preventDefault();
+    });
+
+    refresh();
+  })();
+
+</script>
+</body>
+
+</html>

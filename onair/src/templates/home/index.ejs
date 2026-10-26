@@ -1,0 +1,141 @@
+<%- include('../layout/header') %>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Self-hosted live TV</span>
+          <h1>Every channel,<br><em>one install.</em></h1>
+          <p class="lede">
+            Onair is a Stremio addon for live television with a native EPG,
+            sixteen catalog rails, and health-checked streams. Pick your
+            countries and categories, install once, and watch from Discover or
+            the guide grid.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="<%= configureUrl %>">
+              Build your lineup
+              <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </a>
+            <a class="btn btn-ghost" href="<%= docsUrl %>">Read the docs</a>
+          </div>
+        </div>
+
+        <div class="guide" aria-hidden="true">
+          <div class="guide-head">
+            <span class="guide-title">Live guide</span>
+            <span class="guide-clock">20:42</span>
+          </div>
+          <div class="guide-list">
+            <div class="guide-row is-live">
+              <span class="guide-channel">BBC One</span>
+              <span class="guide-show">Planet Earth</span>
+              <span class="guide-time">20:00</span>
+              <span class="guide-next">Next · Match of the Day</span>
+              <span class="guide-progress" style="--progress: 68%"><span></span></span>
+            </div>
+            <div class="guide-row">
+              <span class="guide-channel">CNN</span>
+              <span class="guide-show">The Lead</span>
+              <span class="guide-time">20:30</span>
+              <span class="guide-next">Next · World Sport</span>
+              <span class="guide-progress" style="--progress: 32%"><span></span></span>
+            </div>
+            <div class="guide-row">
+              <span class="guide-channel">CBC</span>
+              <span class="guide-show">Hockey Night</span>
+              <span class="guide-time">20:15</span>
+              <span class="guide-next">Next · The National</span>
+              <span class="guide-progress" style="--progress: 54%"><span></span></span>
+            </div>
+            <div class="guide-row">
+              <span class="guide-channel">ABC</span>
+              <span class="guide-show">News Breakfast</span>
+              <span class="guide-time">20:20</span>
+              <span class="guide-next">Next · Q&amp;A</span>
+              <span class="guide-progress" style="--progress: 44%"><span></span></span>
+            </div>
+          </div>
+          <div class="guide-foot">
+            <span class="guide-status"><i></i> 42 channels live</span>
+            <span>Preview · Your timezone</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="how-it-works">
+      <div class="wrap how-grid">
+        <div class="how-intro">
+          <span class="eyebrow">Three steps</span>
+          <h2 id="how-it-works">How it works</h2>
+          <p>
+            From a blank Stremio to a full live-TV lineup, with a programme guide
+            that lines up to your own timezone.
+          </p>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-index" aria-hidden="true">01</span>
+            <div class="step-body">
+              <h3>Configure</h3>
+              <p>Choose countries, categories, a username, and your timezone. Your preferences live in the addon link
+                itself.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-index" aria-hidden="true">02</span>
+            <div class="step-body">
+              <h3>Install</h3>
+              <p>Open the link in Stremio desktop or web. The addon registers itself and your catalogs appear instantly.
+              </p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-index" aria-hidden="true">03</span>
+            <div class="step-body">
+              <h3>Watch</h3>
+              <p>Browse channels from Discover, or open the native EPG grid to see what's on now and next.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="cta-band">
+      <div class="wrap">
+        <div class="cta-card">
+          <div class="cta-top">
+            <span class="eyebrow">Ready when you are</span>
+            <span class="cta-note">Free and open source · No account required</span>
+          </div>
+          <h2><span>Every channel you want,</span><span>none you don't.</span></h2>
+          <div class="cta-foot">
+            <p>
+              Filter sixteen categories across four countries, keep the link, and
+              reinstall any time your taste changes.
+            </p>
+            <div class="cta-actions">
+              <a class="btn btn-primary" href="<%= configureUrl %>">
+                Start configuring
+                <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </a>
+              <a class="cta-link" href="<%= githubUrl %>" target="_blank" rel="noopener">
+                View on GitHub
+                <svg class="btn-arrow" width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <%- include('../layout/footer') %>

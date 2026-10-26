@@ -294,6 +294,13 @@
                   "kind": "scalar"
                 }
               },
+              "showInHome": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/bool@1",
+                  "kind": "scalar"
+                }
+              },
               "timezone": {
                 "nullable": false,
                 "type": {
@@ -347,6 +354,9 @@
                 },
                 "id": {
                   "column": "id"
+                },
+                "showInHome": {
+                  "column": "showInHome"
                 },
                 "timezone": {
                   "column": "timezone"
@@ -891,6 +901,15 @@
                   },
                   "nullable": false
                 },
+                "showInHome": {
+                  "codecId": "pg/bool@1",
+                  "dataType": "pg/bool",
+                  "default": {
+                    "kind": "literal",
+                    "value": false
+                  },
+                  "nullable": false
+                },
                 "timezone": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -1269,7 +1288,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "6087857a1e788c60efc9ea1fdab3962c0ce4b496d504b9eb1dcb777501391231"
+    "storageHash": "4bde41f40052afe0c49244fe1f34ded993690c40f67a36fd828e8403e5f2c479"
   },
   "capabilities": {
     "postgres": {
