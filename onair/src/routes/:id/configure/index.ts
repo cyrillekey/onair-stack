@@ -54,7 +54,7 @@ const updateConfigurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           config.countries as string[];
         userGroupConfig[genreConfigureGroup].selected =
           config.categories as string[];
-        const template = fastify.ejs.compile("/configure/index", {
+        const template = await fastify.ejs.compile("/configure/index", {
           pageTitle: "Update your line-up — Onair",
           groups: userGroupConfig,
           countries: COUNTRIES,

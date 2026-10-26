@@ -4,7 +4,140 @@ import {
   ExtraArgs,
   reverseCatalogId,
 } from "@/utils/helpers";
+import {
+  cacheControl,
+  GUIDE_CACHE,
+  metaForChannel,
+  parseGuideDate,
+  previewForChannel,
+  videoForSchedule,
+} from "@/utils/epg";
 import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+
+const CATALOG_PAGE_SIZE = 100;
+const dateTimeFormat: string = "date-time";
+
+const videoSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    title: { type: "string" },
+    released: { type: "string", format: dateTimeFormat },
+    startTime: { type: "string", format: dateTimeFormat },
+    endTime: { type: "string", format: dateTimeFormat },
+    overview: { type: "string" },
+    thumbnail: { type: "string" },
+    runtime: { type: "string" },
+    releaseInfo: { type: "string" },
+    genres: {
+      type: "array",
+      items: { type: "string" },
+    },
+  },
+  required: ["id", "title", "released", "startTime", "endTime"],
+} as const;
+
+const metaPreviewSchema = {
+  type: "object",
+  properties: {
+    id: { type: "string" },
+    name: { type: "string" },
+    type: { type: "string" },
+    description: { type: "string" },
+    poster: { type: "string" },
+    posterShape: { type: "string" },
+    logo: { type: "string" },
+    behaviorHints: {
+      type: "object",
+      properties: {
+        isLive: { type: "boolean" },
+      },
+    },
+  },
+  required: ["id", "name", "type", "poster"],
+} as const;
+
+const metaDetailSchema = {
+  type: "object",
+  properties: {
+    ...metaPreviewSchema.properties,
+    background: { type: "string" },
+    country: { type: "string" },
+    genres: {
+      type: "array",
+      items: { type: "string" },
+    },
+    videos: {
+      type: "array",
+      items: videoSchema,
+    },
+    behaviorHints: {
+      type: "object",
+      properties: {
+        isLive: { type: "boolean" },
+        hasScheduledVideos: { type: "boolean" },
+      },
+    },
+  },
+  required: ["id", "name", "type", "poster"],
+} as const;
+
+const catalogResponseSchema = {
+  type: "object",
+  properties: {
+    metas: {
+      type: "array",
+      items: metaPreviewSchema,
+    },
+    metasDetailed: {
+      type: "array",
+      items: metaDetailSchema,
+    },
+    cacheMaxAge: {
+      type: "integer",
+      default: 120,
+    },
+    staleRevalidate: {
+      type: "integer",
+      default: 600,
+    },
+    staleError: {
+      type: "integer",
+      default: 172800,
+    },
+  },
+} as const;
+
+const catalogParamsSchema = {
+  type: "object",
+  properties: {
+    id: {
+      type: "string",
+    },
+    catalog: {
+      type: "string",
+      enum: catalogTypes.map(encodeCatalogType),
+      default: "sports",
+    },
+    type: {
+      type: "string",
+      enum: ["tv", "movie", "series", "channel"],
+      default: "tv",
+    },
+  },
+  required: ["id", "catalog"],
+} as const;
+
+const catalogExtraParamsSchema = {
+  type: "object",
+  properties: {
+    ...catalogParamsSchema.properties,
+    extraArgs: {
+      type: "string",
+    },
+  },
+  required: ["id", "catalog", "extraArgs"],
+} as const;
 
 const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
   SerializerSchemaOptions: {
@@ -16,8 +149,108 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
     ];
   };
 }> = async (fastify, opts): Promise<void> => {
+  async function getCatalog(
+    userId: string,
+    catalogId: string,
+    extraArgsValue: string,
+  ) {
+    const extraArgs: ExtraArgs = Object.fromEntries(
+      new URLSearchParams(extraArgsValue),
+    );
+    const hasGuideDate = Boolean(extraArgs.date);
+    const guideWindow = parseGuideDate(extraArgs.date);
+    const emptyResponse = hasGuideDate
+      ? { metasDetailed: [], ...GUIDE_CACHE }
+      : {
+          metas: [],
+          cacheMaxAge: 120,
+          staleRevalidate: 600,
+          staleError: 172800,
+        };
+
+    try {
+      const config = await fastify.db.orm.public.Configuration.where({
+        userId,
+      }).first();
+      if (!config) {
+        return emptyResponse;
+      }
+
+      const catalog = reverseCatalogId(catalogId);
+
+      if (hasGuideDate && !guideWindow) {
+        return emptyResponse;
+      }
+
+      let query = fastify.db.orm.public.Channel.where({
+        category: catalog,
+      }).where((channel) => channel.country.in(config.countries));
+
+      if (extraArgs.search) {
+        const search = `%${extraArgs.search}%`;
+        query = query.where((channel) => channel.name.ilike(search));
+      }
+      if (extraArgs.skip) {
+        const skip = Number(extraArgs.skip);
+        if (Number.isInteger(skip) && skip > 0) {
+          query = query.offset(skip);
+        }
+      }
+
+      const channels = await query
+        .orderBy((channel) => channel.name.asc())
+        .limit(CATALOG_PAGE_SIZE)
+        .all();
+
+      if (!guideWindow) {
+        return {
+          metas: channels.map(previewForChannel),
+          cacheMaxAge: 120,
+          staleRevalidate: 600,
+          staleError: 172800,
+        };
+      }
+
+      if (channels.length === 0) {
+        return { metasDetailed: [], ...GUIDE_CACHE };
+      }
+
+      const schedules = await fastify.db.orm.public.Schedule.where({})
+        .where((schedule) => schedule.channelId.in(channels.map((c) => c.id)))
+        .where((schedule) => schedule.endTime.gt(guideWindow.start))
+        .where((schedule) => schedule.startTime.lt(guideWindow.end))
+        .orderBy((schedule) => schedule.startTime.asc())
+        .all();
+
+      const schedulesByChannel = new Map<
+        string,
+        typeof schedules
+      >();
+      for (const schedule of schedules) {
+        const current = schedulesByChannel.get(schedule.channelId) ?? [];
+        current.push(schedule);
+        schedulesByChannel.set(schedule.channelId, current);
+      }
+
+      return {
+        metasDetailed: channels.map((channel) =>
+          metaForChannel(
+            channel,
+            (schedulesByChannel.get(channel.id) ?? []).map((schedule) =>
+              videoForSchedule(channel, schedule),
+            ),
+          ),
+        ),
+        ...GUIDE_CACHE,
+      };
+    } catch (error) {
+      fastify.log.error(error);
+      return emptyResponse;
+    }
+  }
+
   fastify.get(
-    "/:type/:catalog/:extraArgs.json",
+    "/:type/:catalog.json",
     {
       schema: {
         tags: ["Stremio"],
@@ -26,134 +259,44 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
         summary: "Get tv catalogs based on catalog id",
         description: "Get tv catalogs based on catalog id",
         response: {
-          default: {
-            type: "object",
-            properties: {
-              metas: {
-                type: "array",
-                items: {
-                  properties: {
-                    id: {
-                      type: "string",
-                    },
-                    name: {
-                      type: "string",
-                    },
-                    type: {
-                      type: "string",
-                    },
-                    description: {
-                      type: "string",
-                    },
-                    poster: {
-                      type: "string",
-                    },
-                    posterShape: {
-                      type: "string",
-                    },
-                    logo: {
-                      type: "string",
-                    },
-                  },
-                },
-              },
-              cacheMaxAge: {
-                type: "integer",
-                default: 120,
-              },
-              staleRevalidate: {
-                type: "integer",
-                default: 600,
-              },
-              staleError: {
-                type: "integer",
-                default: 172800,
-              },
-            },
-          },
+          default: catalogResponseSchema,
         },
-        params: {
-          type: "object",
-          properties: {
-            id: {
-              type: "string",
-            },
-            catalog: {
-              type: "string",
-              enum: catalogTypes.map(encodeCatalogType),
-              default: "sports",
-            },
-            type: {
-              type: "string",
-              enum: ["tv", "movie", "series", "channel"],
-              default: "tv",
-            },
-            extraArgs: {
-              type: "string",
-            },
-          },
-          required: ["id", "catalog", "extraArgs"],
-        },
+        params: catalogParamsSchema,
       },
     },
     async (req, reply) => {
-      try {
-        const config = await fastify.db.orm.public.Configuration.where({
-          userId: req.params.id,
-        }).first();
-        const catalog = reverseCatalogId(req.params.catalog);
-        if (!config) {
-          return {
-            metas: [],
-            cacheMaxAge: 120,
-            staleRevalidate: 600,
-            staleError: 172800,
-          };
-        }
-        const extraArgs: ExtraArgs = Object.fromEntries(
-          new URLSearchParams(req.params.extraArgs),
-        );
-        let query = fastify.db.orm.public.Channel.where({
-          category: catalog,
-        }).where((catalog) => catalog.country.in(config.countries));
-        if (extraArgs?.search) {
-          query = query.where((channel) =>
-            channel.name.ilike(`%${extraArgs.search}%`),
-          );
-        }
-        if (extraArgs?.skip) {
-          const skip = Number(extraArgs.skip);
-          query = query.offset(skip);
-        }
-        if (extraArgs?.date) {
-          // handle epg case
-        } else {
-          const channels = await query.all();
-          const metas = channels.map((channel) => ({
-            id: channel.id,
-            name: channel.name,
-            type: "tv",
-            description: channel.description,
-            poster: channel.poster,
-            posterShape: "landscape",
-            logo: channel.poster,
-          }));
-          return {
-            metas,
-            cacheMaxAge: 120,
-            staleRevalidate: 600,
-            staleError: 172800,
-          };
-        }
-      } catch (error) {
-        fastify.log.error(error);
-        return {
-          metas: [],
-          cacheMaxAge: 120,
-          staleRevalidate: 600,
-          staleError: 172800,
-        };
-      }
+      const response = await getCatalog(req.params.id, req.params.catalog, "");
+      return reply
+        .header("cache-control", cacheControl(response))
+        .send(response);
+    },
+  );
+
+  fastify.get(
+    "/:type/:catalog/:extraArgs.json",
+    {
+      schema: {
+        tags: ["Stremio"],
+        consumes: ["application/json"],
+        produces: ["application/json"],
+        summary: "Get tv catalogs based on catalog id and extra arguments",
+        description:
+          "Get tv catalogs based on catalog id. A date extra returns the native EPG guide page.",
+        response: {
+          default: catalogResponseSchema,
+        },
+        params: catalogExtraParamsSchema,
+      },
+    },
+    async (req, reply) => {
+      const response = await getCatalog(
+        req.params.id,
+        req.params.catalog,
+        req.params.extraArgs,
+      );
+      return reply
+        .header("cache-control", cacheControl(response))
+        .send(response);
     },
   );
 };

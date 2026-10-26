@@ -4,11 +4,15 @@ import { join } from "path";
 import ejs from "ejs";
 import { existsSync, readFileSync } from "fs";
 import appConfig from "@/config";
+import { minify } from "html-minifier-terser";
 
 declare module "fastify" {
   interface FastifyInstance {
     ejs: {
-      compile: (template: string, data: Record<string, unknown>) => string;
+      compile: (
+        template: string,
+        data: Record<string, unknown>,
+      ) => Promise<string>;
     };
   }
 }
@@ -35,7 +39,10 @@ function compiledTemplate(path: string): ejs.TemplateFunction {
   return html;
 }
 
-function compileEjs(template: string, _data: Record<string, unknown>): string {
+async function compileEjs(
+  template: string,
+  _data: Record<string, unknown>,
+): Promise<string> {
   const path = resolveTemplatePath(template);
   if (!existsSync(path)) {
     return "";
@@ -52,7 +59,15 @@ function compileEjs(template: string, _data: Record<string, unknown>): string {
     baseUrl: appConfig.baseUrl,
     year: new Date().getFullYear(),
   };
-  return compiledTemplate(path)(data);
+  const minified = await minify(compiledTemplate(path)(data), {
+    removeComments: true,
+    collapseWhitespace: true,
+    removeEmptyAttributes: true,
+    minifyCSS: true,
+    minifyJS: true,
+    removeRedundantAttributes: true,
+  });
+  return minified;
 }
 
 export default fp(

@@ -28,7 +28,7 @@ const root: FastifyPluginAsyncJsonSchemaToTs<{
     },
   );
   fastify.get("/", { schema: { hide: true } }, async (_, reply) => {
-    const html = fastify.ejs.compile("/home/index", {});
+    const html = await fastify.ejs.compile("/home/index", {});
     return reply
       .header("cache-control", "public, max-age=300")
       .type("text/html; charset=utf-8")

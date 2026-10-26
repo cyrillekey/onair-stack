@@ -22,7 +22,7 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
   };
 }> = async (fastify, opts): Promise<void> => {
   fastify.get("", { schema: { hide: true } }, async function (_, reply) {
-    const view = fastify.ejs.compile("/configure/index", {
+    const view = await fastify.ejs.compile("/configure/index", {
       pageTitle: "Configure your line-up — Onair",
       groups: CONFIGURE_GROUPS,
       countries: COUNTRIES,

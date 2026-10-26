@@ -72,7 +72,7 @@ export function capitalize(s: string) {
 }
 
 export interface ExtraArgs {
-  skip?: boolean;
-  search?: boolean;
-  date?: boolean;
+  skip?: string;
+  search?: string;
+  date?: string;
 }
