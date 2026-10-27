@@ -24,6 +24,8 @@
 
 
     var form = document.getElementById("config-form");
+    if (!form) return;
+
     var usernameInput = document.getElementById("username");
     var timezoneInput = document.getElementById("timezone");
     var showOnHomeInput = document.getElementById("showOnHome");
@@ -68,6 +70,17 @@
         })
         .map(function (b) {
           return b.value;
+        });
+    }
+
+    function selectedLabels(group) {
+      return boxes(group)
+        .filter(function (b) {
+          return b.checked;
+        })
+        .map(function (b) {
+          var label = b.parentElement && b.parentElement.querySelector("span");
+          return label ? label.textContent.trim() : b.value;
         });
     }
 
@@ -134,6 +147,26 @@
         on + " of " + all.length + " selected";
     }
 
+    function updatePreview() {
+      groups.forEach(function (group) {
+        var target = document.querySelector(
+          '[data-preview-group="' + group.dataset.group + '"]'
+        );
+        if (!target) return;
+        var labels = selectedLabels(group);
+        var legend = group.querySelector("legend");
+        target.textContent = labels.length
+          ? labels.join(", ")
+          : "All " + (legend ? legend.textContent.trim().toLowerCase() : "options");
+      });
+
+      var homeState = document.getElementById("preview-home");
+      if (!homeState) return;
+      var homeOn = showOnHomeInput.checked;
+      homeState.textContent = homeOn ? "On" : "Off";
+      homeState.setAttribute("data-state", homeOn ? "on" : "off");
+    }
+
     /* ---------- Manifest URL ---------- */
     function currentConfig() {
       var config = {};
@@ -148,6 +181,7 @@
 
     function refresh() {
       groups.forEach(updateCount);
+      updatePreview();
       var ok = validate();
       webBtn.setAttribute("aria-disabled", ok ? "false" : "true");
       return ok;
@@ -290,6 +324,7 @@
         });
 
         refresh();
+        toggleState(false);
       });
     });
     function install() {

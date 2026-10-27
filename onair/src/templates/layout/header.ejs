@@ -1136,6 +1136,64 @@
       font-size: 0.86rem;
     }
 
+    #config-form .lineup-summary {
+      display: grid;
+      margin: 18px 0 0;
+      border-top: 1px solid var(--line);
+    }
+
+    #config-form .lineup-row {
+      display: grid;
+      grid-template-columns: 82px minmax(0, 1fr);
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    #config-form .lineup-row dt {
+      color: var(--muted);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    #config-form .lineup-row dd {
+      min-width: 0;
+      margin: 0;
+      color: var(--ink);
+      font-size: 0.86rem;
+      line-height: 1.4;
+      overflow-wrap: anywhere;
+    }
+
+    #config-form .lineup-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 24px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    #config-form .lineup-badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    #config-form .lineup-badge[data-state="off"] {
+      background: var(--soft);
+      color: var(--muted);
+    }
+
     #config-form .url-row {
       display: flex;
       gap: 8px;

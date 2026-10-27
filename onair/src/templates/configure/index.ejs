@@ -1,4 +1,15 @@
 <%- include('../layout/header') %>
+<%
+  function previewLabels(group) {
+    if (!group) return "";
+    const labels = (group.selected || [])
+      .map((value) => group.options.find((option) => option.value === value)?.label)
+      .filter(Boolean);
+    return labels.length ? labels.join(", ") : `All ${group.label.toLowerCase()}`;
+  }
+  const lineupCountries = groups.find((group) => group.name === "countries");
+  const lineupCategories = groups.find((group) => group.name === "categories");
+%>
   <div class="configure-page">
     <main class="wrap">
       <form id="config-form" novalidate>
@@ -84,6 +95,23 @@
           <section class="install" aria-labelledby="install-title">
             <h2 class="section-title" id="install-title">Your lineup</h2>
             <p class="hint" style="margin:0">Your choices are saved in the addon link below.</p>
+            <dl class="lineup-summary" aria-live="polite">
+              <div class="lineup-row">
+                <dt>Countries</dt>
+                <dd id="preview-countries" data-preview-group="countries"><%= previewLabels(lineupCountries) %></dd>
+              </div>
+              <div class="lineup-row">
+                <dt>Genres</dt>
+                <dd id="preview-categories" data-preview-group="categories"><%= previewLabels(lineupCategories) %></dd>
+              </div>
+              <div class="lineup-row">
+                <dt>Home page</dt>
+                <dd>
+                  <span class="lineup-badge" id="preview-home"
+                    data-state="<%= config?.showInHome === false ? "off" : "on" %>"><%= config?.showInHome === false ? "Off" : "On" %></span>
+                </dd>
+              </div>
+            </dl>
             <div id="generate-link" class="">
               <button type="submit" class="btn btn-primary" id="generate-button">
                 <%= config?.id ? "Update Manifest" : "Generate Manifest" %>
