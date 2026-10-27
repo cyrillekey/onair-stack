@@ -25,6 +25,8 @@
     "@fastify/type-provider-json-schema-to-ts": "^5.0.1",
     "@prisma/orm-postgres": "^8.0.0-rc.20",
     "@scalar/fastify-api-reference": "^1.76.0",
+    "@sentry/node": "^11.9.0",
+    "@sentry/profiling-node": "^11.9.0",
     "dayjs": "^1.11.23",
     "dotenv": "^18.0.9",
     "ejs": "^7.0.2",

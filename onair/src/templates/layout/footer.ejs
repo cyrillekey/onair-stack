@@ -207,6 +207,7 @@
         },
       });
       const payload = await response.json();
+
       if (!response.ok || !payload.manifest) {
         setStatus(
           payload.message || "Could not generate your link. Try again.",
@@ -219,8 +220,7 @@
       if (!id || id !== manifestId) {
         window.location.replace(`/${manifestId}/configure`);
       } else {
-
-        document.getElementById("manifest-url").value = manifest;
+        document.getElementById("manifest-url").value = manifestUrl;
         setWebInstallationLink();
         toggleState(true);
         setStatus("", "ok");
