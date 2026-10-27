@@ -1,9 +1,7 @@
+import "temporal-polyfill/global";
 import { join } from "node:path";
 import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
-import type {
-  FastifyPluginCallback,
-  FastifyServerOptions,
-} from "fastify";
+import type { FastifyPluginCallback, FastifyServerOptions } from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import { type JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import fastifyCors from "@fastify/cors";
@@ -56,7 +54,7 @@ const app: FastifyPluginCallback<AppOptions> = (fastify, opts) => {
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
-   
+
   void fastify.register(AutoLoad, {
     dir: join(__dirname, "plugins"),
     options: opts,
@@ -64,7 +62,7 @@ const app: FastifyPluginCallback<AppOptions> = (fastify, opts) => {
 
   // This loads all plugins defined in routes
   // define your routes in one of these
-   
+
   void fastify.register(AutoLoad, {
     dir: join(__dirname, "routes"),
     options: opts,

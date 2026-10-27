@@ -210,7 +210,8 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       }
 
       const channels = await query
-        .orderBy((channel) => channel.name.asc())
+        .orderBy((channel) => channel.slug.asc())
+        .where((a) => a.streams.some())
         .limit(CATALOG_PAGE_SIZE)
         .all();
 

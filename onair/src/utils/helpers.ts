@@ -68,7 +68,7 @@ export function reverseCatalogId(id: string): CatalogType {
 
 export function capitalize(s: string) {
   const words = s.split(" ");
-  return words.map((w) => w.charAt(0).toUpperCase() + w.substring(1)).join(" ");
+  return words.map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase()).join(" ");
 }
 
 export interface ExtraArgs {

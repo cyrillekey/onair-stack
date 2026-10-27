@@ -1,5 +1,4 @@
 import fp from "fastify-plugin";
-import { db } from "@/prisma/db";
 import { join } from "path";
 import ejs from "ejs";
 import { existsSync, readFileSync } from "fs";
@@ -74,9 +73,6 @@ export default fp(
   (fastify) => {
     fastify.decorate("ejs", {
       compile: compileEjs,
-    });
-    fastify.addHook("onClose", async () => {
-      await db.close();
     });
   },
   { name: "ejs" },
