@@ -3,23 +3,46 @@ import { type models } from "@/prisma/contract";
 import appConfig from "@/config";
 export type CatalogType = typeof models.public.Channel.category;
 export const catalogTypes: CatalogType[] = [
-  "ADULT",
+  "ANIME",
+  "BASEBALL",
+  "BASKETBALL",
+  "BUSINESS",
   "CLASSIC_TV",
+  "COMBAT_SPORTS",
+  "COMEDY",
+  "CRICKET",
   "CRIME",
   "DOCUMENTARY",
+  "DRAMA",
+  "EDUCATION",
   "ENTERTAINMENT",
+  "FASHION",
+  "FOOD",
+  "FOOTBALL",
   "GENERAL",
   "INTERNATIONAL",
   "KIDS",
   "LIFESTYLE",
+  "LOCAL",
   "MOVIES",
+  "MOTORSPORTS",
   "MUSIC",
   "NEWS",
   "OUTDOORS_AUTO",
   "RADIO",
+  "REALITY_TV",
   "RELIGIOUS",
   "SHOPPING",
   "SPORTS",
+  "TECHNOLOGY",
+  "TRAVEL",
+  "JEWISH",
+  "CHRISTIAN",
+  "CATHOLIC",
+  "ADVENTIST",
+  "ISLAMIC",
+  "GOSPEL",
+  "PRAISE_WORSHIP",
 ];
 
 export function toReadableString(name: string) {
@@ -68,7 +91,9 @@ export function reverseCatalogId(id: string): CatalogType {
 
 export function capitalize(s: string) {
   const words = s.split(" ");
-  return words.map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase()).join(" ");
+  return words
+    .map((w) => w.charAt(0).toUpperCase() + w.substring(1).toLowerCase())
+    .join(" ");
 }
 
 export interface ExtraArgs {

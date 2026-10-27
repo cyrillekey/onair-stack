@@ -23,7 +23,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'4bde41f40052afe0c49244fe1f34ded993690c40f67a36fd828e8403e5f2c479'>;
+  StorageHashBase<'fa7e8e29444831586fc32a522a2503f64403fc59723331152a770906c82c0ee7'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -243,81 +243,181 @@ type FieldTypeOverrides = {
       readonly Channel: {
         readonly category: {
           readonly output:
-            | 'ENTERTAINMENT'
-            | 'SPORTS'
-            | 'MOVIES'
-            | 'NEWS'
-            | 'INTERNATIONAL'
-            | 'RADIO'
-            | 'RELIGIOUS'
-            | 'DOCUMENTARY'
-            | 'MUSIC'
-            | 'KIDS'
-            | 'SHOPPING'
-            | 'LIFESTYLE'
-            | 'CLASSIC_TV'
-            | 'CRIME'
             | 'ADULT'
+            | 'ADVENTIST'
+            | 'ANIME'
+            | 'BASEBALL'
+            | 'BASKETBALL'
+            | 'BUSINESS'
+            | 'CATHOLIC'
+            | 'CHRISTIAN'
+            | 'CLASSIC_TV'
+            | 'COMBAT_SPORTS'
+            | 'COMEDY'
+            | 'CRICKET'
+            | 'CRIME'
+            | 'DOCUMENTARY'
+            | 'DRAMA'
+            | 'EDUCATION'
+            | 'ENTERTAINMENT'
+            | 'FASHION'
+            | 'FOOD'
+            | 'FOOTBALL'
+            | 'GENERAL'
+            | 'GOSPEL'
+            | 'INTERNATIONAL'
+            | 'ISLAMIC'
+            | 'JEWISH'
+            | 'KIDS'
+            | 'LIFESTYLE'
+            | 'LOCAL'
+            | 'MOTORSPORTS'
+            | 'MOVIES'
+            | 'MUSIC'
+            | 'NEWS'
             | 'OUTDOORS_AUTO'
-            | 'GENERAL';
+            | 'PRAISE_WORSHIP'
+            | 'RADIO'
+            | 'REALITY_TV'
+            | 'RELIGIOUS'
+            | 'SCIENTOLOGY'
+            | 'SHOPPING'
+            | 'SPORTS'
+            | 'TECHNOLOGY'
+            | 'TRAVEL';
           readonly input:
-            | 'ENTERTAINMENT'
-            | 'SPORTS'
-            | 'MOVIES'
-            | 'NEWS'
-            | 'INTERNATIONAL'
-            | 'RADIO'
-            | 'RELIGIOUS'
-            | 'DOCUMENTARY'
-            | 'MUSIC'
-            | 'KIDS'
-            | 'SHOPPING'
-            | 'LIFESTYLE'
-            | 'CLASSIC_TV'
-            | 'CRIME'
             | 'ADULT'
+            | 'ADVENTIST'
+            | 'ANIME'
+            | 'BASEBALL'
+            | 'BASKETBALL'
+            | 'BUSINESS'
+            | 'CATHOLIC'
+            | 'CHRISTIAN'
+            | 'CLASSIC_TV'
+            | 'COMBAT_SPORTS'
+            | 'COMEDY'
+            | 'CRICKET'
+            | 'CRIME'
+            | 'DOCUMENTARY'
+            | 'DRAMA'
+            | 'EDUCATION'
+            | 'ENTERTAINMENT'
+            | 'FASHION'
+            | 'FOOD'
+            | 'FOOTBALL'
+            | 'GENERAL'
+            | 'GOSPEL'
+            | 'INTERNATIONAL'
+            | 'ISLAMIC'
+            | 'JEWISH'
+            | 'KIDS'
+            | 'LIFESTYLE'
+            | 'LOCAL'
+            | 'MOTORSPORTS'
+            | 'MOVIES'
+            | 'MUSIC'
+            | 'NEWS'
             | 'OUTDOORS_AUTO'
-            | 'GENERAL';
+            | 'PRAISE_WORSHIP'
+            | 'RADIO'
+            | 'REALITY_TV'
+            | 'RELIGIOUS'
+            | 'SCIENTOLOGY'
+            | 'SHOPPING'
+            | 'SPORTS'
+            | 'TECHNOLOGY'
+            | 'TRAVEL';
         };
       };
       readonly Configuration: {
         readonly categories: {
           readonly output:
-            | 'ENTERTAINMENT'
-            | 'SPORTS'
-            | 'MOVIES'
-            | 'NEWS'
-            | 'INTERNATIONAL'
-            | 'RADIO'
-            | 'RELIGIOUS'
-            | 'DOCUMENTARY'
-            | 'MUSIC'
-            | 'KIDS'
-            | 'SHOPPING'
-            | 'LIFESTYLE'
-            | 'CLASSIC_TV'
-            | 'CRIME'
             | 'ADULT'
+            | 'ADVENTIST'
+            | 'ANIME'
+            | 'BASEBALL'
+            | 'BASKETBALL'
+            | 'BUSINESS'
+            | 'CATHOLIC'
+            | 'CHRISTIAN'
+            | 'CLASSIC_TV'
+            | 'COMBAT_SPORTS'
+            | 'COMEDY'
+            | 'CRICKET'
+            | 'CRIME'
+            | 'DOCUMENTARY'
+            | 'DRAMA'
+            | 'EDUCATION'
+            | 'ENTERTAINMENT'
+            | 'FASHION'
+            | 'FOOD'
+            | 'FOOTBALL'
+            | 'GENERAL'
+            | 'GOSPEL'
+            | 'INTERNATIONAL'
+            | 'ISLAMIC'
+            | 'JEWISH'
+            | 'KIDS'
+            | 'LIFESTYLE'
+            | 'LOCAL'
+            | 'MOTORSPORTS'
+            | 'MOVIES'
+            | 'MUSIC'
+            | 'NEWS'
             | 'OUTDOORS_AUTO'
-            | 'GENERAL';
+            | 'PRAISE_WORSHIP'
+            | 'RADIO'
+            | 'REALITY_TV'
+            | 'RELIGIOUS'
+            | 'SCIENTOLOGY'
+            | 'SHOPPING'
+            | 'SPORTS'
+            | 'TECHNOLOGY'
+            | 'TRAVEL';
           readonly input:
-            | 'ENTERTAINMENT'
-            | 'SPORTS'
-            | 'MOVIES'
-            | 'NEWS'
-            | 'INTERNATIONAL'
-            | 'RADIO'
-            | 'RELIGIOUS'
-            | 'DOCUMENTARY'
-            | 'MUSIC'
-            | 'KIDS'
-            | 'SHOPPING'
-            | 'LIFESTYLE'
-            | 'CLASSIC_TV'
-            | 'CRIME'
             | 'ADULT'
+            | 'ADVENTIST'
+            | 'ANIME'
+            | 'BASEBALL'
+            | 'BASKETBALL'
+            | 'BUSINESS'
+            | 'CATHOLIC'
+            | 'CHRISTIAN'
+            | 'CLASSIC_TV'
+            | 'COMBAT_SPORTS'
+            | 'COMEDY'
+            | 'CRICKET'
+            | 'CRIME'
+            | 'DOCUMENTARY'
+            | 'DRAMA'
+            | 'EDUCATION'
+            | 'ENTERTAINMENT'
+            | 'FASHION'
+            | 'FOOD'
+            | 'FOOTBALL'
+            | 'GENERAL'
+            | 'GOSPEL'
+            | 'INTERNATIONAL'
+            | 'ISLAMIC'
+            | 'JEWISH'
+            | 'KIDS'
+            | 'LIFESTYLE'
+            | 'LOCAL'
+            | 'MOTORSPORTS'
+            | 'MOVIES'
+            | 'MUSIC'
+            | 'NEWS'
             | 'OUTDOORS_AUTO'
-            | 'GENERAL';
+            | 'PRAISE_WORSHIP'
+            | 'RADIO'
+            | 'REALITY_TV'
+            | 'RELIGIOUS'
+            | 'SCIENTOLOGY'
+            | 'SHOPPING'
+            | 'SPORTS'
+            | 'TECHNOLOGY'
+            | 'TRAVEL';
         };
       };
     };
@@ -342,81 +442,181 @@ type ColumnTypeOverrides = {
     readonly channel: {
       readonly category: {
         readonly output:
-          | 'ENTERTAINMENT'
-          | 'SPORTS'
-          | 'MOVIES'
-          | 'NEWS'
-          | 'INTERNATIONAL'
-          | 'RADIO'
-          | 'RELIGIOUS'
-          | 'DOCUMENTARY'
-          | 'MUSIC'
-          | 'KIDS'
-          | 'SHOPPING'
-          | 'LIFESTYLE'
-          | 'CLASSIC_TV'
-          | 'CRIME'
           | 'ADULT'
+          | 'ADVENTIST'
+          | 'ANIME'
+          | 'BASEBALL'
+          | 'BASKETBALL'
+          | 'BUSINESS'
+          | 'CATHOLIC'
+          | 'CHRISTIAN'
+          | 'CLASSIC_TV'
+          | 'COMBAT_SPORTS'
+          | 'COMEDY'
+          | 'CRICKET'
+          | 'CRIME'
+          | 'DOCUMENTARY'
+          | 'DRAMA'
+          | 'EDUCATION'
+          | 'ENTERTAINMENT'
+          | 'FASHION'
+          | 'FOOD'
+          | 'FOOTBALL'
+          | 'GENERAL'
+          | 'GOSPEL'
+          | 'INTERNATIONAL'
+          | 'ISLAMIC'
+          | 'JEWISH'
+          | 'KIDS'
+          | 'LIFESTYLE'
+          | 'LOCAL'
+          | 'MOTORSPORTS'
+          | 'MOVIES'
+          | 'MUSIC'
+          | 'NEWS'
           | 'OUTDOORS_AUTO'
-          | 'GENERAL';
+          | 'PRAISE_WORSHIP'
+          | 'RADIO'
+          | 'REALITY_TV'
+          | 'RELIGIOUS'
+          | 'SCIENTOLOGY'
+          | 'SHOPPING'
+          | 'SPORTS'
+          | 'TECHNOLOGY'
+          | 'TRAVEL';
         readonly input:
-          | 'ENTERTAINMENT'
-          | 'SPORTS'
-          | 'MOVIES'
-          | 'NEWS'
-          | 'INTERNATIONAL'
-          | 'RADIO'
-          | 'RELIGIOUS'
-          | 'DOCUMENTARY'
-          | 'MUSIC'
-          | 'KIDS'
-          | 'SHOPPING'
-          | 'LIFESTYLE'
-          | 'CLASSIC_TV'
-          | 'CRIME'
           | 'ADULT'
+          | 'ADVENTIST'
+          | 'ANIME'
+          | 'BASEBALL'
+          | 'BASKETBALL'
+          | 'BUSINESS'
+          | 'CATHOLIC'
+          | 'CHRISTIAN'
+          | 'CLASSIC_TV'
+          | 'COMBAT_SPORTS'
+          | 'COMEDY'
+          | 'CRICKET'
+          | 'CRIME'
+          | 'DOCUMENTARY'
+          | 'DRAMA'
+          | 'EDUCATION'
+          | 'ENTERTAINMENT'
+          | 'FASHION'
+          | 'FOOD'
+          | 'FOOTBALL'
+          | 'GENERAL'
+          | 'GOSPEL'
+          | 'INTERNATIONAL'
+          | 'ISLAMIC'
+          | 'JEWISH'
+          | 'KIDS'
+          | 'LIFESTYLE'
+          | 'LOCAL'
+          | 'MOTORSPORTS'
+          | 'MOVIES'
+          | 'MUSIC'
+          | 'NEWS'
           | 'OUTDOORS_AUTO'
-          | 'GENERAL';
+          | 'PRAISE_WORSHIP'
+          | 'RADIO'
+          | 'REALITY_TV'
+          | 'RELIGIOUS'
+          | 'SCIENTOLOGY'
+          | 'SHOPPING'
+          | 'SPORTS'
+          | 'TECHNOLOGY'
+          | 'TRAVEL';
       };
     };
     readonly configuration: {
       readonly categories: {
         readonly output:
-          | 'ENTERTAINMENT'
-          | 'SPORTS'
-          | 'MOVIES'
-          | 'NEWS'
-          | 'INTERNATIONAL'
-          | 'RADIO'
-          | 'RELIGIOUS'
-          | 'DOCUMENTARY'
-          | 'MUSIC'
-          | 'KIDS'
-          | 'SHOPPING'
-          | 'LIFESTYLE'
-          | 'CLASSIC_TV'
-          | 'CRIME'
           | 'ADULT'
+          | 'ADVENTIST'
+          | 'ANIME'
+          | 'BASEBALL'
+          | 'BASKETBALL'
+          | 'BUSINESS'
+          | 'CATHOLIC'
+          | 'CHRISTIAN'
+          | 'CLASSIC_TV'
+          | 'COMBAT_SPORTS'
+          | 'COMEDY'
+          | 'CRICKET'
+          | 'CRIME'
+          | 'DOCUMENTARY'
+          | 'DRAMA'
+          | 'EDUCATION'
+          | 'ENTERTAINMENT'
+          | 'FASHION'
+          | 'FOOD'
+          | 'FOOTBALL'
+          | 'GENERAL'
+          | 'GOSPEL'
+          | 'INTERNATIONAL'
+          | 'ISLAMIC'
+          | 'JEWISH'
+          | 'KIDS'
+          | 'LIFESTYLE'
+          | 'LOCAL'
+          | 'MOTORSPORTS'
+          | 'MOVIES'
+          | 'MUSIC'
+          | 'NEWS'
           | 'OUTDOORS_AUTO'
-          | 'GENERAL';
+          | 'PRAISE_WORSHIP'
+          | 'RADIO'
+          | 'REALITY_TV'
+          | 'RELIGIOUS'
+          | 'SCIENTOLOGY'
+          | 'SHOPPING'
+          | 'SPORTS'
+          | 'TECHNOLOGY'
+          | 'TRAVEL';
         readonly input:
-          | 'ENTERTAINMENT'
-          | 'SPORTS'
-          | 'MOVIES'
-          | 'NEWS'
-          | 'INTERNATIONAL'
-          | 'RADIO'
-          | 'RELIGIOUS'
-          | 'DOCUMENTARY'
-          | 'MUSIC'
-          | 'KIDS'
-          | 'SHOPPING'
-          | 'LIFESTYLE'
-          | 'CLASSIC_TV'
-          | 'CRIME'
           | 'ADULT'
+          | 'ADVENTIST'
+          | 'ANIME'
+          | 'BASEBALL'
+          | 'BASKETBALL'
+          | 'BUSINESS'
+          | 'CATHOLIC'
+          | 'CHRISTIAN'
+          | 'CLASSIC_TV'
+          | 'COMBAT_SPORTS'
+          | 'COMEDY'
+          | 'CRICKET'
+          | 'CRIME'
+          | 'DOCUMENTARY'
+          | 'DRAMA'
+          | 'EDUCATION'
+          | 'ENTERTAINMENT'
+          | 'FASHION'
+          | 'FOOD'
+          | 'FOOTBALL'
+          | 'GENERAL'
+          | 'GOSPEL'
+          | 'INTERNATIONAL'
+          | 'ISLAMIC'
+          | 'JEWISH'
+          | 'KIDS'
+          | 'LIFESTYLE'
+          | 'LOCAL'
+          | 'MOTORSPORTS'
+          | 'MOVIES'
+          | 'MUSIC'
+          | 'NEWS'
           | 'OUTDOORS_AUTO'
-          | 'GENERAL';
+          | 'PRAISE_WORSHIP'
+          | 'RADIO'
+          | 'REALITY_TV'
+          | 'RELIGIOUS'
+          | 'SCIENTOLOGY'
+          | 'SHOPPING'
+          | 'SPORTS'
+          | 'TECHNOLOGY'
+          | 'TRAVEL';
       };
     };
   };
@@ -950,23 +1150,48 @@ type ContractBase = Omit<
             readonly Category: {
               readonly kind: 'valueSet';
               readonly values: readonly [
-                'ENTERTAINMENT',
-                'SPORTS',
-                'MOVIES',
-                'NEWS',
-                'INTERNATIONAL',
-                'RADIO',
-                'RELIGIOUS',
-                'DOCUMENTARY',
-                'MUSIC',
-                'KIDS',
-                'SHOPPING',
-                'LIFESTYLE',
-                'CLASSIC_TV',
-                'CRIME',
                 'ADULT',
-                'OUTDOORS_AUTO',
+                'ADVENTIST',
+                'ANIME',
+                'BASEBALL',
+                'BASKETBALL',
+                'BUSINESS',
+                'CATHOLIC',
+                'CHRISTIAN',
+                'CLASSIC_TV',
+                'COMBAT_SPORTS',
+                'COMEDY',
+                'CRICKET',
+                'CRIME',
+                'DOCUMENTARY',
+                'DRAMA',
+                'EDUCATION',
+                'ENTERTAINMENT',
+                'FASHION',
+                'FOOD',
+                'FOOTBALL',
                 'GENERAL',
+                'GOSPEL',
+                'INTERNATIONAL',
+                'ISLAMIC',
+                'JEWISH',
+                'KIDS',
+                'LIFESTYLE',
+                'LOCAL',
+                'MOTORSPORTS',
+                'MOVIES',
+                'MUSIC',
+                'NEWS',
+                'OUTDOORS_AUTO',
+                'PRAISE_WORSHIP',
+                'RADIO',
+                'REALITY_TV',
+                'RELIGIOUS',
+                'SCIENTOLOGY',
+                'SHOPPING',
+                'SPORTS',
+                'TECHNOLOGY',
+                'TRAVEL',
               ];
             };
           };
@@ -1399,45 +1624,95 @@ type ContractBase = Omit<
           readonly Category: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
-              { readonly name: 'ENTERTAINMENT'; readonly value: 'ENTERTAINMENT' },
-              { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
-              { readonly name: 'MOVIES'; readonly value: 'MOVIES' },
-              { readonly name: 'NEWS'; readonly value: 'NEWS' },
-              { readonly name: 'INTERNATIONAL'; readonly value: 'INTERNATIONAL' },
-              { readonly name: 'RADIO'; readonly value: 'RADIO' },
-              { readonly name: 'RELIGIOUS'; readonly value: 'RELIGIOUS' },
-              { readonly name: 'DOCUMENTARY'; readonly value: 'DOCUMENTARY' },
-              { readonly name: 'MUSIC'; readonly value: 'MUSIC' },
-              { readonly name: 'KIDS'; readonly value: 'KIDS' },
-              { readonly name: 'SHOPPING'; readonly value: 'SHOPPING' },
-              { readonly name: 'LIFESTYLE'; readonly value: 'LIFESTYLE' },
-              { readonly name: 'CLASSIC_TV'; readonly value: 'CLASSIC_TV' },
-              { readonly name: 'CRIME'; readonly value: 'CRIME' },
               { readonly name: 'ADULT'; readonly value: 'ADULT' },
-              { readonly name: 'OUTDOORS_AUTO'; readonly value: 'OUTDOORS_AUTO' },
+              { readonly name: 'ADVENTIST'; readonly value: 'ADVENTIST' },
+              { readonly name: 'ANIME'; readonly value: 'ANIME' },
+              { readonly name: 'BASEBALL'; readonly value: 'BASEBALL' },
+              { readonly name: 'BASKETBALL'; readonly value: 'BASKETBALL' },
+              { readonly name: 'BUSINESS'; readonly value: 'BUSINESS' },
+              { readonly name: 'CATHOLIC'; readonly value: 'CATHOLIC' },
+              { readonly name: 'CHRISTIAN'; readonly value: 'CHRISTIAN' },
+              { readonly name: 'CLASSIC_TV'; readonly value: 'CLASSIC_TV' },
+              { readonly name: 'COMBAT_SPORTS'; readonly value: 'COMBAT_SPORTS' },
+              { readonly name: 'COMEDY'; readonly value: 'COMEDY' },
+              { readonly name: 'CRICKET'; readonly value: 'CRICKET' },
+              { readonly name: 'CRIME'; readonly value: 'CRIME' },
+              { readonly name: 'DOCUMENTARY'; readonly value: 'DOCUMENTARY' },
+              { readonly name: 'DRAMA'; readonly value: 'DRAMA' },
+              { readonly name: 'EDUCATION'; readonly value: 'EDUCATION' },
+              { readonly name: 'ENTERTAINMENT'; readonly value: 'ENTERTAINMENT' },
+              { readonly name: 'FASHION'; readonly value: 'FASHION' },
+              { readonly name: 'FOOD'; readonly value: 'FOOD' },
+              { readonly name: 'FOOTBALL'; readonly value: 'FOOTBALL' },
               { readonly name: 'GENERAL'; readonly value: 'GENERAL' },
+              { readonly name: 'GOSPEL'; readonly value: 'GOSPEL' },
+              { readonly name: 'INTERNATIONAL'; readonly value: 'INTERNATIONAL' },
+              { readonly name: 'ISLAMIC'; readonly value: 'ISLAMIC' },
+              { readonly name: 'JEWISH'; readonly value: 'JEWISH' },
+              { readonly name: 'KIDS'; readonly value: 'KIDS' },
+              { readonly name: 'LIFESTYLE'; readonly value: 'LIFESTYLE' },
+              { readonly name: 'LOCAL'; readonly value: 'LOCAL' },
+              { readonly name: 'MOTORSPORTS'; readonly value: 'MOTORSPORTS' },
+              { readonly name: 'MOVIES'; readonly value: 'MOVIES' },
+              { readonly name: 'MUSIC'; readonly value: 'MUSIC' },
+              { readonly name: 'NEWS'; readonly value: 'NEWS' },
+              { readonly name: 'OUTDOORS_AUTO'; readonly value: 'OUTDOORS_AUTO' },
+              { readonly name: 'PRAISE_WORSHIP'; readonly value: 'PRAISE_WORSHIP' },
+              { readonly name: 'RADIO'; readonly value: 'RADIO' },
+              { readonly name: 'REALITY_TV'; readonly value: 'REALITY_TV' },
+              { readonly name: 'RELIGIOUS'; readonly value: 'RELIGIOUS' },
+              { readonly name: 'SCIENTOLOGY'; readonly value: 'SCIENTOLOGY' },
+              { readonly name: 'SHOPPING'; readonly value: 'SHOPPING' },
+              { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
+              { readonly name: 'TECHNOLOGY'; readonly value: 'TECHNOLOGY' },
+              { readonly name: 'TRAVEL'; readonly value: 'TRAVEL' },
             ];
           };
         };
         readonly enumMemberTypes?: {
           readonly Category: readonly [
-            { readonly name: 'ENTERTAINMENT'; readonly value: 'ENTERTAINMENT' },
-            { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
-            { readonly name: 'MOVIES'; readonly value: 'MOVIES' },
-            { readonly name: 'NEWS'; readonly value: 'NEWS' },
-            { readonly name: 'INTERNATIONAL'; readonly value: 'INTERNATIONAL' },
-            { readonly name: 'RADIO'; readonly value: 'RADIO' },
-            { readonly name: 'RELIGIOUS'; readonly value: 'RELIGIOUS' },
-            { readonly name: 'DOCUMENTARY'; readonly value: 'DOCUMENTARY' },
-            { readonly name: 'MUSIC'; readonly value: 'MUSIC' },
-            { readonly name: 'KIDS'; readonly value: 'KIDS' },
-            { readonly name: 'SHOPPING'; readonly value: 'SHOPPING' },
-            { readonly name: 'LIFESTYLE'; readonly value: 'LIFESTYLE' },
-            { readonly name: 'CLASSIC_TV'; readonly value: 'CLASSIC_TV' },
-            { readonly name: 'CRIME'; readonly value: 'CRIME' },
             { readonly name: 'ADULT'; readonly value: 'ADULT' },
-            { readonly name: 'OUTDOORS_AUTO'; readonly value: 'OUTDOORS_AUTO' },
+            { readonly name: 'ADVENTIST'; readonly value: 'ADVENTIST' },
+            { readonly name: 'ANIME'; readonly value: 'ANIME' },
+            { readonly name: 'BASEBALL'; readonly value: 'BASEBALL' },
+            { readonly name: 'BASKETBALL'; readonly value: 'BASKETBALL' },
+            { readonly name: 'BUSINESS'; readonly value: 'BUSINESS' },
+            { readonly name: 'CATHOLIC'; readonly value: 'CATHOLIC' },
+            { readonly name: 'CHRISTIAN'; readonly value: 'CHRISTIAN' },
+            { readonly name: 'CLASSIC_TV'; readonly value: 'CLASSIC_TV' },
+            { readonly name: 'COMBAT_SPORTS'; readonly value: 'COMBAT_SPORTS' },
+            { readonly name: 'COMEDY'; readonly value: 'COMEDY' },
+            { readonly name: 'CRICKET'; readonly value: 'CRICKET' },
+            { readonly name: 'CRIME'; readonly value: 'CRIME' },
+            { readonly name: 'DOCUMENTARY'; readonly value: 'DOCUMENTARY' },
+            { readonly name: 'DRAMA'; readonly value: 'DRAMA' },
+            { readonly name: 'EDUCATION'; readonly value: 'EDUCATION' },
+            { readonly name: 'ENTERTAINMENT'; readonly value: 'ENTERTAINMENT' },
+            { readonly name: 'FASHION'; readonly value: 'FASHION' },
+            { readonly name: 'FOOD'; readonly value: 'FOOD' },
+            { readonly name: 'FOOTBALL'; readonly value: 'FOOTBALL' },
             { readonly name: 'GENERAL'; readonly value: 'GENERAL' },
+            { readonly name: 'GOSPEL'; readonly value: 'GOSPEL' },
+            { readonly name: 'INTERNATIONAL'; readonly value: 'INTERNATIONAL' },
+            { readonly name: 'ISLAMIC'; readonly value: 'ISLAMIC' },
+            { readonly name: 'JEWISH'; readonly value: 'JEWISH' },
+            { readonly name: 'KIDS'; readonly value: 'KIDS' },
+            { readonly name: 'LIFESTYLE'; readonly value: 'LIFESTYLE' },
+            { readonly name: 'LOCAL'; readonly value: 'LOCAL' },
+            { readonly name: 'MOTORSPORTS'; readonly value: 'MOTORSPORTS' },
+            { readonly name: 'MOVIES'; readonly value: 'MOVIES' },
+            { readonly name: 'MUSIC'; readonly value: 'MUSIC' },
+            { readonly name: 'NEWS'; readonly value: 'NEWS' },
+            { readonly name: 'OUTDOORS_AUTO'; readonly value: 'OUTDOORS_AUTO' },
+            { readonly name: 'PRAISE_WORSHIP'; readonly value: 'PRAISE_WORSHIP' },
+            { readonly name: 'RADIO'; readonly value: 'RADIO' },
+            { readonly name: 'REALITY_TV'; readonly value: 'REALITY_TV' },
+            { readonly name: 'RELIGIOUS'; readonly value: 'RELIGIOUS' },
+            { readonly name: 'SCIENTOLOGY'; readonly value: 'SCIENTOLOGY' },
+            { readonly name: 'SHOPPING'; readonly value: 'SHOPPING' },
+            { readonly name: 'SPORTS'; readonly value: 'SPORTS' },
+            { readonly name: 'TECHNOLOGY'; readonly value: 'TECHNOLOGY' },
+            { readonly name: 'TRAVEL'; readonly value: 'TRAVEL' },
           ];
         };
       };

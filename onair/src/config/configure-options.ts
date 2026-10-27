@@ -1,3 +1,5 @@
+import { catalogTypes, toReadableString } from "@/utils/helpers";
+
 export type ConfigureOption = Readonly<{
   value: string;
   label: string;
@@ -23,24 +25,10 @@ export const COUNTRIES: readonly ConfigureOption[] = [
 ];
 
 /** Categories exposed as Stremio catalogs (ADULT is intentionally omitted). */
-export const GENRES: readonly ConfigureOption[] = [
-  { value: "ENTERTAINMENT", label: "Entertainment" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "MOVIES", label: "Movies" },
-  { value: "NEWS", label: "News" },
-  { value: "INTERNATIONAL", label: "International" },
-  { value: "RADIO", label: "Radio" },
-  { value: "RELIGIOUS", label: "Religious" },
-  { value: "DOCUMENTARY", label: "Documentary" },
-  { value: "MUSIC", label: "Music" },
-  { value: "KIDS", label: "Kids" },
-  { value: "SHOPPING", label: "Shopping" },
-  { value: "LIFESTYLE", label: "Lifestyle" },
-  { value: "CLASSIC_TV", label: "Classic TV" },
-  { value: "CRIME", label: "Crime" },
-  { value: "OUTDOORS_AUTO", label: "Outdoors & Auto" },
-  { value: "GENERAL", label: "General" },
-];
+export const GENRES: readonly ConfigureOption[] = catalogTypes.map((type) => ({
+  value: type,
+  label: toReadableString(type),
+}));
 
 export const CONFIGURE_GROUPS: ConfigureGroup[] = [
   {
