@@ -51,8 +51,9 @@ const envSchema = z.object({
   CLOUDINARY_CLOUD_NAME: z.string().optional().default(""),
   CLOUDINARY_API_KEY: z.string().optional().default(""),
   CLOUDINARY_API_SECRET: z.string().optional().default(""),
-  LOGTAIL_SOURCE_TOKEN: z.string().optional().default(""),
-  LOGTAIL_INGESTING_HOST: z.string().optional().default(""),
+  AXIOM_TOKEN: z.string().optional().default(""),
+  AXIOM_REGION: z.string().optional().default("us-east-1.aws.edge.axiom.co"),
+  AXIOM_DATASET: z.string().optional().default(""),
 });
 
 export type AppConfig = z.infer<typeof envSchema>;
