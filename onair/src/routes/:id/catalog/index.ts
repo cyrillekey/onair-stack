@@ -182,7 +182,14 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         return emptyResponse;
       }
 
-      let query = fastify.db.orm.public.Channel.where({
+      let query = fastify.db.orm.public.Channel.include(
+        "schedule",
+        (schedules) =>
+          schedules
+            .where((schedule) => schedule.endTime.gt(guideWindow.start))
+            .where((schedule) => schedule.startTime.lt(guideWindow.end))
+            .orderBy((schedule) => schedule.startTime.asc()),
+      ).where({
         category: catalog,
       });
 
@@ -220,25 +227,11 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         return { metasDetailed: [], ...GUIDE_CACHE };
       }
 
-      const schedules = await fastify.db.orm.public.Schedule.where({})
-        .where((schedule) => schedule.channelId.in(channels.map((c) => c.id)))
-        .where((schedule) => schedule.endTime.gt(guideWindow.start))
-        .where((schedule) => schedule.startTime.lt(guideWindow.end))
-        .orderBy((schedule) => schedule.startTime.asc())
-        .all();
-
-      const schedulesByChannel = new Map<string, typeof schedules>();
-      for (const schedule of schedules) {
-        const current = schedulesByChannel.get(schedule.channelId) ?? [];
-        current.push(schedule);
-        schedulesByChannel.set(schedule.channelId, current);
-      }
-
       return {
         metasDetailed: channels.map((channel) =>
           metaForChannel(
             channel,
-            (schedulesByChannel.get(channel.id) ?? []).map((schedule) =>
+            channel.schedule.map((schedule) =>
               videoForSchedule(channel, schedule),
             ),
           ),

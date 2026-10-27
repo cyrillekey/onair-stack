@@ -3,11 +3,9 @@ import appConfig from "@/config";
 import type { Models } from "@/prisma/contract";
 import { toIsoString } from "@/utils/api";
 import { toReadableString } from "@/utils/helpers";
+import dayjs from "dayjs";
 
-export type ChannelRecord = Omit<
-  Models.public_Channel,
-  "schedule" | "streams"
->;
+export type ChannelRecord = Omit<Models.public_Channel, "schedule" | "streams">;
 export type ScheduleRecord = Omit<Models.public_Schedule, "channel">;
 
 export interface GuideWindow {
@@ -30,16 +28,26 @@ export function cacheControl(cache: {
   return `max-age=${cache.cacheMaxAge}, stale-while-revalidate=${cache.staleRevalidate}, stale-if-error=${cache.staleError}, public`;
 }
 
-export function parseGuideDate(date: string | undefined): GuideWindow | null {
+export function parseGuideDate(date: string | undefined): GuideWindow {
   if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return null;
+    return {
+      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
+      end: Temporal.Instant.from(
+        dayjs().add(60, "minutes").toDate().toISOString(),
+      ),
+    };
   }
 
   try {
     const start = Temporal.Instant.from(`${date}T00:00:00Z`);
-    return { start, end: start.add({ hours: 24 }) };
+    return { start, end: start.add({ minutes: 60 }) };
   } catch {
-    return null;
+    return {
+      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
+      end: Temporal.Instant.from(
+        dayjs().add(60, "minutes").toDate().toISOString(),
+      ),
+    };
   }
 }
 
@@ -121,8 +129,7 @@ export function videoForSchedule(
     startTime,
     endTime,
     overview: schedule.description || undefined,
-    thumbnail:
-      schedule.poster || channel.poster || appConfig.fallbackImage,
+    thumbnail: schedule.poster || channel.poster || appConfig.fallbackImage,
     runtime,
     releaseInfo: startTime.slice(0, 4),
     genres: [toReadableString(channel.category)],
