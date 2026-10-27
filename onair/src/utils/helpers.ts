@@ -28,7 +28,7 @@ export function toReadableString(name: string) {
 
 export const baseManifest: Manifest = {
   id: "community.onair",
-  version: "1.0.2",
+  version: "1.0.3",
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleotieno7@gmail.com",

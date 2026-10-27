@@ -60,7 +60,15 @@ const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
             ? (config.categories as CatalogType[])
             : (GENRES.map((genre) => genre.value) as CatalogType[]);
         const catalogs = buildCatalog(categories, showInHome);
-        const manifest: Manifest = { ...baseManifest, catalogs };
+        const manifest: Manifest = {
+          ...baseManifest,
+          catalogs,
+          behaviorHints: {
+            configurable: true,
+            epgProvider: true,
+            configurationRequired: false,
+          },
+        };
 
         reply.status(200).send(manifest);
       } catch (error) {
