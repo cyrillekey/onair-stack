@@ -1,41 +1,35 @@
 # syntax=docker/dockerfile:1
 
-FROM node:26-alpine AS builder
-
-# Build tools needed to compile native modules on Alpine (musl libc)
-RUN apk add --no-cache python3 make g++
-
+FROM node:26-alpine AS base
 WORKDIR /app
 
+FROM base AS builder
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci
-
-COPY tsconfig.json ./
-COPY prisma.config.ts ./
+COPY tsconfig.json prisma.config.ts ./
 COPY src ./src
-
 RUN npm run build
 
-FROM node:26-alpine AS runner
+# Production-only node_modules, built clean (no prune needed)
+FROM base AS prod-deps
+RUN apk add --no-cache python3 make g++
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
-# Runtime libs for native modules (Prisma engines, Sentry)
+FROM base AS runner
 RUN apk add --no-cache libgcc libstdc++
-
 ENV NODE_ENV=production
 ENV PORT=8080
 
-WORKDIR /app
+COPY --chown=node:node package.json package-lock.json ./
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+COPY --from=builder --chown=node:node /app/src/templates ./dist/src/templates
 
-COPY package.json package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-# tsc does not emit .ejs or static files; ship them alongside the compiled app.
-COPY --from=builder /app/src/templates ./dist/src/templates
-COPY --from=builder /app/src/public ./dist/src/public
-RUN npm prune --omit=dev && npm cache clean --force && touch /app/.env && chown -R node:node /app
+# Non-recursive, so it's cheap
+RUN touch .env && chown node:node /app .env
 
 USER node
-
 EXPOSE 8080
-
 CMD ["node", "--enable-source-maps", "dist/src/server.js"]
