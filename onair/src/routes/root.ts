@@ -1,5 +1,6 @@
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
+import { COUNTRIES } from "@/config/configure-options";
 import { baseManifest } from "@/utils/helpers";
 
 const root: FastifyPluginCallbackJsonSchemaToTs<{
@@ -28,7 +29,9 @@ const root: FastifyPluginCallbackJsonSchemaToTs<{
     },
   );
   fastify.get("/", { schema: { hide: true } }, async (_, reply) => {
-    const html = await fastify.ejs.compile("/home/index", {});
+    const html = await fastify.ejs.compile("/home/index", {
+      countries: COUNTRIES,
+    });
     return reply
       .header("cache-control", "public, max-age=300")
       .type("text/html; charset=utf-8")
