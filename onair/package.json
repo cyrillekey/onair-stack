@@ -12,7 +12,9 @@
     "build": "npm run build:ts",
     "build:ts": "tsc && tsc-alias -p tsconfig.json",
     "dev": "fastify start -w -l info -P -r tsx/cjs src/app.ts",
-    "emit": "prisma contract emit"
+    "emit": "prisma contract emit",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint ."
   },
   "keywords": [],
   "author": "",
