@@ -291,5 +291,12 @@
         "sources": [
             "bd_fifa.m3u8"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Cnmajun/IptvSync/refs/heads/main/src/",
+        "sources": [
+            "ss_gb.m3u",
+            "ss_us.m3u"
+        ]
     }
 ]

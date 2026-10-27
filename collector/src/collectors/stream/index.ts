@@ -56,9 +56,16 @@ class StreamsCollector extends BaseCollector {
             logger.info({ streams: streams.length }, "streams collected");
 
             for (const channel of allChannels) {
-              const matching = streams.filter((a) =>
-                this.fuzzyMatch(a.name, channel.name),
-              );
+              const matching = streams.filter((a) => {
+                if (a?.countryName && channel.country) {
+                  if (
+                    a.countryName.toLowerCase() != channel.country.toLowerCase()
+                  ) {
+                    return false;
+                  }
+                }
+                return this.fuzzyMatch(a.name, channel.name);
+              });
               // for all matching upsert streams
               await Promise.all(
                 matching.map((a) =>
@@ -68,6 +75,8 @@ class StreamsCollector extends BaseCollector {
                     slug: this.slugify(a.name),
                     url: a.streamLink,
                     resolution: a.resolution,
+                    language: a.countryName,
+                    logo: a.logo ?? a.tvgLogo,
                   }),
                 ),
               );
@@ -89,9 +98,14 @@ class StreamsCollector extends BaseCollector {
           logger.info({ streams: streams.length }, "streams collected");
           // for all matching upsert streams
           for (const channel of allChannels) {
-            const channelStreams = (famelack.streams ?? []).filter((a) =>
-              this.fuzzyMatch(a.name, channel.name),
-            );
+            const channelStreams = (famelack.streams ?? []).filter((a) => {
+              if (a?.country && channel.country) {
+                if (a.country.toLowerCase() != channel.country.toLowerCase()) {
+                  return false;
+                }
+              }
+              return this.fuzzyMatch(a.name, channel.name);
+            });
             const promises = [];
             for (const stream of channelStreams) {
               // pass
@@ -131,7 +145,9 @@ class StreamsCollector extends BaseCollector {
   }
   private async upsertRecord(
     ctx: CollectorContext,
-    record: Partial<DefaultModelRow<Contract, "Stream", never>>,
+    record: Partial<
+      DefaultModelRow<Contract, "Stream", never> & { logo?: string }
+    >,
   ) {
     try {
       const streamSlug = this.slugifyUrl(record.url!, record.channelId!);
@@ -142,7 +158,7 @@ class StreamsCollector extends BaseCollector {
           slug: streamSlug,
           url: record.url!,
           resolution: record.resolution,
-          language: "English",
+          language: record.language ?? "",
         },
         update: {
           slug: streamSlug,
@@ -150,6 +166,14 @@ class StreamsCollector extends BaseCollector {
         },
         conflictOn: { slug: streamSlug },
       });
+      if (record?.logo) {
+        await ctx.db.orm.public.Channel.where({
+          id: record.channelId,
+          poster: null,
+        }).update({
+          poster: record.logo,
+        });
+      }
     } catch (error) {
       logger.error({
         error,

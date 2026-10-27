@@ -63,6 +63,10 @@ class EpgScheduler extends BaseCollector<Channel> {
       id: "unitedstates1.xml",
       name: "United States",
     },
+    {
+      id: "newzealand.xml",
+      name: "New Zealand",
+    },
   ];
   schedule = "50 00 * * *";
   name = "EPG Scheduler";
@@ -94,7 +98,7 @@ class EpgScheduler extends BaseCollector<Channel> {
           const schedules = await this.fetchScheduleEpg(url);
           ctx.log.info({ schedules: schedules.length }, "channels fetched");
           for (const schedule of schedules) {
-            const channel = await ctx.db.orm.public.Channel.upsert({
+            await ctx.db.orm.public.Channel.upsert({
               create: {
                 country: country.name,
                 name: schedule.name,
@@ -110,23 +114,29 @@ class EpgScheduler extends BaseCollector<Channel> {
               },
               conflictOn: { slug: this.slugify(schedule.name) },
             });
+            const ids = await ctx.db.orm.public.Channel.where({
+              slug: this.slugify(schedule.name),
+            }).all();
             fetched += 1;
-            if (channel?.id) {
+            if (ids.length > 0) {
               // create schedule
-              await ctx.db.orm.public.Schedule.createAll(
-                schedule.schedule.map((a) => ({
-                  channelId: channel.id,
-                  date: this.buildTemporalDate(a.startTime),
-                  startTime: this.buildTemporalDate(a.startTime),
-                  endTime: this.buildTemporalDate(a.endTime),
-                  name: a.title,
-                  description: a?.description,
-                  poster: schedule.logo,
-                })),
-                {
-                  onConflict: "skip",
-                },
-              );
+              for (const channel of ids) {
+                await ctx.db.orm.public.Schedule.createAll(
+                  schedule.schedule.map((a) => ({
+                    channelId: channel.id,
+                    date: this.buildTemporalDate(a.startTime),
+                    startTime: this.buildTemporalDate(a.startTime),
+                    endTime: this.buildTemporalDate(a.endTime),
+                    name: a.title,
+                    description: a?.description,
+                    poster: schedule.logo,
+                  })),
+                  {
+                    onConflict: "skip",
+                  },
+                );
+              }
+
               stored += schedules.length;
             }
           }
