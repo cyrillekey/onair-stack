@@ -71,7 +71,7 @@ async function compileEjs(
 }
 
 export default fp(
-  async (fastify) => {
+  (fastify) => {
     fastify.decorate("ejs", {
       compile: compileEjs,
     });

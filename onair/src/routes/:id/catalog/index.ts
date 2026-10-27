@@ -1,7 +1,7 @@
 import {
   catalogTypes,
   encodeCatalogType,
-  ExtraArgs,
+  type ExtraArgs,
   reverseCatalogId,
 } from "@/utils/helpers";
 import {
@@ -12,7 +12,7 @@ import {
   previewForChannel,
   videoForSchedule,
 } from "@/utils/epg";
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
 const CATALOG_PAGE_SIZE = 100;
 const dateTimeFormat: string = "date-time";
@@ -139,7 +139,7 @@ const catalogExtraParamsSchema = {
   required: ["id", "catalog", "extraArgs"],
 } as const;
 
-const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -148,7 +148,7 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify): void => {
   async function getCatalog(
     userId: string,
     catalogId: string,
@@ -227,10 +227,7 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
         .orderBy((schedule) => schedule.startTime.asc())
         .all();
 
-      const schedulesByChannel = new Map<
-        string,
-        typeof schedules
-      >();
+      const schedulesByChannel = new Map<string, typeof schedules>();
       for (const schedule of schedules) {
         const current = schedulesByChannel.get(schedule.channelId) ?? [];
         current.push(schedule);

@@ -1,9 +1,9 @@
-import { baseManifest, buildCatalog, CatalogType } from "@/utils/helpers";
+import { baseManifest, buildCatalog, type CatalogType } from "@/utils/helpers";
 import { GENRES } from "@/config/configure-options";
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
-import { Manifest } from "stremio-addon-sdk";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type Manifest } from "stremio-addon-sdk";
 
-const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const stremioRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -12,7 +12,7 @@ const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify): void => {
   fastify.get(
     "/manifest.json",
     {
@@ -72,6 +72,7 @@ const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
 
         reply.status(200).send(manifest);
       } catch (error) {
+        req.log.error(error);
         reply.redirect("/configure");
       }
     },

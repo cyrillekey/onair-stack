@@ -4,9 +4,9 @@ import {
   GENRES,
   TIMEZONES,
 } from "@/config/configure-options";
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
-const updateConfigurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const updateConfigurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -15,7 +15,7 @@ const updateConfigurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify): void => {
   // Older add-on links pointed at /:id/configure; the builder now lives at
   // /configure, so send those visitors to the canonical page.
   fastify.get(

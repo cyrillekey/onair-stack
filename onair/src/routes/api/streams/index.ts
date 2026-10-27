@@ -1,4 +1,4 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import { toIsoString } from "@/utils/api";
 
 const streamSchema = {
@@ -35,7 +35,7 @@ const errorSchema = {
   required: ["message"],
 };
 
-const streamsRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const streamsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -44,7 +44,7 @@ const streamsRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify): Promise<void> => {
+}> = (fastify): void => {
   fastify.get(
     "",
     {
@@ -133,7 +133,9 @@ const streamsRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           query = query.offset(request.query.offset);
         }
 
-        const streams = await query.orderBy((stream) => stream.name.asc()).all();
+        const streams = await query
+          .orderBy((stream) => stream.name.asc())
+          .all();
 
         return {
           streams: streams.map((stream) => ({

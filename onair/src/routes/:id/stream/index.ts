@@ -1,6 +1,6 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
-const streamRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -9,7 +9,7 @@ const streamRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify):void => {
   fastify.route({
     method: "GET",
     schema: {

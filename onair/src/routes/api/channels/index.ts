@@ -1,4 +1,4 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import { catalogTypes } from "@/utils/helpers";
 import { toIsoString } from "@/utils/api";
 
@@ -35,7 +35,7 @@ const errorSchema = {
   required: ["message"],
 };
 
-const channelsRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const channelsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -44,7 +44,7 @@ const channelsRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify): Promise<void> => {
+}> = (fastify): void => {
   fastify.get(
     "",
     {

@@ -1,4 +1,4 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import {
   CONFIGURE_GROUPS,
   COUNTRIES,
@@ -11,7 +11,7 @@ import appConfig from "@/config";
 const countryValues = COUNTRIES.map((option) => option.value);
 const genreValues = GENRES.map((option) => option.value);
 
-const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -20,7 +20,7 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify): void => {
   fastify.get("", { schema: { hide: true } }, async function (_, reply) {
     const view = await fastify.ejs.compile("/configure/index", {
       pageTitle: "Configure your line-up — Onair",
@@ -136,7 +136,8 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       if (countries.length === 0 && categories.length === 0) {
         return reply.code(400).send({
           success: false,
-          message: "Select at least one country or genre to generate your link.",
+          message:
+            "Select at least one country or genre to generate your link.",
         });
       }
 

@@ -1,4 +1,4 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import { Temporal } from "temporal-polyfill";
 import { toIsoString } from "@/utils/api";
 
@@ -36,7 +36,7 @@ const errorSchema = {
   required: ["message"],
 };
 
-const schedulesRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const schedulesRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -45,7 +45,7 @@ const schedulesRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify): Promise<void> => {
+}> = (fastify): void => {
   fastify.get(
     "",
     {
@@ -117,9 +117,7 @@ const schedulesRoutes: FastifyPluginAsyncJsonSchemaToTs<{
         if (request.query.date) {
           let start;
           try {
-            start = Temporal.Instant.from(
-              `${request.query.date}T00:00:00Z`,
-            );
+            start = Temporal.Instant.from(`${request.query.date}T00:00:00Z`);
           } catch {
             return reply
               .code(400)

@@ -1,4 +1,4 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import {
   cacheControl,
   GUIDE_CACHE,
@@ -59,7 +59,7 @@ const metaSchema = {
   },
 } as const;
 
-const metaRoutes: FastifyPluginAsyncJsonSchemaToTs<{
+const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -68,7 +68,7 @@ const metaRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify):void => {
   fastify.get(
     "/:type/:metaId.json",
     {

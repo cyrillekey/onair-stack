@@ -16,7 +16,7 @@ declare module "fastify" {
  * closed when the server shuts down.
  */
 export default fp(
-  async (fastify) => {
+  (fastify) => {
     fastify.decorate("db", db);
 
     fastify.addHook("onClose", async () => {

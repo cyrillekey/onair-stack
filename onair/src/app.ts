@@ -1,8 +1,11 @@
 import { join } from "node:path";
-import AutoLoad, { AutoloadPluginOptions } from "@fastify/autoload";
-import { FastifyPluginAsync, FastifyServerOptions } from "fastify";
+import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
+import type {
+  FastifyPluginCallback,
+  FastifyServerOptions,
+} from "fastify";
 import fastifySwagger from "@fastify/swagger";
-import { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import { type JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import fastifyCors from "@fastify/cors";
 import scalarDocumentation from "@scalar/fastify-api-reference";
 export interface AppOptions
@@ -13,10 +16,7 @@ const options: AppOptions = {
   dirNameRoutePrefix: true,
 };
 
-const app: FastifyPluginAsync<AppOptions> = async (
-  fastify,
-  opts,
-): Promise<void> => {
+const app: FastifyPluginCallback<AppOptions> = (fastify, opts) => {
   // Place here your custom code!
   fastify.withTypeProvider<
     JsonSchemaToTsProvider<{
@@ -56,7 +56,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
   // This loads all plugins defined in plugins
   // those should be support plugins that are reused
   // through your application
-  // eslint-disable-next-line no-void
+   
   void fastify.register(AutoLoad, {
     dir: join(__dirname, "plugins"),
     options: opts,
@@ -64,7 +64,7 @@ const app: FastifyPluginAsync<AppOptions> = async (
 
   // This loads all plugins defined in routes
   // define your routes in one of these
-  // eslint-disable-next-line no-void
+   
   void fastify.register(AutoLoad, {
     dir: join(__dirname, "routes"),
     options: opts,

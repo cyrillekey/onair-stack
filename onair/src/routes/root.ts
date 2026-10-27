@@ -1,8 +1,8 @@
-import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
 import { baseManifest } from "@/utils/helpers";
 
-const root: FastifyPluginAsyncJsonSchemaToTs<{
+const root: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
     deserialize: [
       {
@@ -11,7 +11,7 @@ const root: FastifyPluginAsyncJsonSchemaToTs<{
       },
     ];
   };
-}> = async (fastify, opts): Promise<void> => {
+}> = (fastify): void => {
   fastify.get(
     "/manifest.json",
     {
@@ -23,7 +23,7 @@ const root: FastifyPluginAsyncJsonSchemaToTs<{
         description: "Get default stremio addon manifest",
       },
     },
-    async (req, reply) => {
+    (_req, _reply) => {
       return baseManifest;
     },
   );
