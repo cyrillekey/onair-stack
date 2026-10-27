@@ -1,38 +1,29 @@
 # syntax=docker/dockerfile:1
 
 FROM node:26-alpine AS builder
-
 WORKDIR /app
-
 COPY package.json package-lock.json ./
 RUN npm ci
-
 COPY tsconfig.json ./
 COPY src ./src
-
 RUN npm run build
 
-# Prisma CLI stage: keeps the dev dependencies (the `prisma` CLI) together with
-# the contract and the migration history, so the database can be created before
-# the services start. `prisma db init` is additive and idempotent.
-FROM builder AS migrate
-
-COPY prisma.config.ts ./
-COPY src/prisma ./src/prisma
-COPY migrations ./migrations
-
-CMD ["node_modules/.bin/prisma", "db", "init"]
+# Production-only node_modules, installed clean (no prune)
+FROM node:26-alpine AS prod-deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
 
 FROM node:26-alpine AS runner
-
 ENV NODE_ENV=production
-
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-RUN npm prune --omit=dev && npm cache clean --force && touch /app/.env && chown -R node:node /app
+COPY --chown=node:node package.json package-lock.json ./
+COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/dist ./dist
+
+# Non-recursive, so it's cheap
+RUN touch .env && chown node:node /app .env
 
 USER node
 
