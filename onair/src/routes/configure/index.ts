@@ -7,6 +7,7 @@ import {
 } from "@/config/configure-options";
 import type { CatalogType } from "@/utils/helpers";
 import appConfig from "@/config";
+import { getCountryForTimezone } from "countries-and-timezones";
 
 const countryValues = COUNTRIES.map((option) => option.value);
 const genreValues = GENRES.map((option) => option.value);
@@ -144,7 +145,9 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       try {
         const user = await fastify.db.orm.public.User.create({
           name: username,
-          country: request.body.timezone,
+          country:
+            getCountryForTimezone(request.body.timezone)?.name ??
+            request.body.timezone,
         });
 
         try {
@@ -264,7 +267,9 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           // create config and user
           const user = await fastify.db.orm.public.User.create({
             name: request.body.username,
-            country: request.body.timezone,
+            country:
+              getCountryForTimezone(request.body.timezone)?.name ??
+              request.body.timezone,
           });
           await fastify.db.orm.public.Configuration.create({
             countries,
