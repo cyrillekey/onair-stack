@@ -6,10 +6,11 @@ export const logger = pino({
   transport:
     config.NODE_ENV === "production"
       ? {
-          target: "@logtail/pino",
+          target: "@axiomhq/pino",
           options: {
-            sourceToken: config.LOGTAIL_SOURCE_TOKEN,
-            options: { endpoint: config.LOGTAIL_INGESTING_HOST },
+            dataset: config.AXIOM_DATASET,
+            token: config.AXIOM_TOKEN,
+            edge: config.AXIOM_REGION,
           },
         }
       : {
