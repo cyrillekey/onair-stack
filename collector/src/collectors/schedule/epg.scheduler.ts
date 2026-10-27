@@ -68,8 +68,9 @@ class EpgScheduler extends BaseCollector<Channel> {
       name: "New Zealand",
     },
   ];
-  schedule = "50 00 * * *";
+  schedule = "30 01 * * *";
   name = "EPG Scheduler";
+
   private buildUrl(country: string) {
     return `${this.epgUrl}${country}.gz`;
   }

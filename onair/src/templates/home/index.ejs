@@ -1,0 +1,354 @@
+<%- include('../layout/header') %>
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <span class="eyebrow">Self-hosted live TV</span>
+          <h1>Every channel,<br><em>one install.</em></h1>
+          <p class="lede">
+            Onair is a Stremio addon for live television with a native EPG,
+            sixteen catalog rails, and health-checked streams. Pick your
+            countries and categories, install once, and watch from Discover or
+            the guide grid.
+          </p>
+          <div class="actions">
+            <a class="btn btn-primary" href="<%= configureUrl %>">
+              Build your lineup
+              <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
+            </a>
+            <a class="btn btn-ghost" href="<%= docsUrl %>">Read the docs</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <svg class="epg-art-svg" viewBox="0 0 760 650" xmlns="http://www.w3.org/2000/svg" focusable="false">
+            <g class="epg-deco" fill="none" stroke="var(--art-ink)">
+              <circle cx="644" cy="128" r="116" stroke-dasharray="2 9" opacity=".2" />
+              <circle cx="112" cy="596" r="52" stroke-dasharray="2 9" opacity=".16" />
+              <path d="M64 106v26M51 119h26" opacity=".26" />
+              <path d="M700 462v22M689 473h22" opacity=".26" />
+            </g>
+
+            <g transform="rotate(-2.4 380 325)">
+              <rect x="82" y="60" width="596" height="536" rx="30" fill="var(--art-back)" />
+              <rect x="64" y="42" width="596" height="536" rx="30" fill="var(--art-paper)" stroke="var(--art-paper-edge)"
+                stroke-width="1.5" />
+
+              <circle cx="99" cy="88" r="4" fill="var(--live)" />
+              <text x="112" y="93" fill="var(--art-ink)" font-size="12" font-weight="700" letter-spacing="2.2">THE
+                GUIDE</text>
+              <text x="624" y="93" fill="var(--art-muted)" font-size="10.5" letter-spacing="1.4" text-anchor="end">NOW ·
+                20:22</text>
+              <line x1="96" y1="112" x2="624" y2="112" stroke="var(--art-rule)" />
+
+              <g fill="var(--art-muted)" font-size="9.5" letter-spacing="1.2">
+                <text x="190" y="138">20:00</text>
+                <text x="298" y="138">20:30</text>
+                <text x="407" y="138">21:00</text>
+                <text x="516" y="138">21:30</text>
+                <text x="624" y="138" text-anchor="end">22:00</text>
+              </g>
+
+              <g stroke="var(--art-ink)" stroke-opacity=".07">
+                <line x1="298" y1="150" x2="298" y2="480" />
+                <line x1="407" y1="150" x2="407" y2="480" />
+                <line x1="516" y1="150" x2="516" y2="480" />
+              </g>
+
+              <g class="epg-row">
+                <rect x="96" y="170" width="24" height="24" rx="6" fill="var(--art-accent)" />
+                <text x="108" y="187" text-anchor="middle" fill="var(--art-on-accent)" font-size="9" font-weight="700">B</text>
+                <text x="128" y="187" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.3">BBC
+                  ONE</text>
+                <g class="epg-program" style="--i:0">
+                  <rect x="190" y="158" width="145" height="48" rx="7" fill="var(--art-accent)" />
+                  <text x="201" y="179" fill="var(--art-on-accent)" font-size="12.5" class="epg-program-title">Planet Earth</text>
+                  <text x="201" y="194" fill="var(--art-on-accent)" opacity=".65" font-size="8.5">20:00 – 20:40</text>
+                  <rect x="294" y="166" width="31" height="13" rx="6.5" fill="var(--live)" />
+                  <text x="309.5" y="175" text-anchor="middle" fill="var(--art-on-accent)" font-size="7" font-weight="700"
+                    letter-spacing=".7">LIVE</text>
+                </g>
+                <g class="epg-program" style="--i:1">
+                  <rect x="343" y="158" width="140" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="354" y="179" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">Match of the
+                    Day</text>
+                  <text x="354" y="194" fill="var(--art-label)" opacity=".8" font-size="8.5">20:40 – 21:20</text>
+                </g>
+                <g class="epg-program" style="--i:2">
+                  <rect x="491" y="158" width="133" height="48" rx="7" fill="var(--art-block-alt)" />
+                  <text x="502" y="179" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">The Catch-Up</text>
+                  <text x="502" y="194" fill="var(--art-label)" opacity=".8" font-size="8.5">21:20 – 22:00</text>
+                </g>
+              </g>
+
+              <g class="epg-row">
+                <rect x="96" y="238" width="24" height="24" rx="6" fill="var(--art-icon-bg)" />
+                <text x="108" y="255" text-anchor="middle" fill="var(--art-accent)" font-size="9" font-weight="700">C</text>
+                <text x="128" y="255" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.3">CNN</text>
+                <g class="epg-program" style="--i:3">
+                  <rect x="190" y="226" width="190" height="48" rx="7" fill="var(--art-solid)" />
+                  <text x="201" y="247" fill="var(--art-on-solid)" font-size="12.5" class="epg-program-title">The Lead</text>
+                  <text x="201" y="262" fill="var(--art-on-solid)" opacity=".6" font-size="8.5">20:00 – 20:50</text>
+                </g>
+                <g class="epg-program" style="--i:4">
+                  <rect x="388" y="226" width="126" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="399" y="247" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">World Sport</text>
+                  <text x="399" y="262" fill="var(--art-label)" opacity=".8" font-size="8.5">20:50 – 21:30</text>
+                </g>
+                <g class="epg-program" style="--i:5">
+                  <rect x="522" y="226" width="102" height="48" rx="7" fill="var(--art-block-alt)" />
+                  <text x="533" y="247" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">The Brief</text>
+                  <text x="533" y="262" fill="var(--art-label)" opacity=".8" font-size="8.5">21:30 – 22:00</text>
+                </g>
+              </g>
+
+              <g class="epg-row">
+                <rect x="96" y="306" width="24" height="24" rx="6" fill="var(--art-icon-bg)" />
+                <text x="108" y="323" text-anchor="middle" fill="var(--art-accent)" font-size="9" font-weight="700">C</text>
+                <text x="128" y="323" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.3">CBC</text>
+                <g class="epg-program" style="--i:6">
+                  <rect x="190" y="294" width="250" height="48" rx="7" fill="var(--art-block-alt)" />
+                  <text x="201" y="315" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">Hockey Night</text>
+                  <text x="201" y="330" fill="var(--art-label)" opacity=".8" font-size="8.5">20:00 – 21:10</text>
+                </g>
+                <g class="epg-program" style="--i:7">
+                  <rect x="448" y="294" width="176" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="459" y="315" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">The National</text>
+                  <text x="459" y="330" fill="var(--art-label)" opacity=".8" font-size="8.5">21:10 – 22:00</text>
+                </g>
+              </g>
+
+              <g class="epg-row">
+                <rect x="96" y="374" width="24" height="24" rx="6" fill="var(--art-icon-bg)" />
+                <text x="108" y="391" text-anchor="middle" fill="var(--art-accent)" font-size="9" font-weight="700">A</text>
+                <text x="128" y="391" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.3">ABC</text>
+                <g class="epg-program" style="--i:8">
+                  <rect x="190" y="362" width="150" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="201" y="383" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">News
+                    Breakfast</text>
+                  <text x="201" y="398" fill="var(--art-label)" opacity=".8" font-size="8.5">20:00 – 20:40</text>
+                </g>
+                <g class="epg-program" style="--i:9">
+                  <rect x="348" y="362" width="120" height="48" rx="7" fill="var(--art-block-accent)" />
+                  <text x="359" y="383" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">Q&amp;A</text>
+                  <text x="359" y="398" fill="var(--art-ink)" opacity=".6" font-size="8.5">20:40 – 21:20</text>
+                </g>
+                <g class="epg-program" style="--i:10">
+                  <rect x="476" y="362" width="148" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="487" y="383" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">The Business</text>
+                  <text x="487" y="398" fill="var(--art-label)" opacity=".8" font-size="8.5">21:20 – 22:00</text>
+                </g>
+              </g>
+
+              <g class="epg-row">
+                <rect x="96" y="442" width="24" height="24" rx="6" fill="var(--art-icon-bg)" />
+                <text x="108" y="459" text-anchor="middle" fill="var(--art-accent)" font-size="9" font-weight="700">S</text>
+                <text x="128" y="459" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.3">SBS</text>
+                <g class="epg-program" style="--i:11">
+                  <rect x="190" y="430" width="180" height="48" rx="7" fill="var(--art-block-alt)" />
+                  <text x="201" y="451" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">Global News</text>
+                  <text x="201" y="466" fill="var(--art-label)" opacity=".8" font-size="8.5">20:00 – 20:50</text>
+                </g>
+                <g class="epg-program" style="--i:12">
+                  <rect x="378" y="430" width="246" height="48" rx="7" fill="var(--art-block)" />
+                  <text x="389" y="451" fill="var(--art-ink)" font-size="12.5" class="epg-program-title">Cinema
+                    Paradiso</text>
+                  <text x="389" y="466" fill="var(--art-label)" opacity=".8" font-size="8.5">20:50 – 22:00</text>
+                </g>
+              </g>
+
+              <g class="epg-now-line">
+                <line x1="269" y1="150" x2="269" y2="480" stroke="var(--live)" stroke-width="1.5" opacity=".8" />
+                <circle class="epg-ping" cx="269" cy="150" r="6" fill="none" stroke="var(--live)" />
+                <circle cx="269" cy="150" r="4" fill="var(--live)" stroke="var(--art-on-accent)" stroke-width="2" />
+              </g>
+
+              <line x1="96" y1="506" x2="624" y2="506" stroke="var(--art-rule)" />
+              <circle cx="101" cy="538" r="3.5" fill="var(--live)" />
+              <text x="112" y="542" fill="var(--art-label)" font-size="9.5" font-weight="700" letter-spacing="1.4">42
+                CHANNELS LIVE</text>
+              <text x="624" y="542" fill="var(--art-muted)" font-size="9.5" letter-spacing="1.2" text-anchor="end">ALL
+                TIMES · YOUR TIMEZONE</text>
+
+              <g class="epg-stamp" transform="translate(676 556) rotate(-12)">
+                <circle r="44" fill="var(--live)" />
+                <circle r="35" fill="none" stroke="var(--art-on-accent)" stroke-opacity=".55" stroke-dasharray="2 4" />
+                <text y="-2" text-anchor="middle" fill="var(--art-on-accent)" font-size="10" font-weight="700"
+                  letter-spacing="1.4">ON</text>
+                <text y="12" text-anchor="middle" fill="var(--art-on-accent)" font-size="10" font-weight="700"
+                  letter-spacing="1.4">AIR</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="how-it-works">
+      <div class="wrap how-grid">
+        <div class="how-intro">
+          <span class="eyebrow">Three steps</span>
+          <h2 id="how-it-works">How it works</h2>
+          <p>
+            From a blank Stremio to a full live-TV lineup, with a programme guide
+            that lines up to your own timezone.
+          </p>
+        </div>
+        <ol class="steps">
+          <li class="step">
+            <span class="step-index" aria-hidden="true">01</span>
+            <div class="step-body">
+              <h3>Configure</h3>
+              <p>Choose countries, categories, a username, and your timezone. Your preferences live in the addon link
+                itself.</p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-index" aria-hidden="true">02</span>
+            <div class="step-body">
+              <h3>Install</h3>
+              <p>Open the link in Stremio desktop or web. The addon registers itself and your catalogs appear instantly.
+              </p>
+            </div>
+          </li>
+          <li class="step">
+            <span class="step-index" aria-hidden="true">03</span>
+            <div class="step-body">
+              <h3>Watch</h3>
+              <p>Browse channels from Discover, or open the native EPG grid to see what's on now and next.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="cta-band" aria-labelledby="cta-title">
+      <div class="wrap">
+        <div class="cta-rail">
+          <span class="cta-rail-status">
+            <span class="cta-pulse" aria-hidden="true"></span>
+            <span>On air</span>
+            <span class="cta-rail-sep" aria-hidden="true"></span>
+            <span class="cta-rail-ready">Ready when you are</span>
+          </span>
+          <span class="cta-rail-meta">Free &amp; open source · No account required</span>
+        </div>
+
+        <div class="cta-stage">
+          <div class="cta-copy">
+            <h2 id="cta-title">
+              <span>Every channel</span>
+              <span>you want,</span>
+              <span class="cta-em">none you don't<span class="cta-period">.</span></span>
+            </h2>
+
+            <p class="cta-lede">
+              Filter sixteen categories across five countries, keep the link, and
+              reinstall any time your taste changes.
+            </p>
+
+            <div class="cta-actions">
+              <a class="btn btn-primary cta-btn" href="<%= configureUrl %>">
+                <span>Configure your lineup</span>
+                <svg class="btn-arrow" width="18" height="18" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+              <a class="btn btn-ghost cta-btn" href="<%= githubUrl %>" target="_blank" rel="noopener">
+                <svg class="github-mark" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z" />
+                </svg>
+                <span>View on GitHub</span>
+                <svg class="btn-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.5"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </a>
+            </div>
+
+            <p class="cta-note">Your lineup lives in the addon link.</p>
+          </div>
+
+          <div class="cta-globe">
+            <svg class="cta-globe-svg" viewBox="0 0 400 400" fill="none" aria-hidden="true" focusable="false">
+              <defs>
+                <radialGradient id="cta-globe-fill" cx="36%" cy="30%" r="76%">
+                  <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.17" />
+                  <stop offset="58%" stop-color="var(--accent)" stop-opacity="0.045" />
+                  <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+                </radialGradient>
+                <clipPath id="cta-globe-clip">
+                  <circle cx="200" cy="200" r="160" />
+                </clipPath>
+              </defs>
+
+              <circle cx="200" cy="200" r="160" fill="url(#cta-globe-fill)"
+                stroke="var(--line-strong)" />
+              <g clip-path="url(#cta-globe-clip)" stroke="var(--line)">
+                <ellipse cx="200" cy="200" rx="160" ry="54" />
+                <ellipse cx="200" cy="200" rx="160" ry="106" />
+                <ellipse cx="200" cy="200" rx="54" ry="160" />
+                <ellipse cx="200" cy="200" rx="106" ry="160" />
+                <path d="M40 200h320M200 40v320" />
+                <ellipse cx="200" cy="200" rx="160" ry="160" stroke-dasharray="2 6" opacity="0.55" />
+              </g>
+
+              <circle cx="200" cy="200" r="184" stroke="var(--line-strong)"
+                stroke-dasharray="2 10" />
+              <circle cx="200" cy="200" r="184" stroke="var(--accent)" stroke-width="1.5"
+                stroke-linecap="round" stroke-dasharray="34 1122" transform="rotate(-118 200 200)"
+                opacity="0.65" />
+
+              <g class="cta-globe-satellite">
+                <rect x="193.5" y="11" width="5.5" height="9" rx="1" fill="var(--accent)"
+                  opacity="0.85" />
+                <rect x="201" y="11" width="5.5" height="9" rx="1" fill="var(--accent)"
+                  opacity="0.85" />
+                <circle cx="200" cy="15.5" r="2.2" fill="var(--bg)" />
+              </g>
+
+              <% const globeMarkers = {
+                   "United States": [125, 180],
+                   "United Kingdom": [210, 145],
+                   "Canada": [140, 130],
+                   "Australia": [285, 250],
+                   "New Zealand": [315, 280],
+                 }; %>
+              <% countries.forEach((country, index) => {
+                   const marker = globeMarkers[country.value];
+                   if (!marker) return;
+                   const [x, y] = marker;
+              %>
+              <g>
+                <circle class="cta-globe-ping" cx="<%= x %>" cy="<%= y %>" r="4.5"
+                  style="--delay: <%= (index * 0.5).toFixed(1) %>s" />
+                <circle cx="<%= x %>" cy="<%= y %>" r="5.5"
+                  stroke="var(--line-strong)" />
+                <circle class="cta-globe-dot" cx="<%= x %>" cy="<%= y %>" r="2.6" />
+              </g>
+              <% }); %>
+            </svg>
+
+            <div class="cta-globe-caption">
+              <span class="cta-globe-caption-label">Supported countries</span>
+              <ul class="cta-globe-legend">
+                <% countries.forEach((country) => { %>
+                  <li><%= country.label %></li>
+                  <% }); %>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="cta-foot">
+          <span>16 genres · 5 countries · one link</span>
+          <span>All times · your timezone</span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <%- include('../layout/footer') %>

@@ -18,7 +18,7 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'f292463d8fc7801c583624554c6a994c17b6a6593080b2ea4868f4149f457ea6'>;
+  StorageHashBase<'4bde41f40052afe0c49244fe1f34ded993690c40f67a36fd828e8403e5f2c479'>;
 export type ExecutionHash = ExecutionHashBase<string>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
@@ -262,6 +262,34 @@ export type FieldOutputTypes = {
       readonly slug: CodecTypes['pg/text@1']['output'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
+    readonly Configuration: {
+      readonly categories: ReadonlyArray<
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL'
+      >;
+      readonly countries: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly showInHome: CodecTypes['pg/bool@1']['output'];
+      readonly timezone: CodecTypes['pg/text@1']['output'];
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly userId: CodecTypes['pg/text@1']['output'];
+    };
     readonly Schedule: {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
@@ -288,6 +316,13 @@ export type FieldOutputTypes = {
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
       readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
+    };
+    readonly User: {
+      readonly country: CodecTypes['pg/text@1']['output'] | null;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'] | null;
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
   };
 };
@@ -322,6 +357,34 @@ export type FieldInputTypes = {
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
+    readonly Configuration: {
+      readonly categories: ReadonlyArray<
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL'
+      >;
+      readonly countries: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly showInHome: CodecTypes['pg/bool@1']['input'];
+      readonly timezone: CodecTypes['pg/text@1']['input'];
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly userId: CodecTypes['pg/text@1']['input'];
+    };
     readonly Schedule: {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
@@ -348,6 +411,13 @@ export type FieldInputTypes = {
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
       readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
+    };
+    readonly User: {
+      readonly country: CodecTypes['pg/text@1']['input'] | null;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'] | null;
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
   };
 };
@@ -382,6 +452,34 @@ export type StorageColumnTypes = {
       readonly slug: CodecTypes['pg/text@1']['output'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
+    readonly configuration: {
+      readonly categories: ReadonlyArray<
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL'
+      >;
+      readonly countries: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly showInHome: CodecTypes['pg/bool@1']['output'];
+      readonly timezone: CodecTypes['pg/text@1']['output'];
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly userId: CodecTypes['pg/text@1']['output'];
+    };
     readonly schedule: {
       readonly channelId: CodecTypes['pg/text@1']['output'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
@@ -408,6 +506,13 @@ export type StorageColumnTypes = {
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly url: CodecTypes['pg/text@1']['output'];
       readonly youtubeId: CodecTypes['pg/text@1']['output'] | null;
+    };
+    readonly users: {
+      readonly country: CodecTypes['pg/text@1']['output'] | null;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly name: CodecTypes['pg/text@1']['output'] | null;
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
     };
   };
 };
@@ -442,6 +547,34 @@ export type StorageColumnInputTypes = {
       readonly slug: CodecTypes['pg/text@1']['input'];
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
+    readonly configuration: {
+      readonly categories: ReadonlyArray<
+        | 'ENTERTAINMENT'
+        | 'SPORTS'
+        | 'MOVIES'
+        | 'NEWS'
+        | 'INTERNATIONAL'
+        | 'RADIO'
+        | 'RELIGIOUS'
+        | 'DOCUMENTARY'
+        | 'MUSIC'
+        | 'KIDS'
+        | 'SHOPPING'
+        | 'LIFESTYLE'
+        | 'CLASSIC_TV'
+        | 'CRIME'
+        | 'ADULT'
+        | 'OUTDOORS_AUTO'
+        | 'GENERAL'
+      >;
+      readonly countries: ReadonlyArray<CodecTypes['pg/text@1']['input']>;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly showInHome: CodecTypes['pg/bool@1']['input'];
+      readonly timezone: CodecTypes['pg/text@1']['input'];
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly userId: CodecTypes['pg/text@1']['input'];
+    };
     readonly schedule: {
       readonly channelId: CodecTypes['pg/text@1']['input'];
       readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
@@ -468,6 +601,13 @@ export type StorageColumnInputTypes = {
       readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly url: CodecTypes['pg/text@1']['input'];
       readonly youtubeId: CodecTypes['pg/text@1']['input'] | null;
+    };
+    readonly users: {
+      readonly country: CodecTypes['pg/text@1']['input'] | null;
+      readonly createdat: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly name: CodecTypes['pg/text@1']['input'] | null;
+      readonly updatedat: CodecTypes['pg/timestamptz-temporal@1']['input'];
     };
   };
 };
@@ -505,6 +645,36 @@ export namespace Models {
     streams: public_Stream[];
     readonly [RelationKeys]?: 'schedule' | 'streams';
   };
+  export type public_Configuration = {
+    categories: ReadonlyArray<
+      | 'ENTERTAINMENT'
+      | 'SPORTS'
+      | 'MOVIES'
+      | 'NEWS'
+      | 'INTERNATIONAL'
+      | 'RADIO'
+      | 'RELIGIOUS'
+      | 'DOCUMENTARY'
+      | 'MUSIC'
+      | 'KIDS'
+      | 'SHOPPING'
+      | 'LIFESTYLE'
+      | 'CLASSIC_TV'
+      | 'CRIME'
+      | 'ADULT'
+      | 'OUTDOORS_AUTO'
+      | 'GENERAL'
+    >;
+    countries: ReadonlyArray<CodecTypes['pg/text@1']['output']>;
+    createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    id: CodecTypes['pg/text@1']['output'];
+    showInHome: CodecTypes['pg/bool@1']['output'];
+    timezone: CodecTypes['pg/text@1']['output'];
+    updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    userId: CodecTypes['pg/text@1']['output'];
+    user: public_User;
+    readonly [RelationKeys]?: 'user';
+  };
   export type public_Schedule = {
     channelId: CodecTypes['pg/text@1']['output'];
     createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
@@ -536,13 +706,24 @@ export namespace Models {
     channel: public_Channel;
     readonly [RelationKeys]?: 'channel';
   };
+  export type public_User = {
+    country: CodecTypes['pg/text@1']['output'] | null;
+    createdat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    id: CodecTypes['pg/text@1']['output'];
+    name: CodecTypes['pg/text@1']['output'] | null;
+    updatedat: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    configuration: public_Configuration | null;
+    readonly [RelationKeys]?: 'configuration';
+  };
 }
 
 export declare const models: {
   public: {
     Channel: Models.public_Channel;
+    Configuration: Models.public_Configuration;
     Schedule: Models.public_Schedule;
     Stream: Models.public_Stream;
+    User: Models.public_User;
   };
 };
 
@@ -641,6 +822,85 @@ type ContractBase = Omit<
               uniques: readonly [{ readonly columns: readonly ['slug'] }];
               indexes: readonly [];
               foreignKeys: readonly [];
+            };
+            readonly configuration: {
+              columns: {
+                readonly categories: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: { readonly elementNullable: false };
+                };
+                readonly countries: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: { readonly elementNullable: false };
+                };
+                readonly createdat: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'gen_random_uuid()';
+                  };
+                  readonly many: false;
+                };
+                readonly showInHome: {
+                  readonly dataType: 'pg/bool';
+                  readonly codecId: 'pg/bool@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'literal';
+                    readonly value: DefaultLiteralValue<'pg/bool@1', false>;
+                  };
+                  readonly many: false;
+                };
+                readonly timezone: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly updatedat: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly userId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['userId'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'configuration';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'users';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
             readonly schedule: {
               columns: {
@@ -852,6 +1112,50 @@ type ContractBase = Omit<
                 },
               ];
             };
+            readonly users: {
+              columns: {
+                readonly country: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly createdat: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly default: {
+                    readonly kind: 'function';
+                    readonly expression: 'gen_random_uuid()';
+                  };
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: true;
+                  readonly many: false;
+                };
+                readonly updatedat: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
           };
           readonly valueSet: {
             readonly Category: {
@@ -888,8 +1192,13 @@ type ContractBase = Omit<
   readonly targetFamily: 'sql';
   readonly roots: {
     readonly channel: { readonly namespace: 'public' & NamespaceId; readonly model: 'Channel' };
+    readonly configuration: {
+      readonly namespace: 'public' & NamespaceId;
+      readonly model: 'Configuration';
+    };
     readonly schedule: { readonly namespace: 'public' & NamespaceId; readonly model: 'Schedule' };
     readonly stream: { readonly namespace: 'public' & NamespaceId; readonly model: 'Stream' };
+    readonly users: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
   };
   readonly domain: {
     readonly namespaces: {
@@ -982,6 +1291,75 @@ type ContractBase = Omit<
                 readonly poster: { readonly column: 'poster' };
                 readonly slug: { readonly column: 'slug' };
                 readonly updatedat: { readonly column: 'updatedat' };
+              };
+            };
+          };
+          readonly Configuration: {
+            readonly fields: {
+              readonly categories: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
+              readonly countries: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly many: { readonly elementNullable: false };
+              };
+              readonly createdat: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly showInHome: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/bool@1' };
+              };
+              readonly timezone: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedat: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'configuration';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly categories: { readonly column: 'categories' };
+                readonly countries: { readonly column: 'countries' };
+                readonly createdat: { readonly column: 'createdat' };
+                readonly id: { readonly column: 'id' };
+                readonly showInHome: { readonly column: 'showInHome' };
+                readonly timezone: { readonly column: 'timezone' };
+                readonly updatedat: { readonly column: 'updatedat' };
+                readonly userId: { readonly column: 'userId' };
               };
             };
           };
@@ -1169,6 +1547,61 @@ type ContractBase = Omit<
                 readonly updatedat: { readonly column: 'updatedat' };
                 readonly url: { readonly column: 'url' };
                 readonly youtubeId: { readonly column: 'youtubeId' };
+              };
+            };
+          };
+          readonly User: {
+            readonly fields: {
+              readonly country: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly createdat: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly name: {
+                readonly nullable: true;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly updatedat: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
+            };
+            readonly relations: {
+              readonly configuration: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Configuration';
+                };
+                readonly cardinality: '1:1';
+                readonly nullable: true;
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['userId'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'users';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly country: { readonly column: 'country' };
+                readonly createdat: { readonly column: 'createdat' };
+                readonly id: { readonly column: 'id' };
+                readonly name: { readonly column: 'name' };
+                readonly updatedat: { readonly column: 'updatedat' };
               };
             };
           };

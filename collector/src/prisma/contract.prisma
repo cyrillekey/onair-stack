@@ -1,4 +1,29 @@
 // use prisma-8
+model User {
+  id            String         @id @default(sql`gen_random_uuid()`)
+  name          String?
+  country       String?
+  configuration Configuration?
+  createdat     DateTime       @default(now())
+  updatedat     DateTime       @default(now())
+
+  @@map("users")
+}
+
+model Configuration {
+  id         String     @id @default(sql`gen_random_uuid()`)
+  countries  String[]
+  categories Category[]
+  timezone   String
+  showInHome Boolean    @default(false)
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String     @unique
+  createdat  DateTime   @default(now())
+  updatedat  DateTime   @default(now())
+
+  @@map("configuration")
+}
+
 model Channel {
   id          String     @id @default(sql`gen_random_uuid()`)
   name        String
@@ -17,24 +42,24 @@ model Channel {
 }
 
 model Stream {
-  id                String   @id @default(sql`gen_random_uuid()`)
+  id                String    @id @default(sql`gen_random_uuid()`)
   name              String
   resolution        String?
-  slug              String   @unique
+  slug              String    @unique
   url               String
   language          String
   youtubeId         String?
   /// Consecutive failed health passes. Reset to 0 on a successful check.
-  failureCount      Int      @default(0)
+  failureCount      Int       @default(0)
   /// First failure of the current streak; null while healthy. Operational
   /// marker for how long the stream has been unreachable.
   unreachableAt     DateTime?
   /// Most recent verification error, for ops/debugging.
   lastFailureReason String?
-  channel           Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  channel           Channel   @relation(fields: [channelId], references: [id], onDelete: Cascade)
   channelId         String
-  createdat         DateTime @default(now())
-  updatedat         DateTime @default(now())
+  createdat         DateTime  @default(now())
+  updatedat         DateTime  @default(now())
 
   @@map("stream")
 }

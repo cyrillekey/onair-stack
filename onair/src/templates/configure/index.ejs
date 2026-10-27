@@ -1,0 +1,148 @@
+<%- include('../layout/header') %>
+<%
+  function previewLabels(group) {
+    if (!group) return "";
+    const labels = (group.selected || [])
+      .map((value) => group.options.find((option) => option.value === value)?.label)
+      .filter(Boolean);
+    return labels.length ? labels.join(", ") : `All ${group.label.toLowerCase()}`;
+  }
+  const lineupCountries = groups.find((group) => group.name === "countries");
+  const lineupCategories = groups.find((group) => group.name === "categories");
+%>
+  <div class="configure-page">
+    <main class="wrap">
+      <form id="config-form" novalidate>
+        <div class="card" id="form-group">
+          <fieldset class="section">
+            <legend>Configure Addon</legend>
+            <p class="hint">Your timezone lines the TV guide up with your local time.</p>
+            <div class="fields">
+              <div class="field">
+                <label for="username">Username</label>
+                <input class="input" type="text" id="username" name="username" maxlength="80" autocomplete="nickname"
+                  placeholder="How should we call you?" aria-describedby="username-error" required
+                  value="<%=config?.username%>">
+                <p class="error" id="username-error" hidden>Enter a username.</p>
+              </div>
+
+              <div class="field">
+                <label for="timezone">Timezone</label>
+                <input class="input" type="text" id="timezone" name="timezone" list="timezone-options"
+                  autocomplete="off" spellcheck="false" placeholder="Europe/London" aria-describedby="timezone-error"
+                  required value="<%= config?.timezone %>">
+                <datalist id="timezone-options">
+                  <% for (const timezone of timezones) { %>
+                    <option value="<%= timezone?.value %>"></option>
+                    <% } %>
+                </datalist>
+                <p class="error" id="timezone-error" hidden>Pick a timezone from the list, for example Europe/London.
+                </p>
+              </div>
+            </div>
+          </fieldset>
+
+          <% for (const group of groups) { %>
+            <fieldset class="section group" data-group="<%= group.name %>"
+              aria-describedby="<%= group.name %>-error">
+              <legend>
+                <%= group.label %>
+              </legend>
+              <p class="hint">
+                <%= group.hint %>
+              </p>
+
+              <div class="toolbar">
+                <input type="search" class="filter input" placeholder="Filter list"
+                  aria-label="Filter <%= group.label %>" autocomplete="off" <% if (group.options.length <=8) { %>hidden
+                <% } %>
+                  >
+                  <span class="count" aria-live="polite"></span>
+                  <button type="button" class="link" data-action="all">Select all</button>
+                  <button type="button" class="link" data-action="none">Clear</button>
+              </div>
+
+              <div class="choices">
+                <% for (const option of group.options) { %>
+                  <label class="choice">
+                    <input type="checkbox" name="<%= group.name %>" value="<%= option.value %>"
+                      <%=group.selected?.includes(option.value) ? "checked" : "" %>>
+                    <span>
+                      <%= option.label %>
+                    </span>
+                  </label>
+                  <% } %>
+              </div>
+              <p class="empty" hidden>Nothing matches that filter.</p>
+              <p class="error" id="<%= group.name %>-error" hidden>Select at least one country or genre.</p>
+            </fieldset>
+            <% } %>
+
+              <fieldset class="section">
+                <legend>Home page</legend>
+                <p class="hint" id="showOnHome-hint">
+                  Choose whether your catalog rails appear on the Stremio home board. When off, they stay available in
+                  Discover.
+                </p>
+                <label class="choice">
+                  <input type="checkbox" id="showOnHome" name="showOnHome" aria-describedby="showOnHome-hint"
+                    <%=config?.showInHome===false ? "" : "checked" %>>
+                  <span>Show catalogs on the home page</span>
+                </label>
+              </fieldset>
+        </div>
+        <div class="card">
+          <section class="install" aria-labelledby="install-title">
+            <h2 class="section-title" id="install-title">Your lineup</h2>
+            <p class="hint" style="margin:0">Your choices are saved in the addon link below.</p>
+            <dl class="lineup-summary" aria-live="polite">
+              <div class="lineup-row">
+                <dt>Countries</dt>
+                <dd id="preview-countries" data-preview-group="countries"><%= previewLabels(lineupCountries) %></dd>
+              </div>
+              <div class="lineup-row">
+                <dt>Genres</dt>
+                <dd id="preview-categories" data-preview-group="categories"><%= previewLabels(lineupCategories) %></dd>
+              </div>
+              <div class="lineup-row">
+                <dt>Home page</dt>
+                <dd>
+                  <span class="lineup-badge" id="preview-home"
+                    data-state="<%= config?.showInHome === false ? "off" : "on" %>"><%= config?.showInHome === false ? "Off" : "On" %></span>
+                </dd>
+              </div>
+            </dl>
+            <div id="generate-link" class="">
+              <button type="submit" class="btn btn-primary" id="generate-button">
+                <%= config?.id ? "Update Manifest" : "Generate Manifest" %>
+              </button>
+            </div>
+            <div class="hide" id="install-actions">
+              <div class="url-row">
+                <input class="input" type="text" id="manifest-url" readonly spellcheck="false"
+                  placeholder="Complete the form to create your addon link" aria-label="Generated addon manifest URL">
+
+              </div>
+
+              <div class="actions">
+                <button type="button" class="btn btn-primary" id="install-btn">Install in Stremio</button>
+                <div class="btn-group">
+                  <a class="btn btn-ghost" id="web-btn" href="#" target="_blank">Install in Web</a>
+                  <button type="button" class="btn btn-ghost" id="copy-btn">Copy link</button>
+                </div>
+              </div>
+            </div>
+
+            <p class="status" id="status" role="status" aria-live="polite"></p>
+          </section>
+          <p class="note">
+            Keep the link if you want to reinstall later, and install again after
+            changing your selection. The desktop button uses <code>stremio://</code>
+            to open the app; if nothing happens, copy the link and paste it into
+            Stremio's addon search box. Your last choices are remembered in this browser.
+          </p>
+        </div>
+      </form>
+    </main>
+  </div>
+  <%- include('../layout/footer') %>

@@ -10,6 +10,7 @@ const appConfig = {
   logo: process.env.LOGO_URL || undefined,
   background: artworkUrl,
   fallbackImage: artworkUrl,
+  baseUrl: process.env.CENTRAL_URL,
 };
 
 export default appConfig;
