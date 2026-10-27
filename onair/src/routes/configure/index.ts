@@ -51,7 +51,6 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           properties: {
             countries: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: countryValues,
@@ -59,7 +58,6 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
             },
             categories: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: genreValues,
@@ -80,7 +78,7 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
               default: true,
             },
           },
-          required: ["countries", "categories", "timezone", "username"],
+          required: ["timezone", "username"],
           additionalProperties: false,
         },
         response: {
@@ -125,10 +123,20 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
     },
     async function (request, reply) {
       const username = request.body.username.trim();
+      const countries = request.body.countries ?? [];
+      const categories = request.body.categories ?? [];
+
       if (!username) {
         return reply.code(400).send({
           success: false,
           message: "Add a username to generate your link.",
+        });
+      }
+
+      if (countries.length === 0 && categories.length === 0) {
+        return reply.code(400).send({
+          success: false,
+          message: "Select at least one country or genre to generate your link.",
         });
       }
 
@@ -140,8 +148,8 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
 
         try {
           await fastify.db.orm.public.Configuration.create({
-            countries: request.body.countries,
-            categories: request.body.categories as CatalogType[],
+            countries,
+            categories: categories as CatalogType[],
             timezone: request.body.timezone,
             userId: user.id,
             showInHome: request.body.showOnHome,
@@ -187,7 +195,6 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           properties: {
             countries: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: countryValues,
@@ -195,7 +202,6 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
             },
             categories: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: genreValues,
@@ -216,7 +222,7 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
               default: true,
             },
           },
-          required: ["countries", "categories", "timezone", "username"],
+          required: ["timezone", "username"],
           additionalProperties: false,
         },
         response: {
@@ -238,6 +244,16 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
       },
     },
     async (request, reply) => {
+      const countries = request.body.countries ?? [];
+      const categories = request.body.categories ?? [];
+
+      if (countries.length === 0 && categories.length === 0) {
+        return reply.code(400).send({
+          success: false,
+          message: "Select at least one country or genre to update your link.",
+        });
+      }
+
       try {
         const config = await fastify.db.orm.public.Configuration.where({
           userId: request.params.id,
@@ -250,8 +266,8 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
             country: request.body.timezone.split("/")[0],
           });
           await fastify.db.orm.public.Configuration.create({
-            countries: request.body.countries,
-            categories: request.body.categories as CatalogType[],
+            countries,
+            categories: categories as CatalogType[],
             timezone: request.body.timezone,
             userId: user.id,
             showInHome: request.body.showOnHome,
@@ -260,8 +276,8 @@ const configurationRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           const updated = await fastify.db.orm.public.Configuration.where({
             id: config.id,
           }).update({
-            categories: request.body.categories as CatalogType[],
-            countries: request.body.countries,
+            categories: categories as CatalogType[],
+            countries,
             showInHome: request.body.showOnHome,
             timezone: request.body.timezone,
           });

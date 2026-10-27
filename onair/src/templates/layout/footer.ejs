@@ -109,11 +109,16 @@
         tzOk,
       );
 
-      var groupsOk = true;
+      // Either group satisfies the requirement; only both being empty is invalid.
+      var groupsOk = groups.some(function (g) {
+        return selectedValues(g).length > 0;
+      });
+      var groupErrorShown = false;
       groups.forEach(function (g) {
-        var ok = selectedValues(g).length > 0;
-        g.querySelector(".error").hidden = ok;
-        if (!ok) groupsOk = false;
+        var empty = selectedValues(g).length === 0;
+        var show = showFieldErrors && !groupsOk && !groupErrorShown && empty;
+        g.querySelector(".error").hidden = !show;
+        if (show) groupErrorShown = true;
       });
 
       return nameOk && tzOk && groupsOk;
@@ -165,7 +170,10 @@
         var bad = groups.filter(function (g) {
           return selectedValues(g).length === 0;
         })[0];
-        target = bad && bad.querySelector("input, button");
+        target =
+          bad &&
+          (bad.querySelector(".choice:not([hidden]) input") ||
+            bad.querySelector(".choice input"));
       }
       if (target) target.focus();
     }
@@ -198,9 +206,16 @@
           "Content-Type": "application/json",
         },
       });
-      const { manifest } = await response.json();
-      manifestUrl = manifest;
-      const manifestId = parseUUID(manifest);
+      const payload = await response.json();
+      if (!response.ok || !payload.manifest) {
+        setStatus(
+          payload.message || "Could not generate your link. Try again.",
+          "bad"
+        );
+        return;
+      }
+      manifestUrl = payload.manifest;
+      const manifestId = parseUUID(manifestUrl);
       if (!id || id !== manifestId) {
         window.location.replace(`/${manifestId}/configure`);
       } else {

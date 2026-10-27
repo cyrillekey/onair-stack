@@ -1,4 +1,5 @@
 import { baseManifest, buildCatalog, CatalogType } from "@/utils/helpers";
+import { GENRES } from "@/config/configure-options";
 import { FastifyPluginAsyncJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import { Manifest } from "stremio-addon-sdk";
 
@@ -53,10 +54,12 @@ const stremioRoutes: FastifyPluginAsyncJsonSchemaToTs<{
           req.query.home === undefined
             ? config.showInHome
             : req.query.home !== "0";
-        const catalogs = buildCatalog(
-          config.categories as CatalogType[],
-          showInHome,
-        );
+        // An empty genre list means every configurable genre.
+        const categories =
+          config.categories.length > 0
+            ? (config.categories as CatalogType[])
+            : (GENRES.map((genre) => genre.value) as CatalogType[]);
+        const catalogs = buildCatalog(categories, showInHome);
         const manifest: Manifest = { ...baseManifest, catalogs };
 
         reply.status(200).send(manifest);

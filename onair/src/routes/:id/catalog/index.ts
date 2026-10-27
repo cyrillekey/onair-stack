@@ -184,7 +184,12 @@ const catalogRoutes: FastifyPluginAsyncJsonSchemaToTs<{
 
       let query = fastify.db.orm.public.Channel.where({
         category: catalog,
-      }).where((channel) => channel.country.in(config.countries));
+      });
+
+      // An empty country list means every country.
+      if (config.countries.length > 0) {
+        query = query.where((channel) => channel.country.in(config.countries));
+      }
 
       if (extraArgs.search) {
         const search = `%${extraArgs.search}%`;

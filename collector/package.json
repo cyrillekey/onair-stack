@@ -21,7 +21,7 @@
     "node": ">=24.x"
   },
   "dependencies": {
-    "@logtail/pino": "^0.5.12",
+    "@axiomhq/pino": "^2.0.0",
     "@prisma/orm-postgres": "^8.0.0-rc.18",
     "@sentry/node": "^11.6.0",
     "@sentry/profiling-node": "^11.6.0",
@@ -57,4 +57,3 @@
     "vitest": "^2.0.0"
   }
 }
-
