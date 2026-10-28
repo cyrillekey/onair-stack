@@ -1,51 +1,13 @@
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
-import type { FastifyRequest } from "fastify";
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import { CONFIGURE_GROUPS, COUNTRIES, GENRES } from "@/config/configure-options";
+import {
+  CONFIGURE_GROUPS,
+  COUNTRIES,
+  GENRES,
+  TIMEZONES,
+} from "@/config/configure-options";
 import type { CatalogType } from "@/utils/helpers";
+import appConfig from "@/config";
 import { getCountryForTimezone } from "countries-and-timezones";
-
-const PUBLIC_DIRS = [
-  join(process.cwd(), "src", "public"),
-  join(__dirname, "..", "..", "public"),
-];
-const assets = new Map<string, string>();
-
-function readAsset(name: string): string {
-  const cached = assets.get(name);
-  if (cached !== undefined) {
-    return cached;
-  }
-  const path = PUBLIC_DIRS.map((dir) => join(dir, name)).find((candidate) =>
-    existsSync(candidate),
-  );
-  if (!path) {
-    throw new Error(`Configure asset not found: ${name}`);
-  }
-  const contents = readFileSync(path, "utf8");
-  assets.set(name, contents);
-  return contents;
-}
-
-function requestOrigin(request: FastifyRequest): string {
-  const forwardedProto = request.headers["x-forwarded-proto"];
-  const protoHeader = Array.isArray(forwardedProto)
-    ? forwardedProto[0]
-    : forwardedProto;
-  const protocol = protoHeader?.split(",")[0]?.trim() || request.protocol;
-
-  const forwardedHost = request.headers["x-forwarded-host"];
-  const hostHeader = Array.isArray(forwardedHost)
-    ? forwardedHost[0]
-    : forwardedHost;
-  const host =
-    hostHeader?.split(",")[0]?.trim() ||
-    request.headers.host ||
-    request.hostname;
-
-  return `${protocol}://${host}`;
-}
 
 const countryValues = COUNTRIES.map((option) => option.value);
 const genreValues = GENRES.map((option) => option.value);
@@ -63,37 +25,20 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   fastify.get("", { schema: { hide: true } }, async function (_, reply) {
     const view = await fastify.ejs.compile("/configure/index", {
       pageTitle: "Configure your line-up — Onair",
-      pageStyles: ["/configure/configure.css"],
-      pageScript: "/configure/configure.js",
       groups: CONFIGURE_GROUPS,
+      countries: COUNTRIES,
+      genres: GENRES,
+      timezones: TIMEZONES,
+      config: {
+        countries: COUNTRIES,
+        genres: GENRES,
+      },
     });
     return reply
       .header("cache-control", "no-store")
       .type("text/html; charset=utf-8")
       .send(view);
   });
-
-  fastify.get(
-    "/configure.css",
-    { schema: { hide: true } },
-    async function (_, reply) {
-      return reply
-        .header("cache-control", "no-cache")
-        .type("text/css; charset=utf-8")
-        .send(readAsset("configure.css"));
-    },
-  );
-
-  fastify.get(
-    "/configure.js",
-    { schema: { hide: true } },
-    async function (_, reply) {
-      return reply
-        .header("cache-control", "no-cache")
-        .type("text/javascript; charset=utf-8")
-        .send(readAsset("configure.js"));
-    },
-  );
 
   fastify.post(
     "",
@@ -107,7 +52,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           properties: {
             countries: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: countryValues,
@@ -115,7 +59,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             },
             categories: {
               type: "array",
-              minItems: 1,
               items: {
                 type: "string",
                 enum: genreValues,
@@ -136,7 +79,7 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
               default: true,
             },
           },
-          required: ["countries", "categories", "timezone", "username"],
+          required: ["timezone", "username"],
           additionalProperties: false,
         },
         response: {
@@ -181,6 +124,9 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     },
     async function (request, reply) {
       const username = request.body.username.trim();
+      const countries = request.body.countries ?? [];
+      const categories = request.body.categories ?? [];
+
       if (!username) {
         return reply.code(400).send({
           success: false,
@@ -188,7 +134,13 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         });
       }
 
-      const showOnHome = request.body.showOnHome ?? true;
+      if (countries.length === 0 && categories.length === 0) {
+        return reply.code(400).send({
+          success: false,
+          message:
+            "Select at least one country or genre to generate your link.",
+        });
+      }
 
       try {
         const user = await fastify.db.orm.public.User.create({
@@ -200,11 +152,11 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
 
         try {
           await fastify.db.orm.public.Configuration.create({
-            countries: request.body.countries,
-            categories: request.body.categories as CatalogType[],
+            countries,
+            categories: categories as CatalogType[],
             timezone: request.body.timezone,
             userId: user.id,
-            showInHome: showOnHome,
+            showInHome: request.body.showOnHome,
           });
         } catch (error) {
           // Do not leave a user behind when the configuration write fails.
@@ -212,9 +164,7 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           throw error;
         }
 
-        const manifest = `${requestOrigin(request)}/${user.id}/manifest.json${
-          showOnHome ? "" : "?home=0"
-        }`;
+        const manifest = `${appConfig.baseUrl}/${user.id}/manifest.json`;
 
         return { success: true, manifest };
       } catch (error) {
@@ -308,8 +258,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         });
       }
 
-      const showOnHome = request.body.showOnHome ?? true;
-
       try {
         const config = await fastify.db.orm.public.Configuration.where({
           userId: request.params.id,
@@ -328,21 +276,20 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             categories: categories as CatalogType[],
             timezone: request.body.timezone,
             userId: user.id,
-            showInHome: showOnHome,
+            showInHome: request.body.showOnHome,
           });
-          userId = user.id;
         } else {
           const updated = await fastify.db.orm.public.Configuration.where({
             id: config.id,
           }).update({
             categories: categories as CatalogType[],
             countries,
-            showInHome: showOnHome,
+            showInHome: request.body.showOnHome,
             timezone: request.body.timezone,
           });
           userId = updated?.userId;
         }
-        const manifest = `${requestOrigin(request)}/${userId}/manifest.json`;
+        const manifest = `${appConfig.baseUrl}/${userId}/manifest.json`;
         return {
           success: true,
           manifest,
