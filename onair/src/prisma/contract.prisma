@@ -30,7 +30,7 @@ model Channel {
   category    Category   @default(GENERAL)
   description String?
   country     String
-  slug        String     @unique
+  slug        String
   poster      String?
   streams     Stream[]
   externalId  String?
@@ -38,6 +38,7 @@ model Channel {
   createdat   DateTime   @default(now())
   updatedat   DateTime   @default(now())
 
+  @@unique([slug, country])
   @@map("channel")
 }
 
@@ -127,4 +128,3 @@ enum Category {
   TECHNOLOGY
   TRAVEL
 }
-
