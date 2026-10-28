@@ -255,7 +255,6 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       };
     } catch (error) {
       fastify.log.error(error);
-      console.error(error);
       return emptyResponse;
     }
   }
