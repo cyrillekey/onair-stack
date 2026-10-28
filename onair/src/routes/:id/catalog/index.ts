@@ -1,4 +1,5 @@
 import {
+  type CatalogType,
   catalogTypes,
   encodeCatalogType,
   type ExtraArgs,
@@ -189,9 +190,23 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             .where((schedule) => schedule.endTime.gt(guideWindow.start))
             .where((schedule) => schedule.startTime.lt(guideWindow.end))
             .orderBy((schedule) => schedule.startTime.asc()),
-      ).where({
-        category: catalog,
-      });
+      );
+      if (catalog == "SPORTS") {
+        const sports: CatalogType[] = [
+          "SPORTS",
+          "BASEBALL",
+          "BASKETBALL",
+          "COMBAT_SPORTS",
+          "CRICKET",
+          "FOOTBALL",
+          "MOTORSPORTS",
+        ];
+        query = query.where((channel) => channel.category.in(sports));
+      } else {
+        query = query.where({
+          category: catalog,
+        });
+      }
 
       // An empty country list means every country.
       if (config.countries.length > 0) {

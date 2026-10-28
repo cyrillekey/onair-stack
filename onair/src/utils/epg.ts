@@ -29,24 +29,16 @@ export function cacheControl(cache: {
 }
 
 export function parseGuideDate(date: string | undefined): GuideWindow {
-  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return {
-      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
-      end: Temporal.Instant.from(
-        dayjs().add(60, "minutes").toDate().toISOString(),
-      ),
-    };
-  }
+  const startDate = dayjs(date).startOf("day").toDate();
+  const endDate = dayjs(date).endOf("day").toDate();
 
   try {
-    const start = Temporal.Instant.from(`${date}T00:00:00Z`);
-    return { start, end: start.add({ minutes: 60 }) };
+    const start = Temporal.Instant.from(startDate.toISOString());
+    return { start, end: Temporal.Instant.from(endDate.toISOString()) };
   } catch {
     return {
-      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
-      end: Temporal.Instant.from(
-        dayjs().add(60, "minutes").toDate().toISOString(),
-      ),
+      start: Temporal.Instant.from(startDate.toISOString()),
+      end: Temporal.Instant.from(endDate.toISOString()),
     };
   }
 }
