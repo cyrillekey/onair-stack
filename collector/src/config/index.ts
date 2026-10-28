@@ -16,6 +16,8 @@ const envSchema = z.object({
   HTTP_USER_AGENT: z.string().default("onair-collector/0.0.1"),
   NODE_ENV: z.string().default("development"),
   STREAM_HEALTH_CRON: z.string().default("*/30 * * * *"),
+  SCHEDULE_CLEANUP_CRON: z.string().default("0 4 * * *"),
+  SCHEDULE_RETENTION_DAYS: z.coerce.number().int().positive().default(4),
   STREAM_HEALTH_BATCH_SIZE: z.coerce.number().int().positive().default(20),
   STREAM_HEALTH_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),
   STREAM_HEALTH_DEEP_CHECK: z

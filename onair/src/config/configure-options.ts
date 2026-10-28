@@ -35,7 +35,7 @@ export const CONFIGURE_GROUPS: ConfigureGroup[] = [
     name: "countries",
     label: "Countries",
     eyebrow: "Regions",
-    hint: "Choose the regions to pull channels from. Skip this group to include every country.",
+    hint: "Choose at least one region to pull channels from.",
     placeholder: "Choose countries",
     options: COUNTRIES,
   },
@@ -43,15 +43,8 @@ export const CONFIGURE_GROUPS: ConfigureGroup[] = [
     name: "categories",
     label: "Genres",
     eyebrow: "Catalog rails",
-    hint: "Each genre becomes a catalog row you can browse in Stremio. Skip this group to include every genre.",
+    hint: "Choose at least one genre for your Stremio catalog rails.",
     placeholder: "Choose genres",
     options: GENRES,
   },
 ];
-
-export const TIMEZONES: readonly ConfigureOption[] = Intl.supportedValuesOf(
-  "timeZone",
-).map((timezone) => ({
-  value: timezone,
-  label: timezone,
-}));

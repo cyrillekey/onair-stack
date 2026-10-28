@@ -26,6 +26,7 @@ COPY --chown=node:node package.json package-lock.json ./
 COPY --from=prod-deps --chown=node:node /app/node_modules ./node_modules
 COPY --from=builder --chown=node:node /app/dist ./dist
 COPY --from=builder --chown=node:node /app/src/templates ./dist/src/templates
+COPY --from=builder --chown=node:node /app/src/public ./dist/src/public
 
 # Non-recursive, so it's cheap
 RUN touch .env && chown node:node /app .env

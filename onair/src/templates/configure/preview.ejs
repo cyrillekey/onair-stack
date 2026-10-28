@@ -1,0 +1,72 @@
+<aside class="preview-column" aria-label="Live preview">
+  <div class="preview-card">
+    <div class="preview-top">
+      <span class="preview-live"><i aria-hidden="true"></i> Live preview</span>
+      <span class="preview-pass">CFG / 001</span>
+    </div>
+
+    <div class="preview-identity">
+      <span class="preview-label">Your add-on</span>
+      <p class="preview-name is-placeholder" data-preview-name>your name</p>
+      <p class="preview-sub">Personal live TV for Stremio.</p>
+    </div>
+
+    <div class="preview-divider" aria-hidden="true"></div>
+
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <span>Regions</span>
+        <span data-preview-country-count><%= pad(countries.options.length) %></span>
+      </div>
+      <div class="preview-chips" data-preview-countries>
+        <% countries.options.forEach(function (option) { %>
+        <span class="preview-chip"><%= option.label %></span>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <span>Catalog rails</span>
+        <span data-preview-genre-count><%= pad(genres.options.length) %></span>
+      </div>
+      <div class="preview-rails" data-preview-genres>
+        <% genres.options.forEach(function (option, index) { %>
+        <span class="preview-rail" title="<%= option.label %>">
+          <i aria-hidden="true"><%= pad(index + 1) %></i>
+          <span><%= option.label %></span>
+        </span>
+        <% }); %>
+      </div>
+    </div>
+
+    <div class="preview-section">
+      <div class="preview-section-head">
+        <span>Home screen</span>
+      </div>
+      <%# Default text; keep in sync with the checked option in home-choice.ejs %>
+      <div class="preview-home" data-preview-home>
+        <span class="preview-home-dot" aria-hidden="true"></span>
+        <span data-preview-home-label>Catalogs on your Board</span>
+      </div>
+    </div>
+
+    <div class="preview-meta">
+      <span>Device timezone</span>
+      <span data-preview-timezone>Detecting…</span>
+    </div>
+
+    <div class="preview-action">
+      <button type="button" class="preview-generate" data-generate>
+        <span data-generate-label>Generate link</span>
+        <%- include('./icon', { name: "arrow", size: 16 }) %>
+      </button>
+      <p class="preview-note">One link. Regenerate any time.</p>
+      <p class="preview-error" data-preview-error role="alert" hidden></p>
+    </div>
+
+    <%- include('./preview-result') %>
+  </div>
+  <p class="preview-footnote">Works with Stremio on desktop, mobile and TV.</p>
+  <div class="preview-barcode" aria-hidden="true"></div>
+</aside>

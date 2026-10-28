@@ -1,0 +1,61 @@
+<div class="tag-field" data-tag-field data-name="<%= group.name %>" data-label="<%= group.label %>">
+  <div class="tag-anchor">
+    <div class="tag-shell" data-tag-shell>
+      <div class="tag-values">
+        <div class="tag-chips" data-tag-chips>
+          <% group.options.slice(0, 4).forEach(function (option) { %>
+          <span class="tag-chip">
+            <span><%= option.label %></span>
+            <button type="button" class="tag-chip-remove" data-chip-remove="<%= option.value %>" aria-label="Remove <%= option.label %>">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                <path d="m2 2 6 6M8 2 2 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </button>
+          </span>
+          <% }); %>
+          <% if (group.options.length > 4) { %>
+          <span class="tag-chip tag-chip-more" data-tag-more title="<%= group.options.slice(4).map(function (option) { return option.label; }).join(', ') %>">+<%= group.options.length - 4 %></span>
+          <% } %>
+        </div>
+        <span class="tag-placeholder" data-tag-placeholder hidden><%= group.placeholder %></span>
+      </div>
+      <button type="button" class="tag-toggle" data-tag-toggle aria-expanded="false" aria-controls="<%= group.name %>-options">
+        <span class="tag-count" data-tag-count><%= group.options.length %> / <%= group.options.length %></span>
+        <svg class="tag-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+          <path d="m2.5 4.5 3.5 3.5 3.5-3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="tag-popover" id="<%= group.name %>-options" data-tag-popover hidden>
+      <div class="tag-search">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+          <path d="m10.5 10.5 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <input type="search" data-tag-search placeholder="Search <%= group.label.toLowerCase() %>" aria-label="Search <%= group.label.toLowerCase() %>" autocomplete="off">
+      </div>
+      <div class="tag-toolbar">
+        <button type="button" data-tag-all>Select all</button>
+        <button type="button" data-tag-none>Clear</button>
+        <span data-tag-visible-count><%= group.options.length %> of <%= group.options.length %></span>
+      </div>
+      <div class="tag-options" role="group" aria-label="<%= group.label %> options">
+        <% group.options.forEach(function (option) { %>
+        <label class="tag-option" data-tag-option-row>
+          <input type="checkbox" value="<%= option.value %>" data-tag-option data-label="<%= option.label %>" checked>
+          <span class="tag-check" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="m2.5 6 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="tag-option-label"><%= option.label %></span>
+        </label>
+        <% }); %>
+      </div>
+      <p class="tag-empty" data-tag-empty hidden>No matches. Try another search.</p>
+    </div>
+  </div>
+  <p class="field-hint"><%= group.hint %></p>
+  <p class="field-error" data-error="<%= group.name %>" role="alert" hidden></p>
+</div>

@@ -75,7 +75,7 @@ class StreamsCollector extends BaseCollector {
                     slug: this.slugify(a.name),
                     url: a.streamLink,
                     resolution: a.resolution,
-                    language: a.countryName,
+                    language: a?.countryName ?? "",
                     logo: a.logo ?? a.tvgLogo,
                   }),
                 ),

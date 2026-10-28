@@ -1,0 +1,64 @@
+<%
+  // The form is a numbered sequence of steps. Each step is a heading plus one field partial.
+  // Add, remove or reorder steps here; numbering and aria wiring follow automatically.
+  const steps = [
+    {
+      eyebrow: "Identity",
+      title: "Name your line-up",
+      description: "This is how your add-on signs off inside Stremio.",
+      partial: "username-field"
+    },
+    {
+      eyebrow: "Regions",
+      title: "Choose your regions",
+      description: "We pull live channels from the countries you keep.",
+      partial: "tag-select",
+      locals: { group: countries }
+    },
+    {
+      eyebrow: "Catalog",
+      title: "Pick your catalog rails",
+      description: "Every genre you keep becomes a row you can browse in Stremio.",
+      partial: "tag-select",
+      locals: { group: genres }
+    },
+    {
+      eyebrow: "Placement",
+      title: "Set the home screen",
+      description: "Decide whether your catalog rails land on the Stremio Board.",
+      partial: "home-choice"
+    }
+  ];
+%>
+<form class="builder-form" action="/configure" method="post" data-config-form novalidate>
+  <div class="form-head">
+    <span class="form-kicker">Line-up sheet</span>
+    <span class="form-stamp"><i aria-hidden="true"></i> Stremio / TV</span>
+  </div>
+
+  <noscript>
+    <p class="form-noscript">JavaScript is required to build your line-up and generate a link.</p>
+  </noscript>
+
+  <% steps.forEach(function (step, index) { %>
+  <% const titleId = "step-" + (index + 1) + "-title"; %>
+  <section class="form-section" aria-labelledby="<%= titleId %>">
+    <span class="section-marker" aria-hidden="true"><%= pad(index + 1) %></span>
+    <div class="section-body">
+      <div class="section-head">
+        <div class="section-title">
+          <span class="section-eyebrow"><%= step.eyebrow %></span>
+          <h2 id="<%= titleId %>"><%= step.title %></h2>
+        </div>
+        <p><%= step.description %></p>
+      </div>
+      <%- include(step.partial, step.locals || {}) %>
+    </div>
+  </section>
+  <% }); %>
+
+  <div class="form-foot">
+    <%- include('./icon', { name: "lock", size: 15 }) %>
+    <span>Your link is generated on this server. No account, no email.</span>
+  </div>
+</form>

@@ -3,6 +3,7 @@ import BroadcastCollector from "@/collectors/stream/broadcast.collector.js";
 import StreamsCollector from "@/collectors/stream/index.js";
 
 import StreamHealthCollector from "@/collectors/cleaner/stream-health.collector.js";
+import ScheduleCleanupCollector from "@/collectors/cleaner/schedule-cleanup.collector.js";
 import EpgScheduler from "@/collectors/schedule/epg.scheduler.js";
 
 // Single place to add/remove sources. Append new collectors here.
@@ -15,5 +16,6 @@ export function buildRegistry(): BaseCollector[] {
     new StreamsCollector(),
     new BroadcastCollector(),
     new EpgScheduler(),
+    new ScheduleCleanupCollector(),
   ];
 }

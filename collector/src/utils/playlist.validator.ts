@@ -67,7 +67,15 @@ async function main(playlistUrl: string) {
     content.map(async (a) => {
       try {
         const b = await verifyM3U8(a.streamLink);
-        return { ...b, name: a.name };
+        return {
+          url: b.url,
+          isValid: b.isValid,
+          isPlayable: b.isPlayable,
+          name: a.name,
+          country: a.country,
+          tvgId: a.tvgId,          
+          variantCount: b.variantCount
+        };
       } finally {
         // Tick on completion (success or failure) so the bar always reaches
         // its total, even if a stream throws.

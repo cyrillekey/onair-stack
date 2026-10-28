@@ -21,47 +21,47 @@ class EpgScheduler extends BaseCollector<Channel> {
     },
     {
       id: "unitedstates11.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates10.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates9.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates8.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates7.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates6.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates5.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates4.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates3.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates2.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "unitedstates1.xml",
-      name: "United States",
+      name: "United States of America",
     },
     {
       id: "newzealand.xml",
@@ -108,12 +108,14 @@ class EpgScheduler extends BaseCollector<Channel> {
                 poster: schedule.logo,
               },
               update: {
-                country: country.name,
                 name: schedule.name,
                 slug: this.slugify(schedule.name),
                 poster: schedule.logo,
               },
-              conflictOn: { slug: this.slugify(schedule.name) },
+              conflictOn: {
+                slug: this.slugify(schedule.name),
+                country: country.name,
+              },
             });
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
