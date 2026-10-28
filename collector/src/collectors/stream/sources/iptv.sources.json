@@ -298,5 +298,11 @@
             "ss_gb.m3u",
             "ss_us.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/alexcraib1-del/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "playlist-v2.m3u"
+        ]
     }
 ]

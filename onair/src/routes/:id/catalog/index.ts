@@ -229,7 +229,7 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         .where((a) => a.streams.some())
         .limit(CATALOG_PAGE_SIZE)
         .all();
-      if (!guideWindow) {
+      if (!extraArgs?.date || !guideWindow) {
         return {
           metas: channels.map(previewForChannel),
           cacheMaxAge: 120,
