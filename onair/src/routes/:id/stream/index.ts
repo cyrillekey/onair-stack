@@ -9,7 +9,7 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       },
     ];
   };
-}> = (fastify):void => {
+}> = (fastify): void => {
   fastify.route({
     method: "GET",
     schema: {
@@ -79,6 +79,7 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             id: stream.id,
             name: stream.name,
             url: stream.url,
+            description: stream.resolution ?? "Unknown",
           })),
           cacheMaxAge: 120,
           staleRevalidate: 600,
