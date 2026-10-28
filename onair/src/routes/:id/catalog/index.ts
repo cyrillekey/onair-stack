@@ -229,7 +229,6 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         .where((a) => a.streams.some())
         .limit(CATALOG_PAGE_SIZE)
         .all();
-
       if (!guideWindow) {
         return {
           metas: channels.map(previewForChannel),
@@ -256,6 +255,7 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       };
     } catch (error) {
       fastify.log.error(error);
+      console.error(error);
       return emptyResponse;
     }
   }

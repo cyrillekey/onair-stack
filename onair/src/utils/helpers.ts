@@ -54,7 +54,7 @@ export const baseManifest: Manifest = {
   version: "1.0.3",
   logo: appConfig.logo,
   // background: appConfig.background,
-  contactEmail: "cyrilleotieno7@gmail.com",
+  contactEmail: "cyrilleodev@gmail.com",
   behaviorHints: {
     configurable: true,
     epgProvider: true,
