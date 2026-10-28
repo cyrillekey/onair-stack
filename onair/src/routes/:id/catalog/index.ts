@@ -170,9 +170,7 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         };
 
     try {
-      const config = await fastify.db.orm.public.Configuration.where({
-        userId,
-      }).first();
+      const config = await fastify.configCache.get(userId);
       if (!config) {
         return emptyResponse;
       }
