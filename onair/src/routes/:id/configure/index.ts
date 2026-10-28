@@ -37,17 +37,13 @@ const updateConfigurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     async function (req, reply) {
       try {
         const id = req.params.id;
-        const config = await fastify.db.orm.public.Configuration.whereUnique({
-          userId: id,
-        })
-          .include("user")
-          .first();
+        const config = await fastify.configCache.get(id);
         if (!config) return reply.redirect("/configure");
         const userGroupConfig = CONFIGURE_GROUPS.map((group) => ({
           ...group,
           selected:
             group.name === "countries"
-              ? (config.countries as string[])
+              ? config.countries
               : (config.categories as string[]),
         }));
         const template = await fastify.ejs.compile("/configure/index", {
@@ -56,7 +52,7 @@ const updateConfigurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           countries: COUNTRIES,
           genres: GENRES,
           timezones: TIMEZONES,
-          config: { ...config, username: config.user.name },
+          config,
         });
         return reply
           .header("cache-control", "no-store")

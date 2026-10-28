@@ -44,9 +44,7 @@ const stremioRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     },
     async (req, reply) => {
       try {
-        const config = await fastify.db.orm.public.Configuration.whereUnique({
-          userId: req.params.id,
-        }).first();
+        const config = await fastify.configCache.get(req.params.id);
         if (!config?.id) {
           return reply.redirect("/configure");
         }
@@ -57,7 +55,7 @@ const stremioRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         // An empty genre list means every configurable genre.
         const categories =
           config.categories.length > 0
-            ? (config.categories as CatalogType[])
+            ? config.categories
             : (GENRES.map((genre) => genre.value) as CatalogType[]);
         const catalogs = buildCatalog(categories, showInHome);
         const manifest: Manifest = {
