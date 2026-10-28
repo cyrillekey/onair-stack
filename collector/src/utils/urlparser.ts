@@ -5,6 +5,7 @@
  * lines, and a stream URL) into a list of structured Stream objects.
  */
 
+import { CountryParser } from "../matchers/country/country.matcher.js";
 import { isProfane } from "./media.filter.js";
 
 export interface Stream {
@@ -18,9 +19,9 @@ export interface Stream {
   logo?: string;
   resolution?: string;
   /** Two-letter country code parsed from the tvg-id (e.g. "US" from "WillowSports.us@SD"), if present */
-  country?: string;
+  country: string | null;
   /** Full country name for `country` (e.g. "United States"), if it could be resolved */
-  countryName?: string;
+  countryName: string | null;
 }
 
 const GEO_BLOCKED_PATTERN = /\s*\[geo-blocked\]\s*/i;
@@ -122,6 +123,7 @@ export async function parseM3U(url: string): Promise<Stream[]> {
  */
 export function parseM3UContent(content: string): Stream[] {
   const streams: Stream[] = [];
+  const matcher = new CountryParser();
 
   const lines = content
     .split(/\r?\n/)
@@ -165,7 +167,9 @@ export function parseM3UContent(content: string): Stream[] {
 
       // Drop entries whose display name or group title contains profanity.
       if (!isProfane(name) && !isProfane(pendingGroupTitle)) {
-        const country = extractCountry(pendingTvgId);
+        const country = matcher.parseCountry(
+          [name, pendingTvgId].filter((a) => a !== undefined),
+        );
 
         streams.push({
           name,
@@ -173,7 +177,7 @@ export function parseM3UContent(content: string): Stream[] {
           streamLink: line,
           tvgId: pendingTvgId,
           country,
-          countryName: countryNameFromCode(country),
+          countryName: country,
           httpReferrer: pendingReferrer,
           logo: pendingLogo,
           tvgLogo: pendingLogo,
@@ -191,40 +195,4 @@ export function parseM3UContent(content: string): Stream[] {
   }
 
   return streams;
-}
-
-/**
- * Extract the country code from a tvg-id like "WillowSports.us@SD".
- * The country is the 2-letter suffix after the last dot, before an optional
- * "@Variant" part.
- */
-const COUNTRY_FROM_TVG_ID_PATTERN = /\.([a-z]{2})(?:@[^@]*)?$/i;
-
-export function extractCountry(tvgId: string | undefined): string | undefined {
-  if (!tvgId) return undefined;
-  const match = tvgId.trim().match(COUNTRY_FROM_TVG_ID_PATTERN);
-  return match ? match[1].toUpperCase() : undefined;
-}
-
-const regionNames = new Intl.DisplayNames(["en"], {
-  type: "region",
-  fallback: "none", // undefined for unknown codes instead of echoing them back
-});
-
-/** Non-standard codes seen in playlists, mapped to their ISO 3166-1 alpha-2 equivalent. */
-const COUNTRY_CODE_ALIASES: Record<string, string> = {
-  UK: "GB",
-};
-
-export function countryNameFromCode(
-  code: string | undefined,
-): string | undefined {
-  if (!code) return undefined;
-  const upper = code.toUpperCase();
-  const normalized = COUNTRY_CODE_ALIASES[upper] ?? upper;
-  try {
-    return regionNames.of(normalized);
-  } catch {
-    return undefined; // malformed code
-  }
 }

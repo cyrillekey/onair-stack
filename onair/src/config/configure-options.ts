@@ -1,3 +1,5 @@
+import { catalogTypes, toReadableString } from "@/utils/helpers";
+
 export type ConfigureOption = Readonly<{
   value: string;
   label: string;
@@ -15,7 +17,7 @@ export type ConfigureGroup = {
 
 /** Countries the collector currently produces channels for. */
 export const COUNTRIES: readonly ConfigureOption[] = [
-  { value: "United States", label: "United States" },
+  { value: "United States of America", label: "United States" },
   { value: "United Kingdom", label: "United Kingdom" },
   { value: "Canada", label: "Canada" },
   { value: "Australia", label: "Australia" },
@@ -23,24 +25,10 @@ export const COUNTRIES: readonly ConfigureOption[] = [
 ];
 
 /** Categories exposed as Stremio catalogs (ADULT is intentionally omitted). */
-export const GENRES: readonly ConfigureOption[] = [
-  { value: "ENTERTAINMENT", label: "Entertainment" },
-  { value: "SPORTS", label: "Sports" },
-  { value: "MOVIES", label: "Movies" },
-  { value: "NEWS", label: "News" },
-  { value: "INTERNATIONAL", label: "International" },
-  { value: "RADIO", label: "Radio" },
-  { value: "RELIGIOUS", label: "Religious" },
-  { value: "DOCUMENTARY", label: "Documentary" },
-  { value: "MUSIC", label: "Music" },
-  { value: "KIDS", label: "Kids" },
-  { value: "SHOPPING", label: "Shopping" },
-  { value: "LIFESTYLE", label: "Lifestyle" },
-  { value: "CLASSIC_TV", label: "Classic TV" },
-  { value: "CRIME", label: "Crime" },
-  { value: "OUTDOORS_AUTO", label: "Outdoors & Auto" },
-  { value: "GENERAL", label: "General" },
-];
+export const GENRES: readonly ConfigureOption[] = catalogTypes.map((a) => ({
+  value: a,
+  label: toReadableString(a),
+}));
 
 export const CONFIGURE_GROUPS: ConfigureGroup[] = [
   {

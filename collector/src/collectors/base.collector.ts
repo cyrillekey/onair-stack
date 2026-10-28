@@ -6,7 +6,7 @@ import { reportError } from "@/utils/sentry.js";
 import {
   StreamMatcher,
   type StreamMatcherConfig,
-} from "@/matching/stream.matcher.js";
+} from "@/matchers/stream/stream.matcher.js";
 import { createHash } from "node:crypto";
 import { classifyTvChannel } from "@/utils/channel.classifier.js";
 

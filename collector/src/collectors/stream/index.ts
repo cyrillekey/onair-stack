@@ -57,9 +57,9 @@ class StreamsCollector extends BaseCollector {
 
             for (const channel of allChannels) {
               const matching = streams.filter((a) => {
-                if (a?.countryName && channel.country) {
+                if (a?.country && channel.country) {
                   if (
-                    a.countryName.toLowerCase() != channel.country.toLowerCase()
+                    a.country.toLowerCase() != channel.country.toLowerCase()
                   ) {
                     return false;
                   }
@@ -75,7 +75,7 @@ class StreamsCollector extends BaseCollector {
                     slug: this.slugify(a.name),
                     url: a.streamLink,
                     resolution: a.resolution,
-                    language: a.countryName,
+                    language: a?.countryName ?? "",
                     logo: a.logo ?? a.tvgLogo,
                   }),
                 ),

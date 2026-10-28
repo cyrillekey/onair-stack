@@ -60,6 +60,7 @@ Registered in `src/jobs/registry.ts`; cron expressions are evaluated in `TZ` (de
 | `Broadcast` | `0 */4 * * *` | `broadcastatlas.com/api/channels/ranked` | Pages through ranked UK/US channels, verifies playback options and creates `Stream` rows. |
 | `Bein Schedule` | `00 03 * * *` | `beinsports.com/api/opta` | Upserts beIN channels (`USA`/`MENA`) and their programmes. |
 | `UK Sports Schedule` | `30 01 * * *` | `zappscore.com/epg/api/epg.xml` | Parses the XMLTV EPG per channel and writes `SPORTS` channels and programmes. |
+| `ScheduleCleanup` | `0 4 * * *` (override with `SCHEDULE_CLEANUP_CRON`) | `schedule` rows | Deletes programmes whose `endTime` is older than `SCHEDULE_RETENTION_DAYS` (default 4). |
 
 `StreamHealth` is registered first so a `RUN_ONCE` pass prunes dead links before the
 ingest collectors re-add working ones.
@@ -88,6 +89,7 @@ in-process cron. A `RUN_ONCE` run exits non-zero when a job fails.
 Config (env): `DATABASE_URL`, `NODE_ENV`, `RUN_ONCE`, `TZ`, `LOG_LEVEL`, `HTTP_TIMEOUT_MS`,
 `HTTP_MAX_RETRIES`, `HTTP_USER_AGENT`, `STREAM_HEALTH_CRON`, `STREAM_HEALTH_BATCH_SIZE`,
 `STREAM_HEALTH_TIMEOUT_MS`, `STREAM_HEALTH_DEEP_CHECK`, `STREAM_HEALTH_MAX_DELETE_RATIO`,
+`SCHEDULE_CLEANUP_CRON`, `SCHEDULE_RETENTION_DAYS`,
 `SENTRY_DSN`, `SENTRY_ENVIRONMENT`, `SENTRY_TRACES_SAMPLE_RATE`, `CRONITOR_API_KEY`,
 `CRONITOR_ENVIRONMENT`, `CRONITOR_REGION`, `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`,
 `CLOUDINARY_API_SECRET`. See [`.env.example`](.env.example) for the full list and defaults.

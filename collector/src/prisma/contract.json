@@ -33,72 +33,172 @@
             "codecId": "pg/text@1",
             "members": [
               {
-                "name": "ENTERTAINMENT",
-                "value": "ENTERTAINMENT"
+                "name": "ADULT",
+                "value": "ADULT"
               },
               {
-                "name": "SPORTS",
-                "value": "SPORTS"
+                "name": "ADVENTIST",
+                "value": "ADVENTIST"
               },
               {
-                "name": "MOVIES",
-                "value": "MOVIES"
+                "name": "ANIME",
+                "value": "ANIME"
               },
               {
-                "name": "NEWS",
-                "value": "NEWS"
+                "name": "BASEBALL",
+                "value": "BASEBALL"
               },
               {
-                "name": "INTERNATIONAL",
-                "value": "INTERNATIONAL"
+                "name": "BASKETBALL",
+                "value": "BASKETBALL"
               },
               {
-                "name": "RADIO",
-                "value": "RADIO"
+                "name": "BUSINESS",
+                "value": "BUSINESS"
               },
               {
-                "name": "RELIGIOUS",
-                "value": "RELIGIOUS"
+                "name": "CATHOLIC",
+                "value": "CATHOLIC"
               },
               {
-                "name": "DOCUMENTARY",
-                "value": "DOCUMENTARY"
-              },
-              {
-                "name": "MUSIC",
-                "value": "MUSIC"
-              },
-              {
-                "name": "KIDS",
-                "value": "KIDS"
-              },
-              {
-                "name": "SHOPPING",
-                "value": "SHOPPING"
-              },
-              {
-                "name": "LIFESTYLE",
-                "value": "LIFESTYLE"
+                "name": "CHRISTIAN",
+                "value": "CHRISTIAN"
               },
               {
                 "name": "CLASSIC_TV",
                 "value": "CLASSIC_TV"
               },
               {
+                "name": "COMBAT_SPORTS",
+                "value": "COMBAT_SPORTS"
+              },
+              {
+                "name": "COMEDY",
+                "value": "COMEDY"
+              },
+              {
+                "name": "CRICKET",
+                "value": "CRICKET"
+              },
+              {
                 "name": "CRIME",
                 "value": "CRIME"
               },
               {
-                "name": "ADULT",
-                "value": "ADULT"
+                "name": "DOCUMENTARY",
+                "value": "DOCUMENTARY"
+              },
+              {
+                "name": "DRAMA",
+                "value": "DRAMA"
+              },
+              {
+                "name": "EDUCATION",
+                "value": "EDUCATION"
+              },
+              {
+                "name": "ENTERTAINMENT",
+                "value": "ENTERTAINMENT"
+              },
+              {
+                "name": "FASHION",
+                "value": "FASHION"
+              },
+              {
+                "name": "FOOD",
+                "value": "FOOD"
+              },
+              {
+                "name": "FOOTBALL",
+                "value": "FOOTBALL"
+              },
+              {
+                "name": "GENERAL",
+                "value": "GENERAL"
+              },
+              {
+                "name": "GOSPEL",
+                "value": "GOSPEL"
+              },
+              {
+                "name": "INTERNATIONAL",
+                "value": "INTERNATIONAL"
+              },
+              {
+                "name": "ISLAMIC",
+                "value": "ISLAMIC"
+              },
+              {
+                "name": "JEWISH",
+                "value": "JEWISH"
+              },
+              {
+                "name": "KIDS",
+                "value": "KIDS"
+              },
+              {
+                "name": "LIFESTYLE",
+                "value": "LIFESTYLE"
+              },
+              {
+                "name": "LOCAL",
+                "value": "LOCAL"
+              },
+              {
+                "name": "MOTORSPORTS",
+                "value": "MOTORSPORTS"
+              },
+              {
+                "name": "MOVIES",
+                "value": "MOVIES"
+              },
+              {
+                "name": "MUSIC",
+                "value": "MUSIC"
+              },
+              {
+                "name": "NEWS",
+                "value": "NEWS"
               },
               {
                 "name": "OUTDOORS_AUTO",
                 "value": "OUTDOORS_AUTO"
               },
               {
-                "name": "GENERAL",
-                "value": "GENERAL"
+                "name": "PRAISE_WORSHIP",
+                "value": "PRAISE_WORSHIP"
+              },
+              {
+                "name": "RADIO",
+                "value": "RADIO"
+              },
+              {
+                "name": "REALITY_TV",
+                "value": "REALITY_TV"
+              },
+              {
+                "name": "RELIGIOUS",
+                "value": "RELIGIOUS"
+              },
+              {
+                "name": "SCIENTOLOGY",
+                "value": "SCIENTOLOGY"
+              },
+              {
+                "name": "SHOPPING",
+                "value": "SHOPPING"
+              },
+              {
+                "name": "SPORTS",
+                "value": "SPORTS"
+              },
+              {
+                "name": "TECHNOLOGY",
+                "value": "TECHNOLOGY"
+              },
+              {
+                "name": "TRAVEL",
+                "value": "TRAVEL"
               }
             ]
           }
@@ -748,8 +848,8 @@
             "channel": {
               "checks": [
                 {
-                  "expression": "\"category\" IN ('ENTERTAINMENT', 'SPORTS', 'MOVIES', 'NEWS', 'INTERNATIONAL', 'RADIO', 'RELIGIOUS', 'DOCUMENTARY', 'MUSIC', 'KIDS', 'SHOPPING', 'LIFESTYLE', 'CLASSIC_TV', 'CRIME', 'ADULT', 'OUTDOORS_AUTO', 'GENERAL')",
-                  "name": "channel_category_check_4a50aa63",
+                  "expression": "\"category\" IN ('ADULT', 'ADVENTIST', 'ANIME', 'BASEBALL', 'BASKETBALL', 'BUSINESS', 'CATHOLIC', 'CHRISTIAN', 'CLASSIC_TV', 'COMBAT_SPORTS', 'COMEDY', 'CRICKET', 'CRIME', 'DOCUMENTARY', 'DRAMA', 'EDUCATION', 'ENTERTAINMENT', 'FASHION', 'FOOD', 'FOOTBALL', 'GENERAL', 'GOSPEL', 'INTERNATIONAL', 'ISLAMIC', 'JEWISH', 'KIDS', 'LIFESTYLE', 'LOCAL', 'MOTORSPORTS', 'MOVIES', 'MUSIC', 'NEWS', 'OUTDOORS_AUTO', 'PRAISE_WORSHIP', 'RADIO', 'REALITY_TV', 'RELIGIOUS', 'SCIENTOLOGY', 'SHOPPING', 'SPORTS', 'TECHNOLOGY', 'TRAVEL')",
+                  "name": "channel_category_check_2aa3a623",
                   "prefix": "channel_category_check"
                 }
               ],
@@ -837,7 +937,8 @@
               "uniques": [
                 {
                   "columns": [
-                    "slug"
+                    "slug",
+                    "country"
                   ]
                 }
               ]
@@ -845,8 +946,8 @@
             "configuration": {
               "checks": [
                 {
-                  "expression": "array_remove(\"categories\", NULL) <@ '{\"ENTERTAINMENT\",\"SPORTS\",\"MOVIES\",\"NEWS\",\"INTERNATIONAL\",\"RADIO\",\"RELIGIOUS\",\"DOCUMENTARY\",\"MUSIC\",\"KIDS\",\"SHOPPING\",\"LIFESTYLE\",\"CLASSIC_TV\",\"CRIME\",\"ADULT\",\"OUTDOORS_AUTO\",\"GENERAL\"}'",
-                  "name": "configuration_categories_check_cd161752",
+                  "expression": "array_remove(\"categories\", NULL) <@ '{\"ADULT\",\"ADVENTIST\",\"ANIME\",\"BASEBALL\",\"BASKETBALL\",\"BUSINESS\",\"CATHOLIC\",\"CHRISTIAN\",\"CLASSIC_TV\",\"COMBAT_SPORTS\",\"COMEDY\",\"CRICKET\",\"CRIME\",\"DOCUMENTARY\",\"DRAMA\",\"EDUCATION\",\"ENTERTAINMENT\",\"FASHION\",\"FOOD\",\"FOOTBALL\",\"GENERAL\",\"GOSPEL\",\"INTERNATIONAL\",\"ISLAMIC\",\"JEWISH\",\"KIDS\",\"LIFESTYLE\",\"LOCAL\",\"MOTORSPORTS\",\"MOVIES\",\"MUSIC\",\"NEWS\",\"OUTDOORS_AUTO\",\"PRAISE_WORSHIP\",\"RADIO\",\"REALITY_TV\",\"RELIGIOUS\",\"SCIENTOLOGY\",\"SHOPPING\",\"SPORTS\",\"TECHNOLOGY\",\"TRAVEL\"}'",
+                  "name": "configuration_categories_check_45ac4b3e",
                   "prefix": "configuration_categories_check"
                 },
                 {
@@ -1263,23 +1364,48 @@
             "Category": {
               "kind": "valueSet",
               "values": [
-                "ENTERTAINMENT",
-                "SPORTS",
-                "MOVIES",
-                "NEWS",
-                "INTERNATIONAL",
-                "RADIO",
-                "RELIGIOUS",
-                "DOCUMENTARY",
-                "MUSIC",
-                "KIDS",
-                "SHOPPING",
-                "LIFESTYLE",
-                "CLASSIC_TV",
-                "CRIME",
                 "ADULT",
+                "ADVENTIST",
+                "ANIME",
+                "BASEBALL",
+                "BASKETBALL",
+                "BUSINESS",
+                "CATHOLIC",
+                "CHRISTIAN",
+                "CLASSIC_TV",
+                "COMBAT_SPORTS",
+                "COMEDY",
+                "CRICKET",
+                "CRIME",
+                "DOCUMENTARY",
+                "DRAMA",
+                "EDUCATION",
+                "ENTERTAINMENT",
+                "FASHION",
+                "FOOD",
+                "FOOTBALL",
+                "GENERAL",
+                "GOSPEL",
+                "INTERNATIONAL",
+                "ISLAMIC",
+                "JEWISH",
+                "KIDS",
+                "LIFESTYLE",
+                "LOCAL",
+                "MOTORSPORTS",
+                "MOVIES",
+                "MUSIC",
+                "NEWS",
                 "OUTDOORS_AUTO",
-                "GENERAL"
+                "PRAISE_WORSHIP",
+                "RADIO",
+                "REALITY_TV",
+                "RELIGIOUS",
+                "SCIENTOLOGY",
+                "SHOPPING",
+                "SPORTS",
+                "TECHNOLOGY",
+                "TRAVEL"
               ]
             }
           }
@@ -1288,7 +1414,7 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "4bde41f40052afe0c49244fe1f34ded993690c40f67a36fd828e8403e5f2c479"
+    "storageHash": "05ac50dfb6bb7915ea3a2ee7c00a78eb6254d75def8508ae95c6a3ec7f855c26"
   },
   "capabilities": {
     "postgres": {
