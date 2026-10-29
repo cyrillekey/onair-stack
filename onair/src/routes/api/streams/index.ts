@@ -134,7 +134,7 @@ const streamsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         }
 
         const streams = await query
-          .orderBy((stream) => stream.name.asc())
+          .orderBy((stream) => stream.createdat.desc())
           .all();
 
         return {
