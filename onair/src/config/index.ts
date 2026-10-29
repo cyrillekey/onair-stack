@@ -11,6 +11,7 @@ const appConfig = {
   background: artworkUrl,
   fallbackImage: artworkUrl,
   baseUrl: process.env.CENTRAL_URL,
+  signature: process.env.STREMIO_SIGNATURE ?? "",
 };
 
 export default appConfig;

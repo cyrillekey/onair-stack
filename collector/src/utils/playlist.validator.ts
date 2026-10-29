@@ -73,8 +73,8 @@ async function main(playlistUrl: string) {
           isPlayable: b.isPlayable,
           name: a.name,
           country: a.country,
-          tvgId: a.tvgId,          
-          variantCount: b.variantCount
+          tvgId: a.tvgId,
+          variantCount: b.variantCount,
         };
       } finally {
         // Tick on completion (success or failure) so the bar always reaches
@@ -94,7 +94,7 @@ async function main(playlistUrl: string) {
       : "0";
 
   // console log playlist summary with health,total ingested,total valid in formated output
-  console.log(valid);
+  console.log(JSON.stringify(valid));
   console.log(
     `Playlist Health: ${healthyRatio}%\nTotal Ingested: ${validated.length}\nTotal Valid: ${valid.length}`,
   );

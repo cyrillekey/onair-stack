@@ -67,10 +67,14 @@ class EpgScheduler extends BaseCollector<Channel> {
       id: "newzealand.xml",
       name: "New Zealand",
     },
+    {
+      id: "sports5.xml",
+      name: "United Kingdom",
+    },
   ];
   schedule = "30 01 * * *";
   name = "EPG Scheduler";
-
+  private blockedTitles = ["no event today"];
   private buildUrl(country: string) {
     return `${this.epgUrl}${country}.gz`;
   }
@@ -119,21 +123,29 @@ class EpgScheduler extends BaseCollector<Channel> {
             });
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
+              country: country.name,
             }).all();
             fetched += 1;
             if (ids.length > 0) {
               // create schedule
               for (const channel of ids) {
                 await ctx.db.orm.public.Schedule.createAll(
-                  schedule.schedule.map((a) => ({
-                    channelId: channel.id,
-                    date: this.buildTemporalDate(a.startTime),
-                    startTime: this.buildTemporalDate(a.startTime),
-                    endTime: this.buildTemporalDate(a.endTime),
-                    name: a.title,
-                    description: a?.description,
-                    poster: schedule.logo,
-                  })),
+                  schedule.schedule
+                    .filter(
+                      (a) =>
+                        !this.blockedTitles.includes(
+                          a.title?.toLowerCase() ?? "",
+                        ),
+                    )
+                    .map((a) => ({
+                      channelId: channel.id,
+                      date: this.buildTemporalDate(a.startTime),
+                      startTime: this.buildTemporalDate(a.startTime),
+                      endTime: this.buildTemporalDate(a.endTime),
+                      name: a.title,
+                      description: a?.description,
+                      poster: schedule.logo,
+                    })),
                   {
                     onConflict: "skip",
                   },

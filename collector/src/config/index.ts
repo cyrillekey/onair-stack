@@ -17,6 +17,7 @@ const envSchema = z.object({
   NODE_ENV: z.string().default("development"),
   STREAM_HEALTH_CRON: z.string().default("*/30 * * * *"),
   SCHEDULE_CLEANUP_CRON: z.string().default("0 4 * * *"),
+  SCHEDULE_OVERLAP_CLEANUP_CRON: z.string().default("30 3 * * *"),
   SCHEDULE_RETENTION_DAYS: z.coerce.number().int().positive().default(4),
   STREAM_HEALTH_BATCH_SIZE: z.coerce.number().int().positive().default(20),
   STREAM_HEALTH_TIMEOUT_MS: z.coerce.number().int().positive().default(15000),

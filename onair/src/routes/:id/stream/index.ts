@@ -73,7 +73,9 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       try {
         const streams = await fastify.db.orm.public.Stream.where({
           channelId: req.params.catalogId,
-        }).all();
+        })
+          .orderBy((a) => a.createdat.desc())
+          .all();
         return reply.send({
           streams: streams.map((stream) => ({
             id: stream.id,
