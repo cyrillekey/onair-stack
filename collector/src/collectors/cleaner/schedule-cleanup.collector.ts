@@ -4,6 +4,7 @@ import {
   type CollectorContext,
   type CollectResult,
 } from "../base.collector.js";
+import dayjs from "dayjs";
 
 /**
  * Deletes Schedule rows whose programme has ended more than
@@ -19,9 +20,7 @@ class ScheduleCleanupCollector extends BaseCollector<string> {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<string>, "job" | "durationMs">> {
     const cutoff = this.buildTemporalDate(
-      new Date(
-        Date.now() - config.SCHEDULE_RETENTION_DAYS * 24 * 60 * 60 * 1000,
-      ),
+      dayjs().subtract(config.SCHEDULE_RETENTION_DAYS, "days").toDate(),
     );
 
     const deleted = await ctx.db.orm.public.Schedule.where((schedule) =>
