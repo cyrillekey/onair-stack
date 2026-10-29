@@ -49,7 +49,12 @@ export function toReadableString(name: string) {
   return capitalize(name.replace(/_/gi, " ").toString());
 }
 
-export const baseManifest: Manifest = {
+export const baseManifest: Manifest & {
+  stremioAddonsConfig: {
+    issuer: string;
+    signature: string;
+  };
+} = {
   id: "community.onair",
   version: "1.0.3",
   logo: appConfig.logo,
@@ -66,6 +71,11 @@ export const baseManifest: Manifest = {
   name: "Onair",
   description:
     "Live TV for Stremio with a native EPG programme guide. Browse Entertainment, General, News and Sports channel catalogs and watch live channels from Discover or the guide grid.",
+
+  stremioAddonsConfig: {
+    issuer: "https://stremio-addons.net",
+    signature: appConfig.signature,
+  },
 };
 
 export function buildCatalog(
