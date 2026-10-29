@@ -1,0 +1,63 @@
+name: New Country Request
+description: Suggest a new country to add to OnAir.
+title: "[New Country Request]: "
+labels: ["country request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping expand OnAir! Please provide as much detail as possible about the country and the channels available there.
+
+  - type: input
+    id: country-name
+    attributes:
+      label: Country name
+      description: The official English name of the country.
+      placeholder: e.g. France
+    validations:
+      required: true
+
+  - type: input
+    id: country-code
+    attributes:
+      label: ISO 3166-1 alpha-2 code
+      description: The two-letter country code used by IPTV playlists and EPG feeds.
+      placeholder: e.g. FR
+    validations:
+      required: true
+
+  - type: input
+    id: stream-source
+    attributes:
+      label: Stream or playlist link
+      description: Direct link to an HLS/m3u8 stream or playlist covering channels from this country (optional).
+      placeholder: https://example.com/playlist.m3u
+    validations:
+      required: false
+
+  - type: input
+    id: epg-source
+    attributes:
+      label: EPG link
+      description: Direct link to an XMLTV/EPG feed covering this country (optional).
+      placeholder: https://example.com/epg.xml
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: can-test
+    attributes:
+      label: Testing
+      description: Would you be able to help verify channels once they are added?
+      options:
+        - label: I can help test channels from this country
+          required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional context
+      description: Any other context, such as the main languages, popular categories, or existing sources.
+      placeholder: Anything else we should know about this country.
+    validations:
+      required: false

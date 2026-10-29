@@ -304,5 +304,29 @@
         "sources": [
             "playlist-v2.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://dearbulut.github.io/iptv/playlists/country/",
+        "sources": [
+            "us.m3u",
+            "ca.m3u",
+            "au.m3u",
+            "uk.m3u",
+            "nz.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/mdarif2743/Cmcl-digital-mpd/refs/heads/main/",
+        "sources": [
+            "README.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/mdarif2743/",
+        "sources": [
+            "Sky-life-bd/refs/heads/main/README.m3u",
+            "Channel-I.m3u/refs/heads/main/Ottplusbdix.m3u",
+            "Cmcl-digital-mpd/refs/heads/main/README.m3u"
+        ]
     }
 ]

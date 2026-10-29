@@ -67,6 +67,10 @@ class EpgScheduler extends BaseCollector<Channel> {
       id: "newzealand.xml",
       name: "New Zealand",
     },
+    {
+      id: "sports5.xml",
+      name: "United Kingdom",
+    },
   ];
   schedule = "30 01 * * *";
   name = "EPG Scheduler";
@@ -119,6 +123,7 @@ class EpgScheduler extends BaseCollector<Channel> {
             });
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
+              country: country.name,
             }).all();
             fetched += 1;
             if (ids.length > 0) {
