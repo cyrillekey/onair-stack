@@ -81,6 +81,7 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             id: stream.id,
             name: stream.name,
             url: stream.url,
+            title: stream.resolution ?? "Unknown",
             description: stream.resolution ?? "Unknown",
           })),
           cacheMaxAge: 120,

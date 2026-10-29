@@ -75,6 +75,8 @@ export function previewForChannel(channel: ChannelRecord) {
     poster,
     posterShape: "landscape",
     logo: poster,
+    country: channel.country,
+    language: channel.country,
     behaviorHints: {
       isLive: true,
     },
@@ -91,6 +93,7 @@ export function metaForChannel(
     ...preview,
     background: appConfig.background,
     country: channel.country,
+    language: channel.country,
     genres: [toReadableString(channel.category)],
     videos,
     behaviorHints: {

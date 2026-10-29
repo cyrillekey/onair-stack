@@ -45,6 +45,8 @@ const metaPreviewSchema = {
     name: { type: "string" },
     type: { type: "string" },
     description: { type: "string" },
+    country: { type: "string" },
+    language: { type: "string" },
     poster: { type: "string" },
     posterShape: { type: "string" },
     logo: { type: "string" },
