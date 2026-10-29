@@ -316,12 +316,6 @@
         ]
     },
     {
-        "baseUrl": "https://raw.githubusercontent.com/mdarif2743/Cmcl-digital-mpd/refs/heads/main/",
-        "sources": [
-            "README.m3u"
-        ]
-    },
-    {
         "baseUrl": "https://raw.githubusercontent.com/mdarif2743/",
         "sources": [
             "Sky-life-bd/refs/heads/main/README.m3u",
