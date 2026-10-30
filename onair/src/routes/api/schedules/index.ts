@@ -71,6 +71,7 @@ const schedulesRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             },
             limit: {
               type: "integer",
+              default: 50,
               minimum: 1,
               maximum: 500,
               description: "Maximum number of entries to return.",

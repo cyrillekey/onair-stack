@@ -77,6 +77,7 @@ const streamsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
               type: "integer",
               minimum: 1,
               maximum: 500,
+              default: 50,
               description: "Maximum number of streams to return.",
             },
             offset: {
