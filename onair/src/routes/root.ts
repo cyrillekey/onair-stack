@@ -1,7 +1,7 @@
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 
 import { COUNTRIES } from "@/config/configure-options";
-import { baseManifest } from "@/utils/helpers";
+import { baseManifest, catalogTypes } from "@/utils/helpers";
 
 const root: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
@@ -31,6 +31,7 @@ const root: FastifyPluginCallbackJsonSchemaToTs<{
   fastify.get("/", { schema: { hide: true } }, async (_, reply) => {
     const html = await fastify.ejs.compile("/home/index", {
       countries: COUNTRIES,
+      genres: catalogTypes,
     });
     return reply
       .header("cache-control", "public, max-age=300")
