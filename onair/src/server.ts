@@ -15,9 +15,23 @@ function closeGraceDelay(): number {
 }
 
 const fastify = Fastify({
-  logger: {
-    level: process.env.LOG_LEVEL || "info",
-  },
+  logger:
+    process.env.NODE_ENV !== "production"
+      ? {
+          level: process.env.LOG_LEVEL || "info",
+        }
+      : {
+          level: "info",
+          enabled: true,
+          transport: {
+            target: "@axiomhq/pino",
+            options: {
+              dataset: process.env.AXIOM_DATASET,
+              token: process.env.AXIOM_TOKEN,
+              edge: process.env.AXIOM_REGION || "us-east-1.aws.edge.axiom.co",
+            },
+          },
+        },
 });
 
 void fastify.register(app, options);
