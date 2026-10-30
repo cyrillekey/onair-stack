@@ -56,7 +56,7 @@ export const baseManifest: Manifest & {
   };
 } = {
   id: "community.onair",
-  version: "1.0.3",
+  version: "1.0.4",
   logo: appConfig.logo,
   // background: appConfig.background,
   contactEmail: "cyrilleodev@gmail.com",

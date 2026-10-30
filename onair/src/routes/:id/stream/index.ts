@@ -71,8 +71,15 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     url: "/:type/:catalogId.json",
     handler: async (req, reply) => {
       try {
+        let id;
+        if (req.params.catalogId.includes("epg")) {
+          const parts = req.params.catalogId.split(":");
+          id = parts?.at(0) ?? req.params.catalogId;
+        } else {
+          id = req.params.catalogId;
+        }
         const streams = await fastify.db.orm.public.Stream.where({
-          channelId: req.params.catalogId,
+          channelId: id,
         })
           .orderBy((a) => a.createdat.desc())
           .all();
