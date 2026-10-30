@@ -22,6 +22,10 @@ export const COUNTRIES: readonly ConfigureOption[] = [
   { value: "Canada", label: "Canada" },
   { value: "Australia", label: "Australia" },
   { value: "New Zealand", label: "New Zealand" },
+  {
+    value: "Brazil",
+    label: "Brazil",
+  },
 ];
 
 /** Categories exposed as Stremio catalogs (ADULT is intentionally omitted). */

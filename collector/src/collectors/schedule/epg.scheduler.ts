@@ -71,6 +71,7 @@ class EpgScheduler extends BaseCollector<Channel> {
       id: "sports5.xml",
       name: "United Kingdom",
     },
+    { id: "brazil1.xml", name: "Brazil" },
   ];
   schedule = "30 01 * * *";
   name = "EPG Scheduler";
