@@ -275,10 +275,25 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       },
     },
     async (req, reply) => {
-      const response = await getCatalog(req.params.id, req.params.catalog, "");
-      return reply
-        .header("cache-control", cacheControl(response))
-        .send(response);
+      try {
+        const response = await getCatalog(
+          req.params.id,
+          req.params.catalog,
+          "",
+        );
+        return reply
+          .header("cache-control", cacheControl(response))
+          .send(response);
+      } catch (error) {
+        req.log.error(error);
+        return {
+          metas: [],
+          metasDetailed: [],
+          cacheMaxAge: 120,
+          staleRevalidate: 600,
+          staleError: 172800,
+        };
+      }
     },
   );
 
@@ -299,14 +314,25 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       },
     },
     async (req, reply) => {
-      const response = await getCatalog(
-        req.params.id,
-        req.params.catalog,
-        req.params.extraArgs,
-      );
-      return reply
-        .header("cache-control", cacheControl(response))
-        .send(response);
+      try {
+        const response = await getCatalog(
+          req.params.id,
+          req.params.catalog,
+          req.params.extraArgs,
+        );
+        return reply
+          .header("cache-control", cacheControl(response))
+          .send(response);
+      } catch (error) {
+        fastify.log.error(error);
+        return {
+          metas: [],
+          metasDetailed: [],
+          cacheMaxAge: 120,
+          staleRevalidate: 600,
+          staleError: 172800,
+        };
+      }
     },
   );
 };

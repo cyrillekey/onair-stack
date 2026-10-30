@@ -77,6 +77,7 @@ const channelsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             limit: {
               type: "integer",
               minimum: 1,
+              default: 50,
               maximum: 500,
               description: "Maximum number of channels to return.",
             },
