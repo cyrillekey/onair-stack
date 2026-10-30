@@ -9,7 +9,7 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       },
     ];
   };
-}> = (fastify): void => {
+}> = (fastify):void => {
   fastify.route({
     method: "GET",
     schema: {
@@ -73,19 +73,15 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       try {
         const streams = await fastify.db.orm.public.Stream.where({
           channelId: req.params.catalogId,
-        })
-          .orderBy((a) => a.createdat.desc())
-          .all();
+        }).all();
         return reply.send({
           streams: streams.map((stream) => ({
             id: stream.id,
-            name: `${stream.name} %${stream.failureCount > 0 ? "🔴" : "🟢"}`,
+            name: stream.name,
             url: stream.url,
-            title: stream.resolution ?? "Unknown",
-            description: stream.resolution ?? "Unknown",
           })),
-          cacheMaxAge: 60,
-          staleRevalidate: 300,
+          cacheMaxAge: 120,
+          staleRevalidate: 600,
           staleError: 172800,
         });
       } catch (error) {

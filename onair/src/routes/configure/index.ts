@@ -158,7 +158,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             userId: user.id,
             showInHome: request.body.showOnHome,
           });
-          fastify.configCache.invalidate(user.id);
         } catch (error) {
           // Do not leave a user behind when the configuration write fails.
           await fastify.db.orm.public.User.where({ id: user.id }).delete();
@@ -279,7 +278,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             userId: user.id,
             showInHome: request.body.showOnHome,
           });
-          fastify.configCache.invalidate(user.id);
         } else {
           const updated = await fastify.db.orm.public.Configuration.where({
             id: config.id,
@@ -290,7 +288,6 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             timezone: request.body.timezone,
           });
           userId = updated?.userId;
-          fastify.configCache.invalidate(request.params.id);
         }
         const manifest = `${appConfig.baseUrl}/${userId}/manifest.json`;
         return {

@@ -38,7 +38,6 @@
     "fastify-cli": "^7.4.1",
     "fastify-plugin": "^5.0.0",
     "html-minifier-terser": "^7.2.0",
-    "lru-cache": "^11.5.3",
     "stremio-addon-sdk": "https://github.com/Stremio/stremio-addon-sdk.git",
     "temporal-polyfill": "^1.0.6"
   },

@@ -29,16 +29,24 @@ export function cacheControl(cache: {
 }
 
 export function parseGuideDate(date: string | undefined): GuideWindow {
-  const startDate = dayjs(date).startOf("day").toDate();
-  const endDate = dayjs(date).endOf("day").toDate();
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return {
+      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
+      end: Temporal.Instant.from(
+        dayjs().add(60, "minutes").toDate().toISOString(),
+      ),
+    };
+  }
 
   try {
-    const start = Temporal.Instant.from(startDate.toISOString());
-    return { start, end: Temporal.Instant.from(endDate.toISOString()) };
+    const start = Temporal.Instant.from(`${date}T00:00:00Z`);
+    return { start, end: start.add({ minutes: 60 }) };
   } catch {
     return {
-      start: Temporal.Instant.from(startDate.toISOString()),
-      end: Temporal.Instant.from(endDate.toISOString()),
+      start: Temporal.Instant.from(dayjs().toDate().toISOString()),
+      end: Temporal.Instant.from(
+        dayjs().add(60, "minutes").toDate().toISOString(),
+      ),
     };
   }
 }
@@ -75,8 +83,6 @@ export function previewForChannel(channel: ChannelRecord) {
     poster,
     posterShape: "landscape",
     logo: poster,
-    country: channel.country,
-    language: channel.country,
     behaviorHints: {
       isLive: true,
     },
@@ -93,7 +99,6 @@ export function metaForChannel(
     ...preview,
     background: appConfig.background,
     country: channel.country,
-    language: channel.country,
     genres: [toReadableString(channel.category)],
     videos,
     behaviorHints: {

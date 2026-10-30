@@ -120,7 +120,9 @@ const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     },
     async (req, reply) => {
       try {
-        const config = await fastify.configCache.get(req.params.id);
+        const config = await fastify.db.orm.public.Configuration.where({
+          userId: req.params.id,
+        }).first();
         if (!config) {
           return reply
             .header("cache-control", cacheControl(GUIDE_CACHE))
