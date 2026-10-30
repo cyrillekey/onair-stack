@@ -79,10 +79,10 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         return reply.send({
           streams: streams.map((stream) => ({
             id: stream.id,
-            name: `${stream.name} %${stream.failureCount > 0 ? "🔴" : "🟢"}`,
+            name: `${stream.name} ${stream.failureCount > 0 ? "🔴" : "🟢"}`,
             url: stream.url,
-            title: stream.resolution ?? "Unknown",
-            description: stream.resolution ?? "Unknown",
+            title: stream.resolution || "Unknown",
+            description: stream.resolution || "Unknown",
           })),
           cacheMaxAge: 60,
           staleRevalidate: 300,
