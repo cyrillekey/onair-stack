@@ -168,7 +168,7 @@ export function parseM3UContent(content: string): Stream[] {
       // Drop entries whose display name or group title contains profanity.
       if (!isProfane(name) && !isProfane(pendingGroupTitle)) {
         const country = matcher.parseCountry(
-          [name, pendingTvgId].filter((a) => a !== undefined),
+          [name, pendingTvgId, pendingGroupTitle].filter((a) => a !== undefined),
         );
 
         streams.push({

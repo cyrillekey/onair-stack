@@ -42,7 +42,11 @@
             "us_wfmz.m3u",
             "us_wowza.m3u",
             "us_xumo.m3u",
-            "dk_pluto.m3u"
+            "dk_pluto.m3u",
+            "pr.m3u",
+            "br.m3u",
+            "br_pluto.m3u",
+            "br_samsung.m3u"
         ]
     },
     {
@@ -53,7 +57,10 @@
             "playlist_zz_news_en.m3u8",
             "playlist_zz_music_en.m3u8",
             "playlist_zz_documentaries_en.m3u8",
-            "playlist_zz_movies.m3u8"
+            "playlist_zz_movies.m3u8",
+            "playlist_australia.m3u8",
+            "playlist_portugal.m3u8",
+            "playlist_brazil.m3u8"
         ]
     },
     {
@@ -115,7 +122,9 @@
             "us_wcetv.m3u",
             "us_wfmz.m3u",
             "us_wowza.m3u",
-            "us_xumo.m3u"
+            "us_xumo.m3u",
+            "pt.m3u",
+            "pt_samsung.m3u"
         ]
     },
     {
@@ -171,7 +180,8 @@
             "us-wa.m3u",
             "us-wi.m3u",
             "us.m3u",
-            "int.m3u"
+            "int.m3u",
+            "pt.m3u"
         ]
     },
     {
@@ -312,7 +322,8 @@
             "ca.m3u",
             "au.m3u",
             "uk.m3u",
-            "nz.m3u"
+            "nz.m3u",
+            "pt.m3u"
         ]
     },
     {
@@ -321,6 +332,59 @@
             "Sky-life-bd/refs/heads/main/README.m3u",
             "Channel-I.m3u/refs/heads/main/Ottplusbdix.m3u",
             "Cmcl-digital-mpd/refs/heads/main/README.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/fqw000/IPTVFlow/refs/heads/main/output/",
+        "sources": [
+            "live.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Mr-DS-ML-85/IPTV-98/refs/heads/main/playlist/",
+        "sources": [
+            "playtv.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/LITUATUI/M3UPT/refs/heads/main/M3U/",
+        "sources": [
+            "M3UPT.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/iprtl/m3u/refs/heads/live/",
+        "sources": [
+            "Freetv.m3u",
+            "Pluto.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Mrbotrx/Tvbox_KB/refs/heads/",
+        "sources": [
+            "main/output/bd_fifa.m3u8",
+            "main/kb_tv.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/CookCapitalInvest/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "english-tv.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/zyq1120/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "iptv.m3u",
+            "iptv-ffprobe-only.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/reefquiet/iptv-playlists/refs/heads/main/countries/",
+        "sources": [
+            "pt.m3u",
+            "us.m3u",
+            "gb.m3u"
         ]
     }
 ]

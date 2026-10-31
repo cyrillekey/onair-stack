@@ -1,6 +1,7 @@
 import type { Manifest, ManifestCatalog } from "stremio-addon-sdk";
 import { type models } from "@/prisma/contract";
 import appConfig from "@/config";
+import { COUNTRIES } from "@/config/configure-options";
 export type CatalogType = typeof models.public.Channel.category;
 export const catalogTypes: CatalogType[] = [
   "ANIME",
@@ -80,14 +81,20 @@ export const baseManifest: Manifest & {
 
 export function buildCatalog(
   catalog: CatalogType[] = catalogTypes,
+  countries: string[] = COUNTRIES.map((a) => a.value),
   showInHome?: boolean,
 ): ManifestCatalog[] {
   return catalog.map((a) => ({
     type: "tv",
     id: encodeCatalogType(a),
     name: toReadableString(a),
-    extra: [{ name: "skip" }, { name: "search" }, { name: "date" }],
-    ...(showInHome === undefined ? {} : { showInHome }),
+    extra: [
+      { name: "skip" },
+      { name: "search" },
+      { name: "date" },
+      { name: "genre", options: countries },
+    ],
+    ...(showInHome === undefined || showInHome == false ? {} : { showInHome }),
   }));
 }
 
@@ -110,4 +117,5 @@ export interface ExtraArgs {
   skip?: string;
   search?: string;
   date?: string;
+  genre?: string
 }
