@@ -42,7 +42,11 @@
             "us_wfmz.m3u",
             "us_wowza.m3u",
             "us_xumo.m3u",
-            "dk_pluto.m3u"
+            "dk_pluto.m3u",
+            "pr.m3u",
+            "br.m3u",
+            "br_pluto.m3u",
+            "br_samsung.m3u"
         ]
     },
     {
@@ -53,7 +57,10 @@
             "playlist_zz_news_en.m3u8",
             "playlist_zz_music_en.m3u8",
             "playlist_zz_documentaries_en.m3u8",
-            "playlist_zz_movies.m3u8"
+            "playlist_zz_movies.m3u8",
+            "playlist_australia.m3u8",
+            "playlist_portugal.m3u8",
+            "playlist_brazil.m3u8"
         ]
     },
     {

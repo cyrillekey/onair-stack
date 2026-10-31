@@ -1,5 +1,5 @@
 import { baseManifest, buildCatalog, type CatalogType } from "@/utils/helpers";
-import { GENRES } from "@/config/configure-options";
+import { COUNTRIES, GENRES } from "@/config/configure-options";
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
 import { type Manifest } from "stremio-addon-sdk";
 
@@ -57,7 +57,11 @@ const stremioRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           config.categories.length > 0
             ? config.categories
             : (GENRES.map((genre) => genre.value) as CatalogType[]);
-        const catalogs = buildCatalog(categories, showInHome);
+        const countries =
+          config.countries.length > 0
+            ? config.countries
+            : COUNTRIES.map((country) => country.value);
+        const catalogs = buildCatalog(categories, countries, showInHome);
         const manifest: Manifest = {
           ...baseManifest,
           catalogs,
