@@ -365,5 +365,26 @@
             "main/output/bd_fifa.m3u8",
             "main/kb_tv.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/CookCapitalInvest/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "english-tv.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/zyq1120/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "iptv.m3u",
+            "iptv-ffprobe-only.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/reefquiet/iptv-playlists/refs/heads/main/countries/",
+        "sources": [
+            "pt.m3u",
+            "us.m3u",
+            "gb.m3u"
+        ]
     }
 ]
