@@ -223,8 +223,8 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           query = query.offset(skip);
         }
       }
-      if (extraArgs.genres) {
-        const country = extraArgs.genres;
+      if (extraArgs?.genre) {
+        const country = extraArgs.genre;
         query = query.where((channel) => channel.country.ilike(country));
       }
 
