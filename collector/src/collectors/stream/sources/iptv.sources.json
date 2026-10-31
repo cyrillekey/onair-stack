@@ -358,5 +358,12 @@
             "Freetv.m3u",
             "Pluto.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/Mrbotrx/Tvbox_KB/refs/heads/",
+        "sources": [
+            "main/output/bd_fifa.m3u8",
+            "main/kb_tv.m3u"
+        ]
     }
 ]
