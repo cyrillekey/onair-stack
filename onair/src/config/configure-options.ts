@@ -16,7 +16,7 @@ export type ConfigureGroup = {
 };
 
 /** Countries the collector currently produces channels for. */
-export const COUNTRIES: ConfigureOption[] = [
+export const COUNTRIES: readonly ConfigureOption[] = [
   { value: "United States of America", label: "United States" },
   { value: "United Kingdom", label: "United Kingdom" },
   { value: "Canada", label: "Canada" },
