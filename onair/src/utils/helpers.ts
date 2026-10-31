@@ -117,4 +117,5 @@ export interface ExtraArgs {
   skip?: string;
   search?: string;
   date?: string;
+  genres?: string
 }

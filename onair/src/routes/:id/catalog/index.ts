@@ -223,6 +223,10 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           query = query.offset(skip);
         }
       }
+      if (extraArgs.genres) {
+        const country = extraArgs.genres;
+        query = query.where((channel) => channel.country.ilike(country));
+      }
 
       const channels = await query
         .orderBy((channel) => channel.slug.asc())
