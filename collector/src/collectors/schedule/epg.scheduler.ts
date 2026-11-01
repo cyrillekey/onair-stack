@@ -134,13 +134,10 @@ class EpgScheduler extends BaseCollector<Channel> {
                 country: country.name,
               },
             });
-            // TO PREVENT EMPTY CHANNELS FROM COLLECTING SCHEDULES THAT BLOAT THE DB
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
               country: country.name,
-            })
-              .where((a) => a.streams.some())
-              .all();
+            }).all();
             fetched += 1;
             if (ids.length > 0) {
               // create schedule

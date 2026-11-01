@@ -88,7 +88,6 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
             id: stream.id,
             name: `${stream.name} ${stream.failureCount > 0 ? " 🔴" : " 🟢"}`,
             url: stream.url,
-            title: stream.resolution || "Unknown",
             description: stream.resolution || "Unknown",
           })),
           cacheMaxAge: 60,
