@@ -88,7 +88,6 @@ export function buildCatalog(
     name: toReadableString(a),
     extra: [
       { name: "skip" },
-      { name: "search" },
       { name: "date" },
       { name: "genre", options: countries },
     ],
@@ -112,8 +111,7 @@ export function capitalize(s: string) {
 }
 
 export interface ExtraArgs {
-  skip?: string;
-  search?: string;
+  skip?: string;  
   date?: string;
   genre?: string;
 }

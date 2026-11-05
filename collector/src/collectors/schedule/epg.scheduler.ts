@@ -140,30 +140,32 @@ class EpgScheduler extends BaseCollector<Channel> {
             }).all();
             fetched += 1;
             if (ids.length > 0) {
+              await Promise.all(
+                ids.map((channel) =>
+                  ctx.db.orm.public.Schedule.createAll(
+                    schedule.schedule
+                      .filter(
+                        (a) =>
+                          !this.blockedTitles.includes(
+                            a.title?.toLowerCase() ?? "",
+                          ),
+                      )
+                      .map((a) => ({
+                        channelId: channel.id,
+                        date: this.buildTemporalDate(a.startTime),
+                        startTime: this.buildTemporalDate(a.startTime),
+                        endTime: this.buildTemporalDate(a.endTime),
+                        name: a.title,
+                        description: a?.description,
+                        poster: schedule.logo,
+                      })),
+                    {
+                      onConflict: "skip",
+                    },
+                  ),
+                ),
+              );
               // create schedule
-              for (const channel of ids) {
-                await ctx.db.orm.public.Schedule.createAll(
-                  schedule.schedule
-                    .filter(
-                      (a) =>
-                        !this.blockedTitles.includes(
-                          a.title?.toLowerCase() ?? "",
-                        ),
-                    )
-                    .map((a) => ({
-                      channelId: channel.id,
-                      date: this.buildTemporalDate(a.startTime),
-                      startTime: this.buildTemporalDate(a.startTime),
-                      endTime: this.buildTemporalDate(a.endTime),
-                      name: a.title,
-                      description: a?.description,
-                      poster: schedule.logo,
-                    })),
-                  {
-                    onConflict: "skip",
-                  },
-                );
-              }
 
               stored += schedules.length;
             }

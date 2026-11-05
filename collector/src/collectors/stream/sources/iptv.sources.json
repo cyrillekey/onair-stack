@@ -386,5 +386,17 @@
             "us.m3u",
             "gb.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/CaptainCo0L/iptv-curated/refs/heads/main/",
+        "sources": [
+            "playlist.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://shahrukhalid.github.io/nexonic-iptv/playlists/",
+        "sources": [
+            "verified.m3u"
+        ]
     }
 ]

@@ -212,11 +212,6 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       if (config.countries.length > 0) {
         query = query.where((channel) => channel.country.in(config.countries));
       }
-
-      if (extraArgs.search) {
-        const search = `%${extraArgs.search}%`;
-        query = query.where((channel) => channel.name.ilike(search));
-      }
       if (extraArgs.skip) {
         const skip = Number(extraArgs.skip);
         if (Number.isInteger(skip) && skip > 0) {
