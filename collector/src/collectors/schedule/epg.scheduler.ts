@@ -138,35 +138,36 @@ class EpgScheduler extends BaseCollector<Channel> {
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
               country: country.name,
-            })
-              .where((a) => a.streams.some())
-              .all();
+            }).all();
+
             fetched += 1;
             if (ids.length > 0) {
               // create schedule
-              for (const channel of ids) {
-                await ctx.db.orm.public.Schedule.createAll(
-                  schedule.schedule
-                    .filter(
-                      (a) =>
-                        !this.blockedTitles.includes(
-                          a.title?.toLowerCase() ?? "",
-                        ),
-                    )
-                    .map((a) => ({
-                      channelId: channel.id,
-                      date: this.buildTemporalDate(a.startTime),
-                      startTime: this.buildTemporalDate(a.startTime),
-                      endTime: this.buildTemporalDate(a.endTime),
-                      name: a.title,
-                      description: a?.description,
-                      poster: schedule.logo,
-                    })),
-                  {
-                    onConflict: "skip",
-                  },
-                );
-              }
+              await Promise.all(
+                ids.map((channel) =>
+                  ctx.db.orm.public.Schedule.createAll(
+                    schedule.schedule
+                      .filter(
+                        (a) =>
+                          !this.blockedTitles.includes(
+                            a.title?.toLowerCase() ?? "",
+                          ),
+                      )
+                      .map((a) => ({
+                        channelId: channel.id,
+                        date: this.buildTemporalDate(a.startTime),
+                        startTime: this.buildTemporalDate(a.startTime),
+                        endTime: this.buildTemporalDate(a.endTime),
+                        name: a.title,
+                        description: a?.description,
+                        poster: schedule.logo,
+                      })),
+                    {
+                      onConflict: "skip",
+                    },
+                  ),
+                ),
+              );
 
               stored += schedules.length;
             }

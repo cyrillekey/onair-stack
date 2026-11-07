@@ -48,12 +48,9 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
                   url: {
                     type: "string",
                   },
-                  title: {
-                    type: "string",
-                  },
                   description: {
                     type: "string",
-                  }
+                  },
                 },
               },
             },
