@@ -1,6 +1,5 @@
 import "dotenv/config";
 import "temporal-polyfill/global";
-import Sentry from "@/utils/instrument";
 import Fastify from "fastify";
 import closeWithGrace from "close-with-grace";
 import app, { options } from "@/app";
@@ -15,23 +14,23 @@ function closeGraceDelay(): number {
 }
 
 const fastify = Fastify({
-  logger:
-    process.env.NODE_ENV !== "production"
-      ? {
-          level: process.env.LOG_LEVEL || "info",
-        }
-      : {
-          level: "info",
-          enabled: true,
-          transport: {
-            target: "@axiomhq/pino",
-            options: {
-              dataset: process.env.AXIOM_DATASET,
-              token: process.env.AXIOM_TOKEN,
-              edge: process.env.AXIOM_REGION || "us-east-1.aws.edge.axiom.co",
-            },
-          },
-        },
+  logger: true,
+  // process.env.NODE_ENV !== "production"
+  //   ? {
+  //       level: process.env.LOG_LEVEL || "info",
+  //     }
+  //   : {
+  //       level: "info",
+  //       enabled: true,
+  //       transport: {
+  //         target: "@axiomhq/pino",
+  //         options: {
+  //           dataset: process.env.AXIOM_DATASET,
+  //           token: process.env.AXIOM_TOKEN,
+  //           edge: process.env.AXIOM_REGION || "us-east-1.aws.edge.axiom.co",
+  //         },
+  //       },
+  //     },
 });
 
 void fastify.register(app, options);
@@ -63,10 +62,9 @@ const shutdown = closeWithGrace(
   },
 );
 
-fastify.addHook("onClose", async () => {
+fastify.addHook("onClose", () => {
   shutdown.uninstall();
-  await Sentry.close(2_000);
-});
+});  
 
 async function start(): Promise<void> {
   try {

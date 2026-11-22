@@ -234,7 +234,7 @@ class StreamHealthCollector extends BaseCollector<string> {
         broken.map((b) =>
           ctx.db.orm.public.Stream.where((a) => a.id.eq(b.id))
             .update({
-              unreachableAt: this.buildTemporalDate(new Date()),
+              unreachableAt: new Date(),
               failureCount: 1,
               lastFailureReason: b.reason,
             })

@@ -1,16 +1,19 @@
-import { Temporal } from "temporal-polyfill";
 import appConfig from "@/config";
 import type { Models } from "@/prisma/contract";
 import { toIsoString } from "@/utils/api";
 import { toReadableString } from "@/utils/helpers";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+dayjs.extend(timezone);
+dayjs.extend(utc);
 
 export type ChannelRecord = Omit<Models.public_Channel, "schedule" | "streams">;
 export type ScheduleRecord = Omit<Models.public_Schedule, "channel">;
 
 export interface GuideWindow {
-  start: Temporal.Instant;
-  end: Temporal.Instant;
+  start: dayjs.Dayjs;
+  end: dayjs.Dayjs;
 }
 
 /** Programme data changes often, so cache it briefly and revalidate in the background. */
@@ -29,18 +32,10 @@ export function cacheControl(cache: {
 }
 
 export function parseGuideDate(date: string | undefined): GuideWindow {
-  const startDate = dayjs(date).startOf("day").toDate();
-  const endDate = dayjs(date).endOf("day").toDate();
-
-  try {
-    const start = Temporal.Instant.from(startDate.toISOString());
-    return { start, end: Temporal.Instant.from(endDate.toISOString()) };
-  } catch {
-    return {
-      start: Temporal.Instant.from(startDate.toISOString()),
-      end: Temporal.Instant.from(endDate.toISOString()),
-    };
-  }
+  const startDate = dayjs(date).startOf("day");
+  const endDate = dayjs(date).endOf("day");
+  const start = startDate;
+  return { start, end: endDate };
 }
 
 /**
@@ -48,20 +43,10 @@ export function parseGuideDate(date: string | undefined): GuideWindow {
  * starts at the user's local midnight instead, so it shows the schedule the
  * viewer is actually living through.
  */
-export function metaWindow(timezone: string | undefined): GuideWindow {
-  const now = Temporal.Now.instant();
-  let dayStart: Temporal.Instant;
+export function metaWindow(_timezone: string | undefined): GuideWindow {
+  const now = dayjs()
 
-  try {
-    dayStart = now
-      .toZonedDateTimeISO(timezone || "UTC")
-      .startOfDay()
-      .toInstant();
-  } catch {
-    dayStart = now.toZonedDateTimeISO("UTC").startOfDay().toInstant();
-  }
-
-  return { start: dayStart, end: dayStart.add({ hours: 48 }) };
+  return { start: now, end: now.clone().add(46, "hours") };
 }
 
 export function previewForChannel(channel: ChannelRecord) {

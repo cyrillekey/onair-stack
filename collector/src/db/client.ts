@@ -1,5 +1,6 @@
 import "dotenv/config";
 import postgres from "@prisma/orm-postgres/runtime";
+import { contractFromJson } from "@prisma/orm-postgres/static";
 import type { Contract } from "@/prisma/contract.js";
 import contractJson from "@/prisma/contract.json" with { type: "json" };
 
@@ -11,7 +12,7 @@ import contractJson from "@/prisma/contract.json" with { type: "json" };
 // Until the contract is generated, the client is typed as `any`
 // so the worker compiles and collectors can be developed against
 // the repository interfaces in `src/db/repositories/`.
-
+const contract = contractFromJson<Contract>(contractJson);
 let cached: ReturnType<typeof postgres<Contract>> | null = null;
 
 export function getDb(): ReturnType<typeof postgres<Contract>> {
@@ -20,7 +21,7 @@ export function getDb(): ReturnType<typeof postgres<Contract>> {
   if (!url) throw new Error("DATABASE_URL is required");
 
   cached = postgres<Contract>({
-    contractJson,
+    contract: contract,
     url,
     poolOptions: {
       connectionTimeoutMillis: 20_000,

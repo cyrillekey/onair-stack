@@ -68,7 +68,7 @@ const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       },
     ];
   };
-}> = (fastify):void => {
+}> = (fastify): void => {
   fastify.get(
     "/:type/:metaId.json",
     {
@@ -140,8 +140,8 @@ const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         const schedules = await fastify.db.orm.public.Schedule.where({
           channelId: channel.id,
         })
-          .where((schedule) => schedule.endTime.gt(window.start))
-          .where((schedule) => schedule.startTime.lt(window.end))
+          .where((schedule) => schedule.endTime.gt(window.start.toDate()))
+          .where((schedule) => schedule.startTime.lt(window.end.toDate()))
           .orderBy((schedule) => schedule.startTime.asc())
           .all();
 

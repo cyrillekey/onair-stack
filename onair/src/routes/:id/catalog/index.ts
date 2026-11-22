@@ -187,8 +187,8 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         "schedule",
         (schedules) =>
           schedules
-            .where((schedule) => schedule.endTime.gt(guideWindow.start))
-            .where((schedule) => schedule.startTime.lt(guideWindow.end))
+            .where((schedule) => schedule.endTime.gt(guideWindow.start.toDate()))
+            .where((schedule) => schedule.startTime.lt(guideWindow.end.toDate()))
             .orderBy((schedule) => schedule.startTime.asc()),
       );
       if (catalog == "SPORTS") {
