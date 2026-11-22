@@ -155,9 +155,9 @@ class EpgScheduler extends BaseCollector<Channel> {
                       )
                       .map((a) => ({
                         channelId: channel.id,
-                        date: this.buildTemporalDate(a.startTime),
-                        startTime: this.buildTemporalDate(a.startTime),
-                        endTime: this.buildTemporalDate(a.endTime),
+                        date: a.startTime,
+                        startTime: a.startTime,
+                        endTime: a.endTime,
                         name: a.title,
                         description: a?.description,
                         poster: schedule.logo,

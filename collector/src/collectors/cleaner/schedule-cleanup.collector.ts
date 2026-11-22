@@ -19,9 +19,9 @@ class ScheduleCleanupCollector extends BaseCollector<string> {
   async collect(
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<string>, "job" | "durationMs">> {
-    const cutoff = this.buildTemporalDate(
-      dayjs().subtract(config.SCHEDULE_RETENTION_DAYS, "days").toDate(),
-    );
+    const cutoff = dayjs()
+      .subtract(config.SCHEDULE_RETENTION_DAYS, "days")
+      .toDate();
 
     const deleted = await ctx.db.orm.public.Schedule.where((schedule) =>
       schedule.endTime.lt(cutoff),
