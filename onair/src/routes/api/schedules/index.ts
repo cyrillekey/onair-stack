@@ -1,6 +1,6 @@
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
-import { Temporal } from "temporal-polyfill";
 import { toIsoString } from "@/utils/api";
+import dayjs from "dayjs";
 
 const scheduleSchema = {
   type: "object",
@@ -118,13 +118,13 @@ const schedulesRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         if (request.query.date) {
           let start;
           try {
-            start = Temporal.Instant.from(`${request.query.date}T00:00:00Z`);
+            start = dayjs(request.query.date).startOf("day").toDate();
           } catch {
             return reply
               .code(400)
               .send({ message: "Invalid date. Use YYYY-MM-DD." });
           }
-          const end = start.add({ hours: 24 });
+          const end = dayjs(request.query.date).endOf("day").toDate();
           query = query
             .where((schedule) => schedule.date.gte(start))
             .where((schedule) => schedule.date.lt(end));

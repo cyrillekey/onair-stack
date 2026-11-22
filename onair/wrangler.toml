@@ -1,0 +1,4 @@
+name = "onair-addon"
+compatibility_date = "2026-11-12"
+main = "dist/src/server.js"
+compatibility_flags = ["nodejs_compat"]

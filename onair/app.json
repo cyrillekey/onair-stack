@@ -1,0 +1,28 @@
+{
+    "name": "onair",
+    "buildpacks": [
+        {
+            "url": "heroku/nodejs"
+        }
+    ],
+    "healthchecks": {
+        "web": [
+            {
+                "type": "startup",
+                "name": "web check",
+                "description": "Checking if the app responds to the /health endpoint",
+                "path": "/health",
+                "attempts": 3
+            }
+        ]
+    },
+    "formation": {
+        "web": {
+            "quantity": 1,
+            "max_parallel": 6
+        },
+        "worker": {
+            "quantity": 1
+        }
+    }
+}

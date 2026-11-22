@@ -38,6 +38,12 @@ const root: FastifyPluginCallbackJsonSchemaToTs<{
       .type("text/html; charset=utf-8")
       .send(html);
   });
+  fastify.get("/health", { schema: { hide: true } }, async (_, reply) =>
+    reply.status(200).send({ status: "ok" }),
+  );
+  fastify.get("/health/ready", { schema: { hide: true } }, async (_, reply) =>
+    reply.status(200).send({ status: "ok" }),
+  );
 };
 
 export default root;
