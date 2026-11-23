@@ -84,6 +84,18 @@ class EpgScheduler extends BaseCollector<Channel> {
       id: "spain1.xml",
       name: "Spain",
     },
+    {
+      id: "germany.xml",
+      name: "Germany",
+    },
+    {
+      id: "france.xml",
+      name: "France",
+    },
+    {
+      id: "italy.xml",
+      name: "Italy",
+    },
   ];
   schedule = "30 01 * * *";
   name = "EPG Scheduler";

@@ -187,25 +187,34 @@ const catalogRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         "schedule",
         (schedules) =>
           schedules
-            .where((schedule) => schedule.endTime.gt(guideWindow.start.toDate()))
-            .where((schedule) => schedule.startTime.lt(guideWindow.end.toDate()))
+            .where((schedule) =>
+              schedule.endTime.gt(guideWindow.start.toDate()),
+            )
+            .where((schedule) =>
+              schedule.startTime.lt(guideWindow.end.toDate()),
+            )
             .orderBy((schedule) => schedule.startTime.asc()),
       );
-      if (catalog == "SPORTS") {
-        const sports: CatalogType[] = [
-          "SPORTS",
-          "BASEBALL",
-          "BASKETBALL",
-          "COMBAT_SPORTS",
-          "CRICKET",
-          "FOOTBALL",
-          "MOTORSPORTS",
-        ];
-        query = query.where((channel) => channel.category.in(sports));
+      if (catalog == "ALL") {
+        // pass
       } else {
-        query = query.where({
-          category: catalog,
-        });
+        if (catalog == "SPORTS") {
+          const sports: Exclude<CatalogType, "ALL">[] = [
+            "SPORTS",
+            "BASEBALL",
+            "BASKETBALL",
+            "COMBAT_SPORTS",
+            "CRICKET",
+            "FOOTBALL",
+            "MOTORSPORTS",
+          ];
+
+          query = query.where((channel) => channel.category.in(sports));
+        } else {
+          query = query.where({
+            category: catalog,
+          });
+        }
       }
 
       // An empty country list means every country.

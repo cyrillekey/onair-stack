@@ -1,11 +1,12 @@
 import "temporal-polyfill/global";
-import { join } from "node:path";
+import path, { join } from "node:path";
 import AutoLoad, { type AutoloadPluginOptions } from "@fastify/autoload";
 import type { FastifyPluginCallback, FastifyServerOptions } from "fastify";
 import fastifySwagger from "@fastify/swagger";
 import { type JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 import fastifyCors from "@fastify/cors";
 import scalarDocumentation from "@scalar/fastify-api-reference";
+import fastifyStatic from "@fastify/static";
 export interface AppOptions
   extends FastifyServerOptions, Partial<AutoloadPluginOptions> {}
 // Pass --options via CLI arguments in command to enable these options.
@@ -39,6 +40,10 @@ const app: FastifyPluginCallback<AppOptions> = (fastify, opts) => {
       },
       tags: [],
     },
+  });
+  fastify.register(fastifyStatic, {
+    root: path.join(__dirname, "public"),
+    prefix: "/public/",
   });
   fastify.register(scalarDocumentation, {
     routePrefix: "/api/documentation",

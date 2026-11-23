@@ -153,7 +153,7 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         try {
           await fastify.db.orm.public.Configuration.create({
             countries,
-            categories: categories as CatalogType[],
+            categories: categories as Exclude<CatalogType, "ALL">[],
             timezone: request.body.timezone,
             userId: user.id,
             showInHome: request.body.showOnHome,
@@ -274,7 +274,7 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           });
           await fastify.db.orm.public.Configuration.create({
             countries,
-            categories: categories as CatalogType[],
+            categories: categories as Exclude<CatalogType, "ALL">[],
             timezone: request.body.timezone,
             userId: user.id,
             showInHome: request.body.showOnHome,
@@ -284,7 +284,7 @@ const configurationRoutes: FastifyPluginCallbackJsonSchemaToTs<{
           const updated = await fastify.db.orm.public.Configuration.where({
             id: config.id,
           }).update({
-            categories: categories as CatalogType[],
+            categories: categories as Exclude<CatalogType, "ALL">[],
             countries,
             showInHome: request.body.showOnHome,
             timezone: request.body.timezone,
