@@ -170,7 +170,7 @@ class BroadcastCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<unknown>, "job" | "durationMs">> {
     try {
-      const channels = await ctx.db.orm.public.Channel.all();
+      const channels = await ctx.db.orm.public.Channel.select("id","country","name").all();
       let stored = 0;
       let totalStreams = 0;
       let skipped = 0;

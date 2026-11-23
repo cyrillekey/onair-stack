@@ -6,6 +6,7 @@ import {
   metaWindow,
   videoForSchedule,
 } from "@/utils/epg";
+import { stripAddonIdPrefix } from "@/utils/helpers";
 
 const dateTimeFormat: string = "date-time";
 
@@ -128,7 +129,7 @@ const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         }
 
         const channel = await fastify.db.orm.public.Channel.where({
-          id: req.params.metaId,
+          id: stripAddonIdPrefix(req.params.metaId),
         }).first();
         if (!channel) {
           return reply
@@ -140,6 +141,16 @@ const metaRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         const schedules = await fastify.db.orm.public.Schedule.where({
           channelId: channel.id,
         })
+          .select(
+            "id",
+            "name",
+            "date",
+            "description",
+            "startTime",
+            "endTime",
+            "poster",
+            "channelId",
+          )
           .where((schedule) => schedule.endTime.gt(window.start.toDate()))
           .where((schedule) => schedule.startTime.lt(window.end.toDate()))
           .orderBy((schedule) => schedule.startTime.asc())

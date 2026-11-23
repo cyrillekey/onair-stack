@@ -1,4 +1,5 @@
 import { type FastifyPluginCallbackJsonSchemaToTs } from "@fastify/type-provider-json-schema-to-ts";
+import { stripAddonIdPrefix } from "@/utils/helpers";
 
 const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
   SerializerSchemaOptions: {
@@ -47,10 +48,10 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
                   },
                   url: {
                     type: "string",
-                  },                  
+                  },
                   description: {
                     type: "string",
-                  }
+                  },
                 },
               },
             },
@@ -74,17 +75,20 @@ const streamRoutes: FastifyPluginCallbackJsonSchemaToTs<{
     url: "/:type/:catalogId.json",
     handler: async (req, reply) => {
       try {
+        const catalogId = stripAddonIdPrefix(req.params.catalogId);
         let id;
-        if (req.params.catalogId.includes("epg")) {
-          const parts = req.params.catalogId.split(":");
-          id = parts?.at(0) ?? req.params.catalogId;
+        if (catalogId.includes("epg")) {
+          const parts = catalogId.split(":");
+          id = parts?.at(0) ?? catalogId;
         } else {
-          id = req.params.catalogId;
+          id = catalogId;
         }
         const streams = await fastify.db.orm.public.Stream.where({
           channelId: id,
         })
-          .orderBy((a) => a.failureCount.asc()).orderBy((a)=>a.resolution.asc())
+          .select("id", "name", "failureCount", "url", "resolution")
+          .orderBy((a) => a.failureCount.asc())
+          .orderBy((a) => a.resolution.asc())
           .all();
         return reply.send({
           streams: streams.map((stream) => ({

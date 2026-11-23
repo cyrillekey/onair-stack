@@ -53,6 +53,20 @@ export function toReadableString(name: string) {
   return capitalize(name.replace(/_/gi, " ").toString());
 }
 
+/**
+ * Namespace for content ids exposed to Stremio. Incoming meta and stream
+ * requests still accept ids without the prefix for backwards compatibility.
+ */
+export const ADDON_ID_PREFIX = "onair:";
+
+export function addAddonIdPrefix(id: string): string {
+  return id.startsWith(ADDON_ID_PREFIX) ? id : `${ADDON_ID_PREFIX}${id}`;
+}
+
+export function stripAddonIdPrefix(id: string): string {
+  return id.startsWith(ADDON_ID_PREFIX) ? id.slice(ADDON_ID_PREFIX.length) : id;
+}
+
 export const baseManifest: Manifest & {
   stremioAddonsConfig: {
     issuer: string;
@@ -72,6 +86,9 @@ export const baseManifest: Manifest & {
   catalogs: buildCatalog(),
   resources: ["catalog", "stream", "meta"],
   types: ["tv"],
+  // The empty prefix keeps legacy unprefixed ids matching in Stremio while new
+  // responses are namespaced with onair:.
+  idPrefixes: [ADDON_ID_PREFIX],
   name: "Onair",
   description:
     "Live TV for Stremio with a native EPG programme guide. Browse Entertainment, General, News and Sports channel catalogs and watch live channels from Discover or the guide grid.",

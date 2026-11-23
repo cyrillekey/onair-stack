@@ -105,7 +105,9 @@ const schedulesRoutes: FastifyPluginCallbackJsonSchemaToTs<{
       try {
         const channel = await fastify.db.orm.public.Channel.where({
           id: request.query.channelId,
-        }).first();
+        })
+          .select("id")
+          .first();
 
         if (!channel) {
           return reply.code(404).send({ message: "Channel not found." });
