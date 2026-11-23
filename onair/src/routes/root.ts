@@ -24,8 +24,10 @@ const root: FastifyPluginCallbackJsonSchemaToTs<{
         description: "Get default stremio addon manifest",
       },
     },
-    (_req, _reply) => {
-      return baseManifest;
+    (_req, reply) => {
+      return reply
+        .header("cache-control", "public, max-age=3600")
+        .send(baseManifest);
     },
   );
   fastify.get("/", { schema: { hide: true } }, async (_, reply) => {
@@ -34,7 +36,7 @@ const root: FastifyPluginCallbackJsonSchemaToTs<{
       genres: catalogTypes,
     });
     return reply
-      .header("cache-control", "public, max-age=300")
+      .header("cache-control", "public, max-age=3600")
       .type("text/html; charset=utf-8")
       .send(html);
   });

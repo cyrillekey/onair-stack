@@ -114,7 +114,11 @@ const channelsRoutes: FastifyPluginCallbackJsonSchemaToTs<{
         }
         if (request.query.category) {
           const category = request.query.category;
-          query = query.where((channel) => channel.category.eq(category));
+          if (category == "ALL") {
+            // Do not filter by any category
+          } else {
+            query = query.where((channel) => channel.category.eq(category));
+          }
         }
         if (request.query.search) {
           const search = `%${request.query.search}%`;

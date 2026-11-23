@@ -398,5 +398,23 @@
         "sources": [
             "verified.m3u"
         ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/seowithkhubab/iptv-playlist/refs/heads/main/",
+        "sources": [
+            "playlist.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/womomo8/IPTV-Direct/refs/heads/main/output/",
+        "sources": [
+            "iptv.m3u"
+        ]
+    },
+    {
+        "baseUrl": "https://raw.githubusercontent.com/morleyl004-png/my-iptv-playlist/refs/heads/main/",
+        "sources": [
+            "combined.m3u"
+        ]
     }
 ]

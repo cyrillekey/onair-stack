@@ -34,6 +34,18 @@ export const COUNTRIES: readonly ConfigureOption[] = [
     value: "Portugal",
     label: "Portugal",
   },
+  {
+    value: "Italy",
+    label: "Italy",
+  },
+  {
+    label: "France",
+    value: "France",
+  },
+  {
+    label: "Germany",
+    value: "Germany",
+  },
 ];
 
 /** Categories exposed as Stremio catalogs (ADULT is intentionally omitted). */
