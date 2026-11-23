@@ -108,7 +108,7 @@ The addon implements the Stremio addon protocol for `tv` with the `catalog`, `me
 | `GET /:id/meta/:type/:metaId.json` | Channel details plus the programmes airing over the next ~46 hours. |
 | `GET /:id/stream/:type/:catalogId.json` | Stream sources for a channel or an EPG programme. |
 
-`type` is always `tv`. Catalog ids are lowercase genre names such as `news`, `sports` or `movies`. An EPG video id has the form `<channelId>:epg:<startTime>` and resolves to the channel's live streams.
+`type` is always `tv`. Catalog ids are lowercase genre names such as `news`, `sports` or `movies`. Channel ids returned by the addon are namespaced with the `onair:` prefix; incoming meta and stream requests have that prefix stripped, and legacy unprefixed ids are still accepted. An EPG video id has the form `onair:<channelId>:epg:<startTime>` (the old `<channelId>:epg:<startTime>` form also works) and resolves to the channel's live streams.
 
 ## Configuration API
 

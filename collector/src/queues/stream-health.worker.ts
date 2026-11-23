@@ -78,7 +78,7 @@ async function processStreamHealthJob(
   data: StreamHealthJobData,
   ctx: { db: PostgresClient<Contract>; log: Logger<never, boolean> },
 ): Promise<void> {
-  const stream = await ctx.db.orm.public.Stream.whereUnique({
+  const stream = await ctx.db.orm.public.Stream.select("id","url","failureCount").whereUnique({
     id: data.streamId,
   }).first();
   if (!stream) return;

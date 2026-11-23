@@ -1,7 +1,7 @@
 import appConfig from "@/config";
 import type { Models } from "@/prisma/contract";
 import { toIsoString } from "@/utils/api";
-import { toReadableString } from "@/utils/helpers";
+import { addAddonIdPrefix, toReadableString } from "@/utils/helpers";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -9,7 +9,7 @@ dayjs.extend(timezone);
 dayjs.extend(utc);
 
 export type ChannelRecord = Omit<Models.public_Channel, "schedule" | "streams">;
-export type ScheduleRecord = Omit<Models.public_Schedule, "channel">;
+export type ScheduleRecord = Omit<Models.public_Schedule, "channel" | "createdat" | "updatedat">;
 
 export interface GuideWindow {
   start: dayjs.Dayjs;
@@ -53,7 +53,7 @@ export function previewForChannel(channel: ChannelRecord) {
   const poster = channel.poster || appConfig.fallbackImage;
 
   return {
-    id: channel.id,
+    id: addAddonIdPrefix(channel.id),
     type: "tv",
     name: channel.name,
     description: channel.description || undefined,
@@ -103,7 +103,7 @@ export function videoForSchedule(
       : undefined;
 
   return {
-    id: `${channel.id}:epg:${startTime}`,
+    id: addAddonIdPrefix(`${channel.id}:epg:${startTime}`),
     title: schedule.name,
     released: startTime,
     startTime,

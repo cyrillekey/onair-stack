@@ -150,7 +150,7 @@ class EpgScheduler extends BaseCollector<Channel> {
             const ids = await ctx.db.orm.public.Channel.where({
               slug: this.slugify(schedule.name),
               country: country.name,
-            }).all();
+            }).select("id").all();
 
             fetched += 1;
             if (ids.length > 0) {
