@@ -126,61 +126,59 @@ class EpgScheduler extends BaseCollector<Channel> {
         try {
           const url = this.buildUrl(country.id);
           const schedules = await this.fetchScheduleEpg(url);
+          await ctx.db.orm.public.Channel.createAndCount(
+            schedules.map((a) => ({
+              country: country.name,
+              name: a.name,
+              category: this.classifyChannel(a.name),
+              slug: this.slugify(a.name),
+              poster: a.logo,
+            })),
+            {
+              onConflict: "skip",
+              conflictOn: ["country", "slug"],
+            },
+          );
+          const slugs = this.getUniqueArray(
+            schedules.map((a) => this.slugify(a.name)),
+          );
+          const channels = await ctx.db.orm.public.Channel.select(
+            "id",
+            "slug",
+            "country",
+          )
+            .where((a) => a.slug.in(slugs))
+            .all();
           ctx.log.info({ schedules: schedules.length }, "channels fetched");
           for (const schedule of schedules) {
-            await ctx.db.orm.public.Channel.upsert({
-              create: {
-                country: country.name,
-                name: schedule.name,
-                slug: this.slugify(schedule.name),
-                category: this.classifyChannel(schedule.name),
-                poster: schedule.logo,
-              },
-              update: {
-                name: schedule.name,
-                slug: this.slugify(schedule.name),
-                poster: schedule.logo,
-              },
-              conflictOn: {
-                slug: this.slugify(schedule.name),
-                country: country.name,
-              },
-            });
-            // TO PREVENT EMPTY CHANNELS FROM COLLECTING SCHEDULES THAT BLOAT THE DB
-            const ids = await ctx.db.orm.public.Channel.where({
-              slug: this.slugify(schedule.name),
-              country: country.name,
-            }).select("id").all();
-
-            fetched += 1;
-            if (ids.length > 0) {
-              // create schedule
-              await Promise.all(
-                ids.map((channel) =>
-                  ctx.db.orm.public.Schedule.createAll(
-                    schedule.schedule
-                      .filter(
-                        (a) =>
-                          !this.blockedTitles.includes(
-                            a.title?.toLowerCase() ?? "",
-                          ),
-                      )
-                      .map((a) => ({
-                        channelId: channel.id,
-                        date: a.startTime,
-                        startTime: a.startTime,
-                        endTime: a.endTime,
-                        name: a.title,
-                        description: a?.description,
-                        poster: schedule.logo,
-                      })),
-                    {
-                      onConflict: "skip",
-                    },
-                  ),
-                ),
+            const channel = channels.find(
+              (a) =>
+                a.slug == this.slugify(schedule.name) &&
+                a.country == country.name,
+            );
+            if (channel?.id) {
+              fetched += 1;
+              await ctx.db.orm.public.Schedule.createAll(
+                schedule.schedule
+                  .filter(
+                    (a) =>
+                      !this.blockedTitles.includes(
+                        a.title?.toLowerCase() ?? "",
+                      ),
+                  )
+                  .map((a) => ({
+                    channelId: channel.id,
+                    date: a.startTime,
+                    startTime: a.startTime,
+                    endTime: a.endTime,
+                    name: a.title,
+                    description: a?.description,
+                    poster: schedule.logo,
+                  })),
+                {
+                  onConflict: "skip",
+                },
               );
-
               stored += schedules.length;
             }
           }
