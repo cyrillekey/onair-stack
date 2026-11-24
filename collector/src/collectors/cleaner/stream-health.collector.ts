@@ -233,7 +233,7 @@ class StreamHealthCollector extends BaseCollector<string> {
       await Promise.all(
         broken.map((b) =>
           ctx.db.orm.public.Stream.where((a) => a.id.eq(b.id))
-            .update({
+            .updateAndCount({
               unreachableAt: new Date(),
               failureCount: 1,
               lastFailureReason: b.reason,

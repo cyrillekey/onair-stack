@@ -189,7 +189,7 @@ class BroadcastCollector extends BaseCollector {
             return this.fuzzyMatch(a.name, channel.name);
           });
           if (matching.length > 0) {
-            await ctx.db.orm.public.Stream.createAll(
+            await ctx.db.orm.public.Stream.createAndCount(
               matching
                 .map((a) =>
                   a.playbackOptions.map((b) => ({

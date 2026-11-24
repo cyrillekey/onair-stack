@@ -158,7 +158,7 @@ class EpgScheduler extends BaseCollector<Channel> {
             );
             if (channel?.id) {
               fetched += 1;
-              await ctx.db.orm.public.Schedule.createAll(
+              await ctx.db.orm.public.Schedule.createAndCount(
                 schedule.schedule
                   .filter(
                     (a) =>
