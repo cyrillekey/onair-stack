@@ -84,7 +84,7 @@ async function processStreamHealthJob(
   if (!stream) return;
   const health = await verifyM3U8(stream.url, { deepCheck: true });
   if (health.isPlayable || health.isValid) {
-    await ctx.db.orm.public.Stream.where({ id: data.streamId }).update({
+    await ctx.db.orm.public.Stream.where({ id: data.streamId }).updateAndCount({
       failureCount: 0,
       lastFailureReason: null,
       unreachableAt: null,
@@ -100,7 +100,7 @@ async function processStreamHealthJob(
       );
     } else {
       // update failure count
-      await ctx.db.orm.public.Stream.where({ id: data.streamId }).update({
+      await ctx.db.orm.public.Stream.where({ id: data.streamId }).updateAndCount({
         failureCount: stream.failureCount + 1,
         lastFailureReason: health.playabilityStatus,
       });

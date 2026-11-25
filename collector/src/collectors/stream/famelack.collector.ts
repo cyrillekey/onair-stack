@@ -42,7 +42,7 @@ class FamelackCollecter extends BaseCollector {
   name = "Famelack";
   private country: string;
   private baseUrl =
-    "https://raw.githubusercontent.com/famelack/famelack-data/refs/heads/main/tv/raw/countries/";
+    "https://raw.githubusercontent.com/famelack/famelack-data/refs/heads/main/tv/countries/";
 
   constructor(country: string) {
     super();

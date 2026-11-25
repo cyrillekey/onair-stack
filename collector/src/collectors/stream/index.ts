@@ -36,7 +36,12 @@ class StreamsCollector extends BaseCollector {
     ctx: CollectorContext,
   ): Promise<Omit<CollectResult<null>, "job" | "durationMs">> {
     try {
-      const allChannels = await ctx.db.orm.public.Channel.all();
+      const allChannels = await ctx.db.orm.public.Channel.select(
+        "id",
+        "name",
+        "country",
+        "slug",
+      ).all();
 
       for (const task of this.ipTSources) {
         for (let index = 0; index < task.sources.length; index++) {
@@ -170,7 +175,7 @@ class StreamsCollector extends BaseCollector {
         await ctx.db.orm.public.Channel.where({
           id: record.channelId,
           poster: null,
-        }).update({
+        }).updateAndCount({
           poster: record.logo,
         });
       }

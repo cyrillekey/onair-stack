@@ -394,12 +394,6 @@
         ]
     },
     {
-        "baseUrl": "https://shahrukhalid.github.io/nexonic-iptv/playlists/",
-        "sources": [
-            "verified.m3u"
-        ]
-    },
-    {
         "baseUrl": "https://raw.githubusercontent.com/seowithkhubab/iptv-playlist/refs/heads/main/",
         "sources": [
             "playlist.m3u"
