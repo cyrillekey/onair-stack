@@ -14,7 +14,7 @@ import sources from "./sources/iptv.sources.json" with { type: "json" };
 
 class StreamsCollector extends BaseCollector {
   name = "StreamCollector";
-  schedule = "0 */6 * * *";
+  schedule = "30 */12 * * *";
 
   // General stream matching: let a variant stream fall back to a generic
   // channel (e.g. "Sports 1" -> "Sports"), but never promote a generic stream
